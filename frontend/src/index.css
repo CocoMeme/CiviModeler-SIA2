@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plaster&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: "Outfit", sans-serif;
+}
+
+header {
+  padding: 1rem 2rem;
+  background-color: #592a78;
+  color: white;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo img {
+  height: 50px;
+}
+
+.logo a {
+  font-size: 1rem;
+  background: linear-gradient(to bottom, #1ec5d8, #5a2b79);
+  font-weight: 900;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links li {
+  display: inline;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+.nav-item button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.nav-item button:hover {
+  text-decoration: underline;
+}
+
+.nav-item ul {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  color: black;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.nav-item ul li {
+  padding: 0.5rem 1rem;
+}
+
+.nav-item ul li:hover {
+  background-color: #f0f0f0;
+}
+
+button.bg-yellow-500 {
+  background: linear-gradient(to bottom, #1ec5d8, #5a2b79);
+  border: none;
+}
+
+button.bg-yellow-500:hover {
+  background: linear-gradient(to bottom, #1ec5d8, #5a2b79);
+  opacity: 0.9;
+}
