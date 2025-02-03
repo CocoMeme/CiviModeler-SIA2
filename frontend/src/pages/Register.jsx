@@ -55,7 +55,7 @@ const Register = () => {
           <div className='mt-4'>
             <button
               type="submit"
-              className='w-full flex flex-wrap gap-1 items-center justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none transition-all duration-200 cursor-pointer'
+              className='w-full flex flex-wrap gap-1 items-center justify-center bg-purple-700 hover:bg-purple-900 text-white font-bold py-2 px-8 rounded focus:outline-none transition-all duration-200 cursor-pointer'
             >
               <FaArrowCircleRight />
               Register

@@ -9,14 +9,14 @@ const Navbar = () => {
   };
 
   return (
-    <header className="absolute top-0 left-0 w-full px-4 py-6 bg-primary">
+    <header className="absolute top-0 left-0 w-full px-4 py-6 bg-primary bg-opacity-75 z-50">
       <nav className="flex justify-between items-center max-w-screen-2xl mx-auto">
         {/* Left side */}
         <div className="flex items-center md:gap-16 gap-4">
           <div className="flex items-center">
             <div>
               <Link to="/">
-                <img src="../../public/images/CiviModeler - White.png" alt="Logo" className="size-8" />
+                <img src="/images/CiviModeler - White.png" alt="Logo" className="size-8" />
               </Link>
             </div>
             <div>
@@ -33,13 +33,13 @@ const Navbar = () => {
             <Link to="/docs">
               <li className="nav-item">Docs</li>
             </Link>
-            <Link to="/register">
-              <li className="nav-item">Sign Up</li>
+            <Link to="/testimony">
+              <li className="nav-item">Testimony</li>
             </Link>
-            <Link to="/pricing">
-              <li className="nav-item">Pricing</li>
+            <Link to="/project">
+              <li className="nav-item">Projects</li>
             </Link>
-            <Link to="/about">
+            <Link to="/about-us">
               <li className="nav-item">About Us</li>
             </Link>
           </ul>
@@ -49,7 +49,7 @@ const Navbar = () => {
         <div className="relative flex items-center md:space-x-3 space-x-2">
           <Link to="/register">
             <button className="bg-white text-[#592a78] font-light py-2 px-4 rounded focus:outline-none hover:bg-gray-200 transition-all duration-200">
-              Get Started
+              Get a Quote
             </button>
           </Link>
         </div>

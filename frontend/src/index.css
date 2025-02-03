@@ -12,6 +12,7 @@ header {
   padding: 1rem 2rem;
   background-color: #592a78;
   color: white;
+  z-index: 50;
 }
 
 nav {
