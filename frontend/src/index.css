@@ -102,3 +102,27 @@ button.bg-yellow-500:hover {
   background: linear-gradient(to bottom, #1ec5d8, #5a2b79);
   opacity: 0.9;
 }
+
+/* General Styling */
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: #333;
+  background: #fff;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  font-weight: bold;
+}
+
+p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}

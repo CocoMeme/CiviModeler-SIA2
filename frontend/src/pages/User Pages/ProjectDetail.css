@@ -1,0 +1,19 @@
+.custom-typography {
+  font-family: "Outfit", sans-serif;
+  font-weight: bold;
+}
+
+.custom-textfield {
+  font-family: "Outfit", sans-serif;
+}
+
+.custom-button {
+  font-family: "Outfit", sans-serif;
+  background: linear-gradient(to bottom, #1ec5d8, #5a2b79);
+  color: white;
+}
+
+.custom-button:hover {
+  background: linear-gradient(to bottom, #1ec5d8, #5a2b79);
+  opacity: 0.9;
+}

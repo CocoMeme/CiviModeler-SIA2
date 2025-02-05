@@ -14,7 +14,7 @@ export const register = async (req, res) => {
         const existingUser = await userModel.findOne({ email });
 
         if (existingUser) {
-            return res.status(409).json({ success: false, message: "User already exists" }); // Changed status code to 409 Conflict
+            return res.status(409).json({ success: false, message: "User already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);

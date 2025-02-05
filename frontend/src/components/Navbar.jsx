@@ -9,7 +9,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="absolute top-0 left-0 w-full px-4 py-6 bg-primary bg-opacity-75 z-50">
+    <header className="absolute top-0 left-0 w-full px-4 py-6 bg-primary">
       <nav className="flex justify-between items-center max-w-screen-2xl mx-auto">
         {/* Left side */}
         <div className="flex items-center md:gap-16 gap-4">
@@ -36,7 +36,7 @@ const Navbar = () => {
             <Link to="/testimony">
               <li className="nav-item">Testimony</li>
             </Link>
-            <Link to="/project">
+            <Link to="/projects">
               <li className="nav-item">Projects</li>
             </Link>
             <Link to="/about-us">
@@ -47,9 +47,14 @@ const Navbar = () => {
 
         {/* Right side */}
         <div className="relative flex items-center md:space-x-3 space-x-2">
+          <ul className="flex md:gap-10 text-md text-center font-light">
+            <Link to="/docs">
+              <li className="nav-item">Sign Up</li>
+            </Link>
+          </ul>
           <Link to="/register">
-            <button className="bg-white text-[#592a78] font-light py-2 px-4 rounded focus:outline-none hover:bg-gray-200 transition-all duration-200">
-              Get a Quote
+            <button className="bg-white text-[#592a78] font-light py-2 px-4 rounded focus:outline-none hover:bg-gray-200 transition-all duration-200 ml-4">
+              Get Started
             </button>
           </Link>
         </div>

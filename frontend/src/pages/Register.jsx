@@ -1,11 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaGoogle, FaArrowCircleRight } from "react-icons/fa";
+import { FaGoogle, FaArrowCircleRight } from "react-icons/fa";
+import axios from 'axios';
 
 const Register = () => {
-  const handleSubmit = (event) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Handle form submission
+    try {
+      const response = await axios.post('/api/register', formData);
+      if (response.data.success) {
+        // Handle successful registration (e.g., redirect to login page)
+        console.log('Registration successful');
+      } else {
+        // Handle registration error
+        console.error(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -22,11 +47,13 @@ const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <div className='mb-4'>
-            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="username">Username</label>
+            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="username">Full Name</label>
             <input
-              type="text" id='username'
-              placeholder='Username'
+              type="text" id='name'
+              placeholder='Full Name'
               className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow'
+              value={formData.name}
+              onChange={handleChange}
             />
           </div>
 
@@ -36,6 +63,8 @@ const Register = () => {
               type="email" id='email'
               placeholder='Email Address'
               className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow'
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
 
@@ -45,6 +74,8 @@ const Register = () => {
               type="password" id='password'
               placeholder='Password'
               className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow'
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
 
@@ -58,7 +89,7 @@ const Register = () => {
               className='w-full flex flex-wrap gap-1 items-center justify-center bg-purple-700 hover:bg-purple-900 text-white font-bold py-2 px-8 rounded focus:outline-none transition-all duration-200 cursor-pointer'
             >
               <FaArrowCircleRight />
-              Register
+              Sign Up
             </button>
           </div>
         </form>
