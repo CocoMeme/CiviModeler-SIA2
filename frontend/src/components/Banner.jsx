@@ -1,14 +1,23 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
 
 const Banner = () => {
+  const { userData, isLoggedin, getUserData } = useContext(AppContext);
+
+  useEffect(() => {
+    if(isLoggedin && !userData) {
+      getUserData();
+    }
+  }, [isLoggedin, userData, getUserData]);
+
   return (
     <div className="flex flex-col md:flex-row justify-center items-start min-h-screen bg-white px-52 pt-40">
       <div className="w-full md:w-1/2 max-w-3xl text-left space-y-9 px-6">
         <div className="flex items-center justify-center md:justify-start">
           <img
-            src="../../public/images/CiviModeler - NBG.png"
+            src="/images/CiviModeler - NBG.png"
             alt="CiviModeler Logo"
             className="w-8 h-auto"
           />
@@ -18,7 +27,7 @@ const Banner = () => {
           Let’s make your budget come to life.
         </h2>
         <h3 className="text-2xl text-gray-700">
-          Your future home tailored to your financial plan.
+          Hey, { userData?.name ? userData.name + '!' : 'Guest!' } Your future home tailored to your financial plan.
         </h3>
         <p className="text-lg text-gray-600">
           <span className="font-semibold text-purple-500">CiviModeler</span> provides advanced tools for engineers and project managers, combining data-driven insights with user-friendly interfaces to optimize project planning and execution. Experience seamless integration of technology and engineering expertise.

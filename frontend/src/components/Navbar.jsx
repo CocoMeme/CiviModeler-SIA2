@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AppContext } from '../context/AppContext';
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const {userData, backendUrl, setUserData, setISLoggedin} = useContext(AppContext);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);

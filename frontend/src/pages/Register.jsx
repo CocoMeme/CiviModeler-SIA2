@@ -7,22 +7,21 @@ import { toast } from 'react-toastify';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { backendUrl, setIsLoggedin } = useContext(AppContext);
+  const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: ''
   });
 
-  // Added change handler to update form data
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
       axios.defaults.withCredentials = true;
       const { data } = await axios.post(backendUrl + '/api/auth/register', {
         name: formData.name,
@@ -31,6 +30,7 @@ const Register = () => {
       });
       if (data.success) {
         setIsLoggedin(true);
+        getUserData();
         navigate('/');
       } else {      
         toast.error(data.error);
@@ -52,9 +52,11 @@ const Register = () => {
           <h2 className='text-xl font-semibold'> CiviModeler | Register</h2>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleRegister}>
           <div className='mb-4'>
-            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="name">Full Name</label>
+            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="name">
+              Full Name
+            </label>
             <input
               type="text"
               id='name'
@@ -66,7 +68,9 @@ const Register = () => {
           </div>
 
           <div className='mb-4'>
-            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="email">Email</label>
+            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="email">
+              Email
+            </label>
             <input
               type="email"
               id='email'
@@ -78,7 +82,9 @@ const Register = () => {
           </div>
 
           <div className='mb-4'>
-            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="password">Password</label>
+            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="password">
+              Password
+            </label>
             <input
               type="password"
               id='password'
@@ -120,7 +126,9 @@ const Register = () => {
           </button>
         </div>
 
-        <p className='mt-5 text-center text-grey-500 text-xs'>©2025 CiviModeler. All rights reserved.</p>
+        <p className='mt-5 text-center text-grey-500 text-xs'>
+          ©2025 CiviModeler. All rights reserved.
+        </p>
       </div>
     </div>
   );
