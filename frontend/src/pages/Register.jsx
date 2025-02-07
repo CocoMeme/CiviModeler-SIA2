@@ -1,35 +1,42 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaGoogle, FaArrowCircleRight } from "react-icons/fa";
 import axios from 'axios';
+import { AppContext } from '../context/AppContext';
+import { toast } from 'react-toastify';
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { backendUrl, setIsLoggedin } = useContext(AppContext);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: ''
   });
 
+  // Added change handler to update form data
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value
-    });
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
     try {
-      const response = await axios.post('/api/register', formData);
-      if (response.data.success) {
-        // Handle successful registration (e.g., redirect to login page)
-        console.log('Registration successful');
-      } else {
-        // Handle registration error
-        console.error(response.data.message);
+      e.preventDefault();
+      axios.defaults.withCredentials = true;
+      const { data } = await axios.post(backendUrl + '/api/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      });
+      if (data.success) {
+        setIsLoggedin(true);
+        navigate('/');
+      } else {      
+        toast.error(data.error);
       }
     } catch (error) {
-      console.error('Error during registration:', error);
+      toast.error('An error occurred. Please try again.');
     }
   };
 
@@ -47,9 +54,10 @@ const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <div className='mb-4'>
-            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="username">Full Name</label>
+            <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="name">Full Name</label>
             <input
-              type="text" id='name'
+              type="text"
+              id='name'
               placeholder='Full Name'
               className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow'
               value={formData.name}
@@ -60,7 +68,8 @@ const Register = () => {
           <div className='mb-4'>
             <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="email">Email</label>
             <input
-              type="email" id='email'
+              type="email"
+              id='email'
               placeholder='Email Address'
               className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow'
               value={formData.email}
@@ -71,7 +80,8 @@ const Register = () => {
           <div className='mb-4'>
             <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="password">Password</label>
             <input
-              type="password" id='password'
+              type="password"
+              id='password'
               placeholder='Password'
               className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow'
               value={formData.password}
@@ -110,11 +120,10 @@ const Register = () => {
           </button>
         </div>
 
-
         <p className='mt-5 text-center text-grey-500 text-xs'>©2025 CiviModeler. All rights reserved.</p>
       </div>
     </div>
   );
-}
+};
 
 export default Register;

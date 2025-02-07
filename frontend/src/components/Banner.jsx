@@ -4,16 +4,15 @@ import { Link } from "react-router-dom";
 
 const Banner = () => {
   return (
-    <div className="relative flex flex-col md:flex-row justify-start items-center h-[100vh] overflow-hidden bg-white">
-      {/* Left Section - Textual Content */}
-      <div className="relative z-10 md:w-1/2 w-full px-10 md:px-20 space-y-9 ml-24 s:ml-10">
-        <div className="flex items-center mb-4">
+    <div className="flex flex-col md:flex-row justify-center items-start min-h-screen bg-white px-52 pt-40">
+      <div className="w-full md:w-1/2 max-w-3xl text-left space-y-9 px-6">
+        <div className="flex items-center justify-center md:justify-start">
           <img
             src="../../public/images/CiviModeler - NBG.png"
             alt="CiviModeler Logo"
             className="w-8 h-auto"
           />
-          <h1 className="ml-4 font-extrabold text-lg text-black">CIVIMODELER</h1>
+          <h1 className="ml-2 font-extrabold text-lg text-black">CIVIMODELER</h1>
         </div>
         <h2 className="text-4xl md:text-6xl font-semibold text-black leading-tight">
           Let’s make your budget come to life.
@@ -22,13 +21,9 @@ const Banner = () => {
           Your future home tailored to your financial plan.
         </h3>
         <p className="text-lg text-gray-600">
-          <span className="font-semibold text-purple-500">CiviModeler</span>{" "}
-          provides advanced tools for engineers and project managers, combining
-          data-driven insights with user-friendly interfaces to optimize project
-          planning and execution. Experience seamless integration of technology
-          and engineering expertise.
+          <span className="font-semibold text-purple-500">CiviModeler</span> provides advanced tools for engineers and project managers, combining data-driven insights with user-friendly interfaces to optimize project planning and execution. Experience seamless integration of technology and engineering expertise.
         </p>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
           <Link to="/register">
             <button className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">
               Get a Quote!
@@ -39,13 +34,11 @@ const Banner = () => {
           </button>
         </div>
       </div>
-
-      {/* Right Section - Visual Content */}
-      <div className="relative md:w-1/2 w-full h-full">
+      <div className="w-full md:w-2/3 flex justify-center items-center">
         <img
-          src="../../public/images/interactive-visual.png"
-          alt="Interactive Visual"
-          className="w-full h-full object-cover"
+          src="../../public/images/sci-fi-14149.gif"
+          alt="Sci-Fi Visual"
+          className="w-full h-auto"
         />
       </div>
     </div>

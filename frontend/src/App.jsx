@@ -11,11 +11,15 @@ import Dashboard from "./pages/Admin Pages/Dashboard";
 import Reports from "./pages/Admin Pages/Reports";
 import AdminLayout from "./pages/Admin Pages/AdminLayout";
 
+// React Toastify
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const App = () => {
   return (
     <div>
+      <ToastContainer />
       <Routes>
-        {/* Main Pages with Navbar and Footer */}
         <Route
           path="/*"
           element={
