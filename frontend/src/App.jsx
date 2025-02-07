@@ -10,7 +10,7 @@ import ProjectDetail from "./pages/User Pages/ProjectDetail";
 import Dashboard from "./pages/Admin Pages/Dashboard";
 import Reports from "./pages/Admin Pages/Reports";
 import AdminLayout from "./pages/Admin Pages/AdminLayout";
-
+import ProjectResult from "./pages/User Pages/projectResult";
 // React Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -31,6 +31,7 @@ const App = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/about-us" element={<AboutUs />} />
                 <Route path="/project-detail" element={<ProjectDetail />} />
+                <Route path="/project-result" element={<ProjectResult />} />
               </Routes>
               <Footer />
             </>
