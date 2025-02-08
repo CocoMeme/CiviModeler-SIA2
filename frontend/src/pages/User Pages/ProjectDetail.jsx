@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Box, Stepper, Step, StepLabel, Button, TextField, Typography } from '@mui/material';
+import { Box, Stepper, Step, StepLabel, Button, TextField, Typography, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { FaArrowRight } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './ProjectDetail.css';
 
 const steps = ['Client Details', 'Project Details', 'Setting-up'];
@@ -16,8 +17,10 @@ export default function ProjectDetail() {
     projectName: '',
     locationSize: '',
     projectBudget: '',
-    projectDescription: ''
+    projectDescription: '',
+    designStyle: 'Modern' // Default design style
   });
+  const [errorMessage, setErrorMessage] = React.useState('');
   const navigate = useNavigate();
   
   const handleNext = () => {
@@ -33,8 +36,26 @@ export default function ProjectDetail() {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleGetQuote = () => {
-    navigate('/project-result', { state: formData });
+  const handleSelectChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleGetQuote = async () => {
+    try {
+      const response = await axios.post('http://localhost:5001/estimate', {
+        budget: formData.projectBudget,
+        size: formData.locationSize,
+        design_style: formData.designStyle
+      });
+      navigate('/project-result', { state: { ...formData, result: response.data } });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.error) {
+        setErrorMessage(error.response.data.error);
+      } else {
+        console.error('Error fetching estimate:', error);
+      }
+    }
   };
 
   return (
@@ -63,6 +84,21 @@ export default function ProjectDetail() {
             <TextField fullWidth label="Project Name" id="projectName" margin="normal" className="custom-textfield" value={formData.projectName} onChange={handleChange} />
             <TextField fullWidth label="Location Size (sqft)" id="locationSize" margin="normal" className="custom-textfield" value={formData.locationSize} onChange={handleChange} />
             <TextField fullWidth label="Project Budget (₱)" id="projectBudget" type="number" margin="normal" className="custom-textfield" value={formData.projectBudget} onChange={handleChange} />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="designStyle-label">Design Style</InputLabel>
+              <Select
+                labelId="designStyle-label"
+                id="designStyle"
+                name="designStyle"
+                value={formData.designStyle}
+                onChange={handleSelectChange}
+                className="custom-textfield"
+              >
+                <MenuItem value="Modern">Modern</MenuItem>
+                <MenuItem value="Classic">Classic</MenuItem>
+                <MenuItem value="Rustic">Rustic</MenuItem>
+              </Select>
+            </FormControl>
             <Button onClick={handleBack} className="px-6 py-3 bg-white text-blue-600 border border-blue-600 font-semibold rounded-md shadow-md hover:bg-blue-100 flex items-center gap-2 transition duration-300">
               Back <FaArrowRight />
             </Button>
@@ -89,6 +125,11 @@ export default function ProjectDetail() {
             <button onClick={handleGetQuote} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">
               Get a Quote!
             </button>
+            {errorMessage && (
+              <Typography variant="body2" color="error" sx={{ textAlign: 'center', mt: 2 }}>
+                {errorMessage}
+              </Typography>
+            )}
           </Box>
         )}
       </Box>

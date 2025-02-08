@@ -1,25 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 export default function Result() {
   const location = useLocation();
-  const { clientName, email, phoneNumber, companyName, projectName, locationSize, projectBudget, projectDescription, houseDesign } = location.state || {};
-  const [openDialog, setOpenDialog] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-
-  const result = {
-    total_cost: 35000.00,
-    budget_status: 'Within Budget',
-    materials: {
-      Cement: { quantity: 3.2, unit_price: 250, total_price: 800 },
-      Sand: { quantity: 2.5, unit_price: 500, total_price: 1250 },
-      Gravel: { quantity: 3.0, unit_price: 700, total_price: 2100 },
-      Bricks: { quantity: 1000, unit_price: 10, total_price: 10000 },
-      Steel: { quantity: 100, unit_price: 150, total_price: 15000 },
-      Paint: { quantity: 4.0, unit_price: 500, total_price: 2000 },
-    },
-  };
+  const { clientName, email, phoneNumber, companyName, projectName, locationSize, projectBudget, projectDescription, result } = location.state || {};
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [isConfirmed, setIsConfirmed] = React.useState(false);
 
   const handleConfirm = () => setOpenDialog(true);
 
@@ -51,7 +38,6 @@ export default function Result() {
         <Typography>Location Size: {locationSize} sqft</Typography>
         <Typography>Project Budget: ₱{projectBudget}</Typography>
         <Typography>Project Description: {projectDescription}</Typography>
-        <Typography><strong>House Design:</strong> {houseDesign || 'Not Selected'}</Typography>
       </Paper>
 
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
@@ -65,7 +51,7 @@ export default function Result() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Object.entries(result.materials).map(([material, details]) => (
+            {result && Object.entries(result.materials).map(([material, details]) => (
               <TableRow key={material} hover>
                 <TableCell>{material}</TableCell>
                 <TableCell>{details.quantity}</TableCell>
@@ -75,7 +61,7 @@ export default function Result() {
             ))}
             <TableRow sx={{ backgroundColor: '#f4f4f4' }}>
               <TableCell colSpan={3} sx={{ fontWeight: 'bold' }}>Total Estimated Cost</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>₱{result.total_cost.toFixed(2)}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>₱{result?.total_cost.toFixed(2)}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
