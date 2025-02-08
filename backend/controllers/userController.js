@@ -21,3 +21,12 @@ export const getUserData = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await userModel.find({});
+        res.json({ success: true, users });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};

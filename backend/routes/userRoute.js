@@ -1,9 +1,10 @@
 import express from 'express';
-import { getUserData } from '../controllers/userController.js';
+import { getUserData, getAllUsers } from '../controllers/userController.js';
 import userAuth from '../middleware/userAuth.js';
 
 const userRouter = express.Router();
 
-userRouter.get('/data', userAuth, getUserData)
+userRouter.get('/data', userAuth, getUserData);
+userRouter.get('/all', userAuth, getAllUsers);
 
 export default userRouter;

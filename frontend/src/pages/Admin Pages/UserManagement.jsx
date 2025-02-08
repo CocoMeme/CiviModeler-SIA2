@@ -1,11 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function UserManagement() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com" },
-    { id: 3, name: "Bob Johnson", email: "bob@example.com" },
-  ]);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/all`, { withCredentials: true });
+        if (response.data.success) {
+          setUsers(response.data.users);
+        } else {
+          console.error(response.data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const updateUser = (id) => {
     const updatedName = prompt("Enter the new user name:");
@@ -32,18 +46,18 @@ export default function UserManagement() {
         <table className="min-w-full bg-gray-800 shadow-md rounded-lg overflow-hidden">
           <thead className="bg-gray-700 text-white">
             <tr>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">User ID</th>
               <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">User Name</th>
               <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Email</th>
+              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Account Status</th>
               <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-300">
             {users.map((user) => (
               <tr key={user.id} className="border-b border-gray-700">
-                <td className="w-1/4 py-3 px-4 text-center">{user.id}</td>
                 <td className="w-1/4 py-3 px-4 text-center">{user.name}</td>
                 <td className="w-1/4 py-3 px-4 text-center">{user.email}</td>
+                <td className="w-1/4 py-3 px-4 text-center">{user.isAccountVerified ? "Verified" : "Not Verified"}</td>
                 <td className="w-1/4 py-3 px-2 text-center">
                   <button
                     className="mr-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
