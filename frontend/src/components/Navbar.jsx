@@ -1,23 +1,64 @@
 import React, { useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
-import { FaSignOutAlt, FaUserCheck  } from 'react-icons/fa';
+import { FaSignOutAlt, FaUserCheck } from 'react-icons/fa';
 import { FaCircleUser } from "react-icons/fa6";
-import { PiUserCircleCheckFill } from "react-icons/pi";
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const { userData, backendUrl, setUserData, setIsLoggedin } = useContext(AppContext);
 
-  const {userData, backendUrl, setUserData, setISLoggedin} = useContext(AppContext);
+  const sendVerificationOtp = async () => {
+    try {
+      axios.defaults.withCredentials = true;
+      const { data } = await axios.post(backendUrl + '/api/auth/send-verify-otp');
+
+      if (data.success) {
+        navigate('/email-verify');
+        toast.success('Verification OTP sent successfully');
+      } else {
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogout = () => {
-    // Implement logout functionality here
-    setUserData(null);
-    setISLoggedin(false);
+  const logout = async () => {
+    try {
+      axios.defaults.withCredentials = true;
+      const { data } = await axios.post(backendUrl + '/api/auth/logout');
+      if (data.success) {
+        setUserData(null);
+        setIsLoggedin(false);
+        navigate('/');
+      } else {
+        toast.error('Logout failed');
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || 'An error occurred during logout';
+      toast.error(errorMsg);
+    }
+  };
+
+  // Add new function to get initials
+  const getUserInitials = () => {
+    const name = userData.name.trim();
+    const words = name.split(" ");
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else {
+      return name.length >= 2 ? (name[0] + name[1]).toUpperCase() : name[0].toUpperCase();
+    }
   };
 
   return (
@@ -26,34 +67,22 @@ const Navbar = () => {
         {/* Left side */}
         <div className="flex items-center md:gap-16 gap-4">
           <div className="flex items-center">
-            <div>
-              <Link to="/">
-                <img src="/images/CiviModeler - White.png" alt="Logo" className="size-8" />
-              </Link>
-            </div>
-            <div>
-              <Link to="/">
-                <h3 className="font-bold text-gradient">CIVIMODELER</h3>
-              </Link>
-            </div>
+            <Link to="/">
+              <img src="/images/CiviModeler - White.png" alt="Logo" className="size-8" />
+            </Link>
+            <Link to="/">
+              <h3 className="font-bold text-gradient">CIVIMODELER</h3>
+            </Link>
           </div>
         </div>
 
         {/* Center */}
         <div className="w-2/5 text-white">
           <ul className="flex md:gap-10 text-md text-center font-light">
-            <Link to="/docs">
-              <li className="nav-item">Docs</li>
-            </Link>
-            <Link to="/testimony">
-              <li className="nav-item">Testimony</li>
-            </Link>
-            <Link to="/projects">
-              <li className="nav-item">Projects</li>
-            </Link>
-            <Link to="/about-us">
-              <li className="nav-item">About Us</li>
-            </Link>
+            <Link to="/docs"><li className="nav-item">Docs</li></Link>
+            <Link to="/testimony"><li className="nav-item">Testimony</li></Link>
+            <Link to="/projects"><li className="nav-item">Projects</li></Link>
+            <Link to="/about-us"><li className="nav-item">About Us</li></Link>
           </ul>
         </div>
 
@@ -65,19 +94,25 @@ const Navbar = () => {
                 className="bg-white text-[#592a78] font-semibold py-2 px-4 rounded-full flex items-center justify-center w-10 h-10 cursor-pointer"
                 onClick={toggleDropdown}
               >
-                {userData.name.charAt(0).toUpperCase()}
+                {getUserInitials()}
               </div>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20">
                   <Link to="/profile" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
                     <FaCircleUser className="mr-4" /> Profile
                   </Link>
-                  <Link to="/verify-email" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
-                    <FaUserCheck  className="mr-4" /> Verify Email
-                  </Link>
+                  { !userData.isAccountVerified ? (
+                    <Link onClick={sendVerificationOtp} className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                      <FaUserCheck className="mr-4" /> Verify Email
+                    </Link>
+                  ) : (
+                    <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="Email already verified">
+                      <FaUserCheck className="mr-4" /> Verified
+                    </div>
+                  )}
                   <div 
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
-                    onClick={handleLogout}
+                    onClick={logout}
                   >
                     <FaSignOutAlt className="mr-4" /> Logout
                   </div>
@@ -87,9 +122,7 @@ const Navbar = () => {
           ) : (
             <>
               <ul className="flex md:gap-10 text-md text-center font-light">
-                <Link to="/docs">
-                  <li className="nav-item">Sign Up</li>
-                </Link>
+                <Link to="/docs"><li className="nav-item">Sign Up</li></Link>
               </ul>
               <Link to="/register">
                 <button className="bg-white text-[#592a78] font-light py-2 px-4 rounded focus:outline-none hover:bg-gray-200 transition-all duration-200 ml-4">
@@ -102,6 +135,6 @@ const Navbar = () => {
       </nav>
     </header>
   );
-}
+};
 
 export default Navbar;

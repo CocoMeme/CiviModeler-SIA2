@@ -14,9 +14,12 @@ import AdminLayout from "./pages/Admin Pages/AdminLayout";
 import ProjectManagement from "./pages/Admin Pages/ProjectManagement";
 import UserManagement from "./pages/Admin Pages/UserManagement";
 import ProjectResult from "./pages/User Pages/projectResult";
+import EmailVerify from "./components/EmailVerify";
+import ResetPassord from "./components/ResetPassword";
 // React Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 
 const App = () => {
   return (
@@ -33,6 +36,8 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/about-us" element={<AboutUs />} />
+                <Route path="/email-verify" element={<EmailVerify />} />
+                <Route path="/reset-password" element={<ResetPassord />} />
                 <Route path="/loading" element={<GeneratingPage />} />
                 <Route path="/project-detail" element={<ProjectDetail />} />
                 <Route path="/project-result" element={<ProjectResult />} />

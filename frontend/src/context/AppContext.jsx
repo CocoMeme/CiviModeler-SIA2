@@ -5,20 +5,29 @@ import { toast } from 'react-toastify';
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
+
+    axios.defaults.withCredentials = true;
+
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [isLoggedin, setIsLoggedin] = useState(false);
-    const [userData, setUSerData] = useState(null);
+    const [userData, setUserData] = useState(null);
 
     const getAuthState = async () => {
         try {
-            axios.defaults.withCredentials = true; // send credentials
+            
             const { data } = await axios.get(backendUrl + '/api/auth/is-auth');
             if (data.success) {
                 setIsLoggedin(true);
                 getUserData();
             }
         } catch (error) {
-            toast.error(error.message || 'An error occurred');
+            if (error.response && error.response.status === 401) {
+                // Expected when no user is logged in, clear state without showing error
+                setIsLoggedin(false);
+                setUserData(null);
+            } else {
+                toast.error(error.message || 'An error occurred');
+            }
         }
     };
 
@@ -27,7 +36,7 @@ export const AppContextProvider = (props) => {
             axios.defaults.withCredentials = true;
             const { data } = await axios.get(backendUrl + '/api/user/data');
             data.success 
-                ? setUSerData(data.userData) 
+                ? setUserData(data.userData) 
                 : toast.error(data.message);
         } catch (error) {
             toast.error(error.message || 'An error occurred');
@@ -44,6 +53,7 @@ export const AppContextProvider = (props) => {
         setIsLoggedin,
         getUserData,
         userData,
+        setUserData, // added this line
     };
 
     return (
