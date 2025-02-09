@@ -13,7 +13,8 @@ export const getUserData = async (req, res) => {
             success: true, 
             userData: {
                 name: user.name,
-                isAcccountVerified: user.isAccountVerified,
+                verifyOtpExpireAt: user.verifyOtpExpireAt,
+                isAccountVerified: user.isAccountVerified,
             }
         });
 

@@ -102,9 +102,16 @@ const Navbar = () => {
                     <FaCircleUser className="mr-4" /> Profile
                   </Link>
                   { !userData.isAccountVerified ? (
-                    <Link onClick={sendVerificationOtp} className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
-                      <FaUserCheck className="mr-4" /> Verify Email
-                    </Link>
+                    // If not verified: Check if OTP was recently sent (pending)
+                    userData.verifyOtpExpireAt > Date.now() ? (
+                      <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="OTP already sent, please wait">
+                        <FaUserCheck className="mr-4" /> OTP Sent
+                      </div>
+                    ) : (
+                      <Link onClick={sendVerificationOtp} className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                        <FaUserCheck className="mr-4" /> Verify Email
+                      </Link>
+                    )
                   ) : (
                     <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="Email already verified">
                       <FaUserCheck className="mr-4" /> Verified

@@ -1,0 +1,15 @@
+CLONING:
+1. Create folder called CiviModeler
+2. In the terminal, run this: git clone https://github.com/CocoMeme/CiviModeler-SIA2.git
+
+INSTALLATION:
+1.1. In terminal, go to frontend directory then run: npm i
+
+2.1. In terminal, go to backend directory then run the following: 
+2.2. npm i
+2.3. pip install pandas scikit-learn joblib flask
+2.4. pip install flask-cors
+
+3.1. In terminal, go to CiviModeler directory then run:
+3.2. python backend/python/train_model.py
+
