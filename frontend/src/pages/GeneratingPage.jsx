@@ -46,7 +46,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#0a192f", // Dark navy blue
+    // backgroundColor: "#0a192f", // Dark navy blue
     color: "#f0f0f0", // Light text color
     fontFamily: "Arial, sans-serif",
   },
@@ -55,7 +55,7 @@ const styles = {
     backgroundColor: "#112240", // Slightly lighter navy blue
     padding: "40px",
     borderRadius: "15px",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
+    // boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
   },
   loadingSpinner: {
     border: "6px solid #233554", // Medium navy blue

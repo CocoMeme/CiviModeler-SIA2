@@ -4,6 +4,7 @@ import { AppContext } from '../context/AppContext';
 import { FaSignOutAlt, FaUserCheck } from 'react-icons/fa';
 import { FaCircleUser } from "react-icons/fa6";
 import axios from 'axios';
+import { RiDashboardFill } from "react-icons/ri";
 import { toast } from 'react-toastify';
 
 const Navbar = () => {
@@ -62,7 +63,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="absolute top-0 left-0 w-full px-4 py-6 bg-primary">
+    <header className="absolute top-0 left-0 w-full h-20 px-4 py-4 bg-primary">
       <nav className="flex justify-between items-center max-w-screen-2xl mx-auto">
         {/* Left side */}
         <div className="flex items-center md:gap-16 gap-4">
@@ -90,18 +91,24 @@ const Navbar = () => {
         <div className="relative flex items-center md:space-x-3 space-x-2">
           {userData && userData.name ? (
             <div className="relative">
+              {/* Updated animated avatar container */}
               <div 
-                className="bg-white text-[#592a78] font-semibold py-2 px-4 rounded-full flex items-center justify-center w-10 h-10 cursor-pointer"
+                className="group flex items-center bg-white text-[#592a78] font-semibold rounded-full cursor-pointer overflow-hidden transition-all duration-300 px-1 py-1 hover:scale-105"
                 onClick={toggleDropdown}
               >
-                {getUserInitials()}
+                <span className="flex text-sm items-center px-2 py-2 max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 -mr-4 overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out">
+                <RiDashboardFill className='mr-2'/> <Link to="/user/dashboards">My Dashboard</Link> 
+                </span>
+                <span className="w-10 h-10 z-30 flex text-sm items-center justify-center">
+                  {getUserInitials()}
+                </span>
               </div>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20">
                   <Link to="/profile" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
                     <FaCircleUser className="mr-4" /> Profile
                   </Link>
-                  { !userData.isAccountVerified ? (
+                  {!userData.isAccountVerified ? (
                     // If not verified: Check if OTP was recently sent (pending)
                     userData.verifyOtpExpireAt > Date.now() ? (
                       <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="OTP already sent, please wait">
@@ -117,7 +124,7 @@ const Navbar = () => {
                       <FaUserCheck className="mr-4" /> Verified
                     </div>
                   )}
-                  <div 
+                  <div
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
                     onClick={logout}
                   >

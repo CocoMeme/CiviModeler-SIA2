@@ -19,6 +19,7 @@ import ResetPassord from "./components/ResetPassword";
 // React Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ParentProfile from "./pages/User Pages/Profile Components/ParentProfile";
 
 
 const App = () => {
@@ -41,6 +42,8 @@ const App = () => {
                 <Route path="/loading" element={<GeneratingPage />} />
                 <Route path="/project-detail" element={<ProjectDetail />} />
                 <Route path="/project-result" element={<ProjectResult />} />
+
+                <Route path="/profile" element={<ParentProfile/>} />
               </Routes>
               <Footer />
             </>
