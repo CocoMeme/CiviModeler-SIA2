@@ -136,7 +136,7 @@ const Navbar = () => {
           ) : (
             <>
               <ul className="flex md:gap-10 text-md text-center font-light">
-                <Link to="/docs"><li className="nav-item">Sign Up</li></Link>
+                <Link to="/register"><li className="nav-item">Sign Up</li></Link>
               </ul>
               <Link to="/register">
                 <button className="bg-white text-[#592a78] font-light py-2 px-4 rounded focus:outline-none hover:bg-gray-200 transition-all duration-200 ml-4">

@@ -6,7 +6,7 @@ import Register from "./pages/Register";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AboutUs from "./pages/AboutUs";
-import GeneratingPage from "./pages/GeneratingPage";
+import GeneratingPage from "./components/GeneratingPage";
 import ProjectDetail from "./pages/User Pages/ProjectDetail";
 import Dashboard from "./pages/Admin Pages/Dashboard";
 import Reports from "./pages/Admin Pages/Reports";
@@ -20,6 +20,8 @@ import ResetPassord from "./components/ResetPassword";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ParentProfile from "./pages/User Pages/Profile Components/ParentProfile";
+import UserLayout from "./pages/User Pages/UserLayout";
+import UserHome from "./pages/User Pages/UserHome";
 
 
 const App = () => {
@@ -42,15 +44,19 @@ const App = () => {
                 <Route path="/loading" element={<GeneratingPage />} />
                 <Route path="/project-detail" element={<ProjectDetail />} />
                 <Route path="/project-result" element={<ProjectResult />} />
-
                 <Route path="/profile" element={<ParentProfile/>} />
               </Routes>
               <Footer />
             </>
           }
         />
+        {/* User Interface */}
+        <Route path="/user/*" element={<UserLayout />}>
+          <Route path="home" element={<UserHome />} />
+          <Route path="project-detial" element={<ProjectDetail />} />
+        </Route>
 
-        {/* Admin Pages with Sidebar (No Navbar & Footer) */}
+        {/* Admin Interface */}
         <Route path="/admin/*" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="reports" element={<Reports />} />

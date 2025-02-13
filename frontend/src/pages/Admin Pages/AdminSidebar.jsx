@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const Sidebar = () => {
+const AdminSidebar = () => {
   return (
     <div className="w-64 bg-gray-800 text-white p-5 flex flex-col justify-between">
       <div>
@@ -27,4 +27,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default AdminSidebar;
