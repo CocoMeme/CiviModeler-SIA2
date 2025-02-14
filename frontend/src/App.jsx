@@ -16,6 +16,7 @@ import UserManagement from "./pages/Admin Pages/UserManagement";
 import ProjectResult from "./pages/User Pages/projectResult";
 import EmailVerify from "./components/EmailVerify";
 import ResetPassord from "./components/ResetPassword";
+import ModelGenerator from "./pages/User Pages/ModelGenerator";
 // React Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -45,6 +46,7 @@ const App = () => {
                 <Route path="/project-detail" element={<ProjectDetail />} />
                 <Route path="/project-result" element={<ProjectResult />} />
                 <Route path="/profile" element={<ParentProfile/>} />
+                <Route path="/model-generator" element={<ModelGenerator />} />
               </Routes>
               <Footer />
             </>

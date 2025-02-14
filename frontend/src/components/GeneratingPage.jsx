@@ -12,7 +12,7 @@ const GeneratingPage = () => {
           // Redirect or show completion message
           setTimeout(() => {
             alert("Generation complete! Redirecting...");
-            window.location.href = "/"; // Replace with your actual redirect URL
+            window.location.href = "/model-generator"; // Replace with your actual redirect URL
           }, 500);
           return 100;
         }
