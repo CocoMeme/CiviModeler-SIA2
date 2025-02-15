@@ -1,10 +1,14 @@
-import { NavLink, Link } from "react-router-dom"; // added NavLink
+import { NavLink, Link } from "react-router-dom"; 
 import { FaPlus, FaHome, FaQuestionCircle } from "react-icons/fa";
 import { LuFolderOpen } from "react-icons/lu";
+import { RiFolder3Fill } from "react-icons/ri";
+import { BiSolidDashboard } from "react-icons/bi";
+import { BsFillQuestionSquareFill } from "react-icons/bs";
+
 
 const UserSidebar = () => {
   return (
-    <div className="w-1/6 p-5 flex flex-col justify-between bg-slate-200">
+    <div className="w-1/6 p-5 flex flex-col justify-between bg-slate-200 rounded-lg m-3">
       <div>
         {/* Top Part */}
         <div className="flex justify-center items-center mb-5">
@@ -17,48 +21,51 @@ const UserSidebar = () => {
         </div>
 
         {/* Navigation Part */}
-        <ul className="flex justify-between my-4">
-          <li className="flex items-center">
-            <NavLink
-              to="/user/home"
-              className={({ isActive }) =>
-                `min-w-full p-2 flex items-center bg-slate-50 hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
-              }
-            >
-              <FaHome className="inline mr-2" /> Home
-            </NavLink>
-          </li>
-          <li className="flex items-center">
-            <NavLink
-              to="/user/projects"
-              className={({ isActive }) =>
-                `p-2 flex items-center bg-slate-50 hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
-              }
-            >
-              <LuFolderOpen className="inline mr-2" /> Projects
-            </NavLink>
-          </li>
-          <li className="flex items-center">
-            <NavLink
-              to="/user/help"
-              className={({ isActive }) =>
-                `p-2 flex items-center bg-slate-50 hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
-              }
-            >
-              <FaQuestionCircle className="inline mr-2" /> Help
-            </NavLink>
-          </li>
-        </ul>
+        <div className="bg-white py-0.5 mb-2 rounded-md">
+          <ul className="flex justify-evenly my-4">
+            <li className="flex items-center justify-center">
+              <NavLink
+                to="/user/home"
+                className={({ isActive }) =>
+                  `w-full p-1 flex justify-center items-center  hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
+                }
+              >
+                <BiSolidDashboard className="text-xl sm:text-2xl" />
+              </NavLink>
+            </li>
+            <li className="flex items-center justify-center">
+              <NavLink
+                to="/user/user-projects"
+                className={({ isActive }) =>
+                  `w-full p-1 flex justify-center items-center  hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
+                }
+              >
+                <RiFolder3Fill className="text-xl sm:text-2xl" />
+              </NavLink>
+            </li>
+            <li className="flex items-center justify-center">
+              <NavLink
+                to="/user/help"
+                className={({ isActive }) =>
+                  `w-full p-1 flex justify-center items-center hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
+                }
+              >
+                <BsFillQuestionSquareFill className="text-xl sm:text-2xl" />
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+
 
         {/* Menus & Option Part */}
         <ul>
           <li className="mb-2">
-            <Link to="/user/project-detial" className="flex items-center justify-center text-white p-2 bg-purple-700 hover:bg-purple-400 rounded">
+            <Link to="/user/project-detial" className="flex items-center justify-center text-white p-2 bg-purple-700 hover:bg-purple-600 rounded">
               <FaPlus className="inline mr-3" /> Create Project
             </Link>
           </li>
           <li className="mb-2">
-            <Link to="/user/project-detial" className="flex items-center justify-center p-2 bg-slate-50 hover:bg-purple-200 rounded">
+            <Link to="/user/sample-projects" className="flex items-center justify-center p-2 bg-slate-50 hover:bg-purple-200 rounded">
               <LuFolderOpen className="inline mr-3" /> Sample Project
             </Link>
           </li>
@@ -76,7 +83,7 @@ const UserSidebar = () => {
         </ul>
 
       </div>
-      <button className="bg-slate-400 hover:bg-slate-300 p-2 rounded text-center">
+      <button className="hover:bg-purple-200 p-2 rounded text-center ring-2 ring-purple-300">
         Logout
       </button>
     </div>

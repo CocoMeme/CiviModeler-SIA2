@@ -23,6 +23,9 @@ import "react-toastify/dist/ReactToastify.css";
 import ParentProfile from "./pages/User Pages/Profile Components/ParentProfile";
 import UserLayout from "./pages/User Pages/UserLayout";
 import UserHome from "./pages/User Pages/UserHome";
+import UserProjects from "./pages/User Pages/UserProjects";
+import Help from "./pages/User Pages/Help";
+import SampleProjects from "./pages/User Pages/SampleProjects";
 
 
 const App = () => {
@@ -55,7 +58,9 @@ const App = () => {
         {/* User Interface */}
         <Route path="/user/*" element={<UserLayout />}>
           <Route path="home" element={<UserHome />} />
-          <Route path="project-detial" element={<ProjectDetail />} />
+          <Route path="sample-projects" element={<SampleProjects />} />
+          <Route path="user-projects" element={<UserProjects />} />
+          <Route path="help" element={<Help />} />
         </Route>
 
         {/* Admin Interface */}
