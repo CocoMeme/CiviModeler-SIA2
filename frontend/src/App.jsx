@@ -47,7 +47,7 @@ const App = () => {
                 <Route path="/reset-password" element={<ResetPassord />} />
                 <Route path="/loading" element={<GeneratingPage />} />
                 <Route path="/project-detail" element={<ProjectDetail />} />
-                <Route path="/project-result" element={<ProjectResult />} />
+                {/* <Route path="/project-result" element={<ProjectResult />} /> */}
                 <Route path="/profile" element={<ParentProfile/>} />
                 <Route path="/model-generator" element={<ModelGenerator />} />
               </Routes>
@@ -58,7 +58,9 @@ const App = () => {
         {/* User Interface */}
         <Route path="/user/*" element={<UserLayout />}>
           <Route path="home" element={<UserHome />} />
+          <Route path="project-detail" element={<ProjectDetail />} />
           <Route path="sample-projects" element={<SampleProjects />} />
+          <Route path="project-result" element={<ProjectResult />} />
           <Route path="user-projects" element={<UserProjects />} />
           <Route path="help" element={<Help />} />
         </Route>

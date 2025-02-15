@@ -13,3 +13,4 @@ INSTALLATION:
 3.1. In terminal, go to CiviModeler directory then run:
 3.2. python backend/python/train_model.py
 
+

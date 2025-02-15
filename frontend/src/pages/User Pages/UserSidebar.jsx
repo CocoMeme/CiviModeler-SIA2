@@ -4,6 +4,7 @@ import { LuFolderOpen } from "react-icons/lu";
 import { RiFolder3Fill } from "react-icons/ri";
 import { BiSolidDashboard } from "react-icons/bi";
 import { BsFillQuestionSquareFill } from "react-icons/bs";
+import { FaGear } from "react-icons/fa6";
 
 
 const UserSidebar = () => {
@@ -45,6 +46,16 @@ const UserSidebar = () => {
             </li>
             <li className="flex items-center justify-center">
               <NavLink
+                to="/user/settings"
+                className={({ isActive }) =>
+                  `w-full p-1 flex justify-center items-center  hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
+                }
+              >
+                <FaGear className="text-xl sm:text-2xl" />
+              </NavLink>
+            </li>
+            <li className="flex items-center justify-center">
+              <NavLink
                 to="/user/help"
                 className={({ isActive }) =>
                   `w-full p-1 flex justify-center items-center hover:bg-slate-300 rounded ${isActive ? "ring-2 ring-purple-500" : ""}`
@@ -60,7 +71,7 @@ const UserSidebar = () => {
         {/* Menus & Option Part */}
         <ul>
           <li className="mb-2">
-            <Link to="/user/project-detial" className="flex items-center justify-center text-white p-2 bg-purple-700 hover:bg-purple-600 rounded">
+            <Link to="/user/project-detail" className="flex items-center justify-center text-white p-2 bg-purple-700 hover:bg-purple-600 rounded">
               <FaPlus className="inline mr-3" /> Create Project
             </Link>
           </li>
@@ -69,11 +80,6 @@ const UserSidebar = () => {
               <LuFolderOpen className="inline mr-3" /> Sample Project
             </Link>
           </li>
-          {/* <li className="mb-2">
-            <Link to="/user/home" className="block p-2 hover:bg-gray-400 rounded">
-              <FaHome className="inline mr-1" /> Home
-            </Link>
-          </li> */}
 
           {/* List of the recent projects */}
           <li className="mt-4 mb-2 block p-2 text-sm">

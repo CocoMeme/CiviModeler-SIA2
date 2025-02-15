@@ -3,11 +3,15 @@ import { Box, Stepper, Step, StepLabel, Button, TextField, Typography, MenuItem,
 import { FaArrowRight } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './ProjectDetail.css';
+import '/styles/ProjectDetail.css?url';
+import { AppContext } from '../../context/AppContext';
 
 const steps = ['Client Details', 'Project Details', 'Setting-up'];
 
 export default function ProjectDetail() {
+
+  const { backendUrl, userData } = React.useContext(AppContext);
+
   const [activeStep, setActiveStep] = React.useState(0);
   const [formData, setFormData] = React.useState({
     clientName: '',
@@ -43,23 +47,59 @@ export default function ProjectDetail() {
 
   const handleGetQuote = async () => {
     try {
-      const response = await axios.post('http://localhost:5001/estimate', {
-        budget: formData.projectBudget,
-        size: formData.locationSize,
-        design_style: formData.designStyle
-      });
-      navigate('/project-result', { state: { ...formData, result: response.data } });
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data.error) {
-        setErrorMessage(error.response.data.error);
-      } else {
-        console.error('Error fetching estimate:', error);
+      // Ensure userData exists (i.e. the user is logged in)
+      if (!userData) {
+        console.error('User data not available');
+        setErrorMessage('User is not logged in');
+        return;
       }
+      
+      console.log("Backend URL:", backendUrl);
+      const projectUrl = backendUrl.endsWith('/')
+        ? `${backendUrl}api/project/create`
+        : `${backendUrl}/api/project/create`;
+      
+      const projectData = {
+        projectName: formData.projectName,
+        size: Number(formData.locationSize),
+        budget: Number(formData.projectBudget),
+        style: formData.designStyle,
+        projectDescription: formData.projectDescription,
+        author: userData.name,
+        clientDetails: {
+          clientName: formData.clientName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          companyName: formData.companyName
+        }
+      };
+      
+      console.log('Creating project with payload:', projectData);
+      const projectResponse = await axios.post(projectUrl, projectData);
+  
+      if (projectResponse.status === 201) {
+        console.log('Project created successfully:', projectResponse.data);
+        
+        const estimateResponse = await axios.post('http://localhost:5001/estimate', {
+          budget: projectData.budget,
+          size: projectData.size,
+          design_style: projectData.style
+        });
+  
+        navigate('/user/project-result', { state: { ...formData, result: estimateResponse.data } });
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.error 
+        ? String(error.response.data.error) 
+        : error.message || 'An error occurred';
+      setErrorMessage(errorMsg);
+      console.error('Error processing request:', error);
     }
   };
-
+  
+  
   return (
-    <Box sx={{ width: '100%', maxWidth: 600, margin: 'auto', padding: 4, paddingTop: 10, fontFamily: 'Outfit, sans-serif', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}> 
+    <Box sx={{ width: '100%', maxWidth: 600, margin: 'auto', padding: 4, fontFamily: 'Outfit, sans-serif', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}> 
       <Stepper activeStep={activeStep} alternativeLabel sx={{ '& .MuiStepIcon-root.Mui-active': { color: '#5a2b79' }, '& .MuiStepIcon-root.Mui-completed': { color: '#5a2b79' } }}>
         {steps.map((label) => (
           <Step key={label}>

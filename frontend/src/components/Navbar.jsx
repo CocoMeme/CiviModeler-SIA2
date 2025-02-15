@@ -97,7 +97,7 @@ const Navbar = () => {
                 onClick={toggleDropdown}
               >
                 <span className="flex text-sm items-center px-2 py-2 max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 -mr-4 overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out">
-                <RiDashboardFill className='mr-2'/> <Link to="/user/dashboards">My Dashboard</Link> 
+                <RiDashboardFill className='mr-2'/> <Link to="/user/home">My Dashboard</Link> 
                 </span>
                 <span className="w-10 h-10 z-30 flex text-sm items-center justify-center">
                   {getUserInitials()}

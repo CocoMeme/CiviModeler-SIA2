@@ -53,7 +53,7 @@ export const AppContextProvider = (props) => {
         setIsLoggedin,
         getUserData,
         userData,
-        setUserData, // added this line
+        setUserData,
     };
 
     return (
