@@ -22,18 +22,21 @@ export default function UserManagement() {
   }, []);
 
   const updateUser = (id) => {
-    const updatedName = prompt("Enter the new user name:");
-    const updatedEmail = prompt("Enter the new email:");
-    if (updatedName && updatedEmail) {
+    if (action === 'verify' || action === 'disable') {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === id
-            ? { ...user, name: updatedName, email: updatedEmail }
+            ? { ...user, isAccountVerified: action === 'verify' }
             : user
         )
       );
+      setSelectedUser(null);
+      setAction("");
+    } else {
+      alert("Invalid action. Please select 'verify' or 'disable'.");
     }
   };
+
 
   const deleteUser = (id) => {
     setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));

@@ -1,13 +1,23 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { useLocation } from 'react-router-dom';
 
 const ModelGenerator = () => {
   const mountRef = useRef(null);
-  const [models, setModels] = useState([]);
+  const modelsRef = useRef([]); 
+  const location = useLocation();
+  const { modelUrl } = location.state || {};
 
   useEffect(() => {
+    if (!modelUrl) {
+      console.error('No model URL provided.');
+      return;
+    }
+
+    console.log('Received model URL:', modelUrl);
+
     const mount = mountRef.current;
 
     // Scene
@@ -41,19 +51,26 @@ const ModelGenerator = () => {
     directionalLight.position.set(5, 10, 5);
     scene.add(directionalLight);
 
-    // Load House Model
+    // Load 3D Model
     const loader = new GLTFLoader();
-    loader.load('/path/to/house/model.gltf', (gltf) => {
-      const house = gltf.scene;
-      house.position.set(0, 0, 0);
-      scene.add(house);
-      setModels([...models, house]);
-    });
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        const model = gltf.scene;
+        model.position.set(0, 0, 0);
+        scene.add(model);
+        modelsRef.current.push(model); 
+      },
+      undefined,
+      (error) => {
+        console.error('An error occurred while loading the GLTF model:', error);
+      }
+    );
 
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-      models.forEach(model => {
+      modelsRef.current.forEach((model) => {
         model.rotation.y += 0.01;
       });
       controls.update();
@@ -65,13 +82,9 @@ const ModelGenerator = () => {
     return () => {
       mount.removeChild(renderer.domElement);
     };
-  }, [models]);
+  }, [modelUrl]); 
 
-  return (
-    <div>
-      <div ref={mountRef} style={{ width: '100%', height: '100vh' }} />
-    </div>
-  );
+  return <div ref={mountRef} style={{ width: '100%', height: '100vh' }} />;
 };
 
 export default ModelGenerator;

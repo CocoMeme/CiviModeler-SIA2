@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Box, Stepper, Step, StepLabel, Button, TextField, Typography, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '/styles/ProjectDetail.css?url';
@@ -96,7 +96,19 @@ export default function ProjectDetail() {
       console.error('Error processing request:', error);
     }
   };
-  
+
+
+  const handleGenerateModel = async () => {
+    try {
+      const response = await axios.post('http://localhost:5001/generate-model', {
+        size: formData.locationSize,
+        design_style: formData.designStyle
+      });
+      navigate('/model-generator', { state: { modelUrl: response.data.model_url } });
+    } catch (error) {
+      console.error('Error generating model:', error);
+    }
+  };
   
   return (
     <Box sx={{ width: '100%', maxWidth: 600, margin: 'auto', padding: 4, fontFamily: 'Outfit, sans-serif', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}> 
@@ -128,7 +140,6 @@ export default function ProjectDetail() {
               <InputLabel id="designStyle-label">Design Style</InputLabel>
               <Select
                 labelId="designStyle-label"
-                id="designStyle"
                 name="designStyle"
                 value={formData.designStyle}
                 onChange={handleSelectChange}
@@ -140,7 +151,7 @@ export default function ProjectDetail() {
               </Select>
             </FormControl>
             <Button onClick={handleBack} className="px-6 py-3 bg-white text-blue-600 border border-blue-600 font-semibold rounded-md shadow-md hover:bg-blue-100 flex items-center gap-2 transition duration-300">
-              Back <FaArrowRight />
+              <FaArrowLeft /> Back
             </Button>
             <Button variant="contained" onClick={handleNext} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">Next</Button>
           </Box>
@@ -160,10 +171,13 @@ export default function ProjectDetail() {
               onChange={handleChange}
             />
             <Button onClick={handleBack} className="px-6 py-3 bg-white text-blue-600 border border-blue-600 font-semibold rounded-md shadow-md hover:bg-blue-100 flex items-center gap-2 transition duration-300">
-              Back <FaArrowRight />
+              <FaArrowLeft /> Back
             </Button>
             <button onClick={handleGetQuote} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">
               Get a Quote!
+            </button>
+            <button onClick={handleGenerateModel} className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition duration-300">
+              Generate 3D Model
             </button>
             {errorMessage && (
               <Typography variant="body2" color="error" sx={{ textAlign: 'center', mt: 2 }}>
