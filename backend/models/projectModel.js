@@ -13,6 +13,13 @@ const projectSchema = new mongoose.Schema({
 		phoneNumber: { type: String },
 		companyName: { type: String }
 	},
+	Materials: { 
+		material_name: { type: String },
+		quantity: { type: Number },
+		unit_price: { type: Number }
+		
+	},
+	total_cost: { type: Number },
 	thumbnail: { type: String }
 	
 }, { timestamps: true });
