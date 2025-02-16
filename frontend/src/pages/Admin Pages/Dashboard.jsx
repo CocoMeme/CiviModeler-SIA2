@@ -1,6 +1,26 @@
-
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const Dashboard = () => {
+  const [dashboardData, setDashboardData] = useState({
+    totalUsers: 0,
+    totalProjects: 0,
+    totalCost: 0,
+  });
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/project/dashboard-data`, { withCredentials: true });
+        setDashboardData(data);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   return (
     <div className="flex">
       <div className="flex-1 p-6">
@@ -8,15 +28,15 @@ const Dashboard = () => {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-blue-500 text-white p-6 rounded-lg shadow-md">
             <h2 className="text-lg font-bold">Total Cost</h2>
-            <p className="text-xl mt-2">$25,000</p>
+            <p className="text-xl mt-2">₱{dashboardData.totalCost.toLocaleString()}</p>
           </div>
           <div className="bg-green-500 text-white p-6 rounded-lg shadow-md">
             <h2 className="text-lg font-bold">Users</h2>
-            <p className="text-xl mt-2">1,200</p>
+            <p className="text-xl mt-2">{dashboardData.totalUsers}</p>
           </div>
           <div className="bg-yellow-500 text-white p-6 rounded-lg shadow-md">
             <h2 className="text-lg font-bold">Total layouts</h2>
-            <p className="text-xl mt-2">45</p>
+            <p className="text-xl mt-2">{dashboardData.totalProjects}</p>
           </div>
         </div>
 
@@ -30,7 +50,7 @@ const Dashboard = () => {
                 <th className="py-2 px-4 border-b text-left">Name</th>
                 <th className="py-2 px-4 border-b text-left">Priority</th>
                 <th className="py-2 px-4 border-b text-left">Budget</th>
-                <th className="py-2 px-4 border-b text-left">Actions</th> {/* New Actions Column */}
+                <th className="py-2 px-4 border-b text-left">Actions</th>
               </tr>
             </thead>
             <tbody>

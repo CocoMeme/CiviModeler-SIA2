@@ -59,6 +59,14 @@ export default function ProjectDetail() {
         ? `${backendUrl}api/project/create`
         : `${backendUrl}/api/project/create`;
       
+      const estimateResponse = await axios.post('http://localhost:5001/estimate', {
+        budget: formData.projectBudget,
+        size: formData.locationSize,
+        design_style: formData.designStyle
+      });
+
+      const { materials, total_cost } = estimateResponse.data;
+
       const projectData = {
         projectName: formData.projectName,
         size: Number(formData.locationSize),
@@ -71,7 +79,14 @@ export default function ProjectDetail() {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
           companyName: formData.companyName
-        }
+        },
+        materials: Object.entries(materials).map(([material, details]) => ({
+          material: material,
+          quantity: details.quantity,
+          unitPrice: details.unit_price,
+          totalPrice: details.total_price
+        })),
+        totalCost: total_cost
       };
       
       console.log('Creating project with payload:', projectData);
@@ -79,13 +94,6 @@ export default function ProjectDetail() {
   
       if (projectResponse.status === 201) {
         console.log('Project created successfully:', projectResponse.data);
-        
-        const estimateResponse = await axios.post('http://localhost:5001/estimate', {
-          budget: projectData.budget,
-          size: projectData.size,
-          design_style: projectData.style
-        });
-  
         navigate('/user/project-result', { state: { ...formData, result: estimateResponse.data } });
       }
     } catch (error) {
@@ -96,7 +104,6 @@ export default function ProjectDetail() {
       console.error('Error processing request:', error);
     }
   };
-
 
   const handleGenerateModel = async () => {
     try {
