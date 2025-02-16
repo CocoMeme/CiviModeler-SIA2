@@ -10,7 +10,9 @@ INSTALLATION:
 2.3. pip install pandas scikit-learn joblib flask
 2.4. pip install flask-cors
 
+RUNNING PROJECT:
 3.1. In terminal, go to CiviModeler directory then run:
 3.2. python backend/python/train_model.py
+3.3. Use "npm run dev" for running both frontend and backend
 
 

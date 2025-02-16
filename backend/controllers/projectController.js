@@ -10,3 +10,13 @@ export const createProject = async (req, res) => {
     res.status(500).json({ message: 'Error creating project', error });
   }
 };
+
+// Add getAllProject controller to fetch all projects
+export const getAllProject = async (req, res) => {
+  try {
+    const projects = await projectModel.find();
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching projects', error });
+  }
+};

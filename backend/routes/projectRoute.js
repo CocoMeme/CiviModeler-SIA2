@@ -1,12 +1,11 @@
 import express from 'express';
-import { createProject } from '../controllers/projectController.js';
+import { createProject, getAllProject } from '../controllers/projectController.js';
 import userAuth from '../middleware/userAuth.js';
 
 const router = express.Router();
 
-// Route to create a new project
 router.post('/create', userAuth, createProject);
+router.get('/get-all-projects', userAuth, getAllProject);
 
-// ...existing routes...
 
 export default router;
