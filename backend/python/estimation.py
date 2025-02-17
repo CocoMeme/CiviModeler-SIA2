@@ -1,16 +1,23 @@
-# Material costs per unit (in PHP) based on design style
+# Updated Material costs per unit (in PHP) based on real SRP in the Philippines
 material_costs = {
     "Modern": {
-        "Cement": 250, "Sand": 500, "Gravel": 700, "Bricks": 10, 
-        "Steel": 150, "Wood": 50, "Tiles": 300, "Paint": 500, "Roofing": 400
+        "Cement": 259,  # per 40kg bag
+        "Sand": 1435,  # per cubic meter
+        "Gravel": 1310,  # per cubic meter
+        "Bricks": 12,  # per piece (4" CHB)
+        "Steel": 156,  # per 6m (10mm rebar)
+        "Wood": 656,  # per sheet (1/2" plywood)
+        "Tiles": 300,  # estimated per sqm
+        "Paint": 640,  # per gallon
+        "Roofing": 400  # per piece (G.I. sheet)
     },
     "Classic": {
-        "Cement": 250, "Sand": 500, "Gravel": 700, "Bricks": 10, 
-        "Steel": 150, "Wood": 60, "Tiles": 350, "Paint": 550, "Roofing": 450
+        "Cement": 259, "Sand": 1435, "Gravel": 1310, "Bricks": 12, 
+        "Steel": 156, "Wood": 656, "Tiles": 350, "Paint": 640, "Roofing": 450
     },
     "Rustic": {
-        "Cement": 250, "Sand": 500, "Gravel": 700, "Bricks": 10, 
-        "Steel": 150, "Wood": 70, "Tiles": 400, "Paint": 600, "Roofing": 500
+        "Cement": 259, "Sand": 1435, "Gravel": 1310, "Bricks": 12, 
+        "Steel": 156, "Wood": 656, "Tiles": 400, "Paint": 640, "Roofing": 500
     }
 }
 

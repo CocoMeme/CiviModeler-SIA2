@@ -4,10 +4,12 @@ import userModel from '../models/userModel.js';
 // Create a new project
 export const createProject = async (req, res) => {
   try {
+    //console.log('Request body:', req.body); // Log the request body
     const project = new projectModel(req.body);
     const savedProject = await project.save();
     res.status(201).json(savedProject);
   } catch (error) {
+    console.error('Error creating project:', error); // Log the error
     res.status(500).json({ message: 'Error creating project', error });
   }
 };

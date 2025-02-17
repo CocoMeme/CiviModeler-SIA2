@@ -54,48 +54,13 @@ export default function ProjectDetail() {
         return;
       }
       
-      console.log("Backend URL:", backendUrl);
-      const projectUrl = backendUrl.endsWith('/')
-        ? `${backendUrl}api/project/create`
-        : `${backendUrl}/api/project/create`;
-      
       const estimateResponse = await axios.post('http://localhost:5001/estimate', {
         budget: formData.projectBudget,
         size: formData.locationSize,
         design_style: formData.designStyle
       });
 
-      const { materials, total_cost } = estimateResponse.data;
-
-      const projectData = {
-        projectName: formData.projectName,
-        size: Number(formData.locationSize),
-        budget: Number(formData.projectBudget),
-        style: formData.designStyle,
-        projectDescription: formData.projectDescription,
-        author: userData.name,
-        clientDetails: {
-          clientName: formData.clientName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          companyName: formData.companyName
-        },
-        materials: Object.entries(materials).map(([material, details]) => ({
-          material: material,
-          quantity: details.quantity,
-          unitPrice: details.unit_price,
-          totalPrice: details.total_price
-        })),
-        totalCost: total_cost
-      };
-      
-      console.log('Creating project with payload:', projectData);
-      const projectResponse = await axios.post(projectUrl, projectData);
-  
-      if (projectResponse.status === 201) {
-        console.log('Project created successfully:', projectResponse.data);
-        navigate('/user/project-result', { state: { ...formData, result: estimateResponse.data } });
-      }
+      navigate('/user/project-result', { state: { ...formData, result: estimateResponse.data } });
     } catch (error) {
       const errorMsg = error.response?.data?.error 
         ? String(error.response.data.error) 
