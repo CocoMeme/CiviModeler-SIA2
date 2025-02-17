@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 const defaultImage = '/project images/T2.png';
-import '../../../../public/styles/ProjectCard.css';
+import '../../../public/styles/ProjectCard.css';
 import { TbEyeEdit } from "react-icons/tb";
 
 const Card = ({ project }) => {

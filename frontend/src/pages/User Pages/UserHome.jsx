@@ -1,12 +1,13 @@
 import React from 'react'
-import RecentProject from './Project Components/RecentProject'
+import RecentProject from '../../components/Project Components/RecentProject'
+
 
 const UserHome = () => {
   return (
     <div>
       <img className='rounded-lg' src="/project images/H1.png" alt="CiviModeler H1" />
       <div>
-        <RecentProject />
+        <RecentProject/>
       </div>
     </div>
   )

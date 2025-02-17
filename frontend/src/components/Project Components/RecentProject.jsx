@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import Card from './Card.jsx';
-import { AppContext } from '../../../context/AppContext.jsx';
+import { AppContext } from '../../context/AppContext.jsx';
 
 const RecentProject = () => {
   const [projects, setProjects] = useState([]);
