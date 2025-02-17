@@ -29,7 +29,7 @@ export const getUserProjects = async (req, res) => {
   try {
     const { userId } = req.params; // Get userId from URL parameter
     const userProjects = await projectModel.find({ userId });
-    res.status(200).json(userProjects);
+    res.status(200).json({ success: true, projects: userProjects });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching user projects', error });
   }

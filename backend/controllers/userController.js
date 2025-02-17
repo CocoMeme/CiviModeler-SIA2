@@ -15,6 +15,7 @@ export const getUserData = async (req, res) => {
                 name: user.name,
                 verifyOtpExpireAt: user.verifyOtpExpireAt,
                 isAccountVerified: user.isAccountVerified,
+                _id: user._id,
             }
         });
 

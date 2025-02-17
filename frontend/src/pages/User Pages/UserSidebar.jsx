@@ -10,7 +10,7 @@ import RecentProjectSidebar from "../../components/Project Components/RecentProj
 
 const UserSidebar = () => {
   return (
-    <div className="w-1/6 p-5 flex flex-col justify-between bg-slate-200 rounded-lg m-3">
+    <div className="min-h-full p-5 flex flex-col justify-between bg-slate-200 rounded-lg m-3">
       <div>
         {/* Top Part */}
         <div className="flex justify-center items-center mb-5">

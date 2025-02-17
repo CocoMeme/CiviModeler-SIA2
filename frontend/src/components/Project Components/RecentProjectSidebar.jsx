@@ -10,6 +10,7 @@ const RecentProjectSidebar = () => {
 
   useEffect(() => {
     if (userData && userData._id) {
+      console.log("User ID found:", userData._id);
       fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}`, { credentials: 'include' })
         .then((res) => res.json())
         .then((data) => {
@@ -20,6 +21,8 @@ const RecentProjectSidebar = () => {
           }
         })
         .catch((error) => console.error('Error fetching user projects:', error));
+    } else {
+      console.error("User ID not found in userData:", userData);
     }
   }, [userData, backendUrl]);
 

@@ -52,13 +52,13 @@ const Banner = () => {
           />
         </div>
       </div>
-      <div className="w-full flex justify-center py-4 px-52">
+      {/* <div className="w-full flex justify-center py-4 px-52">
         <img
           src="/project images/CiviModeler B1.png"
           alt="CiviModeler B1"
           className="w-full h-auto"
         />
-      </div>
+      </div> */}
     </>
   );
 };

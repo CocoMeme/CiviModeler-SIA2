@@ -22,7 +22,6 @@ export const AppContextProvider = (props) => {
             }
         } catch (error) {
             if (error.response && error.response.status === 401) {
-                // Expected when no user is logged in, clear state without showing error
                 setIsLoggedin(false);
                 setUserData(null);
             } else {
