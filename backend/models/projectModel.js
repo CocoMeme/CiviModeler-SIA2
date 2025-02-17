@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema({
-	projectName: { type: String, required: true },
-	author: { type: String, required: true }, // changed from ObjectId to String to store user's name
-	size: { type: Number, required: true },
-	budget: { type: Number, required: true },
-	style: { type: String, enum: ["Modern", "Classic", "Rustic"], required: true },
-	projectDescription: { type: String },
-	clientDetails: {
-		clientName: { type: String },
-		email: { type: String },
-		phoneNumber: { type: String },
-		companyName: { type: String }
-	},
+  projectName: { type: String, required: true },
+  author: { type: String, required: true }, // changed from ObjectId to String to store user's name
+  size: { type: Number, required: true },
+  budget: { type: Number, required: true },
+  style: { type: String, enum: ["Modern", "Classic", "Rustic"], required: true },
+  projectDescription: { type: String },
+  clientDetails: {
+    clientName: { type: String },
+    email: { type: String },
+    phoneNumber: { type: String },
+    companyName: { type: String }
+  },
   materials: [
     {
       material: { type: String },
@@ -22,9 +22,8 @@ const projectSchema = new mongoose.Schema({
     }
   ],
   totalCost: { type: Number },
-	thumbnail: { type: String },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }
-	
+  thumbnail: { type: String },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true } // Reference to userModel
 }, { timestamps: true });
 
 const projectModel = mongoose.models.project || mongoose.model("project", projectSchema);

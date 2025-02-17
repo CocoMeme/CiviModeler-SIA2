@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types';
-const defaultImage = '/project images/T2.png';
+const defaultImage = '/project images/T3.png';
+const defaultImage2 = '/project images/T2.png';
+const defaultImage3 = '/project images/T3.png';
 import '../../../public/styles/ProjectCard.css';
 import { TbEyeEdit } from "react-icons/tb";
 
 const Card = ({ project }) => {
-  const { thumbnail, projectName, author, projectDescription } = project;
+  const { thumbnail, projectName, author} = project;
 
   const getUserInitials = () => {
     const name = author ? author.trim() : "Unknown";

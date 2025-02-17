@@ -1,10 +1,11 @@
 import { NavLink, Link } from "react-router-dom"; 
-import { FaPlus, FaHome, FaQuestionCircle } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { LuFolderOpen } from "react-icons/lu";
 import { RiFolder3Fill } from "react-icons/ri";
 import { BiSolidDashboard } from "react-icons/bi";
 import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { FaGear } from "react-icons/fa6";
+import RecentProjectSidebar from "../../components/Project Components/RecentProjectSidebar";
 
 
 const UserSidebar = () => {
@@ -85,6 +86,7 @@ const UserSidebar = () => {
           <li className="mt-4 mb-2 block p-2 text-sm">
             Recent Projects
           </li>
+          <RecentProjectSidebar/>
 
         </ul>
 

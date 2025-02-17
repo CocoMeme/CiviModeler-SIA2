@@ -22,6 +22,17 @@ export const getAllProject = async (req, res) => {
   }
 };
 
+// Fetch all projects created by the specified user
+export const getUserProjects = async (req, res) => {
+  try {
+    const { userId } = req.params; // Get userId from URL parameter
+    const userProjects = await projectModel.find({ userId });
+    res.status(200).json(userProjects);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user projects', error });
+  }
+};
+
 export const getDashboardData = async (req, res) => {
   try {
     const totalUsers = await userModel.countDocuments();
