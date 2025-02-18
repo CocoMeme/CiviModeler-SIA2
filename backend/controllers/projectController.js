@@ -52,3 +52,27 @@ export const getDashboardData = async (req, res) => {
     res.status(500).json({ message: 'Error fetching dashboard data', error });
   }
 };
+
+
+export const getProjectReportsData = async (req, res) => {
+  try {
+    const projects = await projectModel.aggregate([
+      {
+        $group: {
+          _id: {
+            month: { $month: "$createdAt" },
+            year: { $year: "$createdAt" }
+          },
+          totalProjects: { $sum: 1 },
+          totalBudget: { $sum: { $ifNull: ["$budget", 0] } },
+          totalCost: { $sum: { $ifNull: ["$totalCost", 0] } }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching reports data', error });
+  }
+};
