@@ -3,6 +3,10 @@ import axios from "axios";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [action, setAction] = useState("");
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -21,25 +25,63 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
-  const updateUser = (id) => {
-    if (action === 'verify' || action === 'disable') {
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === id
-            ? { ...user, isAccountVerified: action === 'verify' }
-            : user
-        )
-      );
-      setSelectedUser(null);
-      setAction("");
-    } else {
-      alert("Invalid action. Please select 'verify' or 'disable'.");
+  const handleUpdateClick = (user) => {
+    setSelectedUser(user);
+    setAction(user.isAccountVerified ? "verify" : "not verify");
+    setIsUpdateModalOpen(true);
+  };
+
+  const handleDeleteClick = (user) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const updateUser = async (id) => {
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/user/update/${id}`, {
+        name: selectedUser.name,
+        email: selectedUser.email,
+        isAccountVerified: action === 'verify'
+      }, { withCredentials: true });
+
+      if (response.data.success) {
+        setUsers((prevUsers) =>
+          prevUsers.map((user) =>
+            user._id === id
+              ? { ...user, name: selectedUser.name, email: selectedUser.email, isAccountVerified: action === 'verify' }
+              : user
+          )
+        );
+        setSelectedUser(null);
+        setAction("");
+        setIsUpdateModalOpen(false);
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
     }
   };
 
+  const deleteUser = async (id) => {
+    try {
+      const response = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/user/delete/${id}`, { withCredentials: true });
 
-  const deleteUser = (id) => {
-    setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+      if (response.data.success) {
+        setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id));
+        setSelectedUser(null);
+        setIsDeleteModalOpen(false);
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedUser((prevUser) => ({ ...prevUser, [name]: value }));
   };
 
   return (
@@ -57,20 +99,20 @@ export default function UserManagement() {
           </thead>
           <tbody className="text-gray-300">
             {users.map((user) => (
-              <tr key={user.id} className="border-b border-gray-700">
+              <tr key={user._id} className="border-b border-gray-700">
                 <td className="w-1/4 py-3 px-4 text-center">{user.name}</td>
                 <td className="w-1/4 py-3 px-4 text-center">{user.email}</td>
                 <td className="w-1/4 py-3 px-4 text-center">{user.isAccountVerified ? "Verified" : "Not Verified"}</td>
                 <td className="w-1/4 py-3 px-2 text-center">
                   <button
                     className="mr-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    onClick={() => updateUser(user.id)}
+                    onClick={() => handleUpdateClick(user)}
                   >
                     Update
                   </button>
                   <button
                     className="mr-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                    onClick={() => deleteUser(user.id)}
+                    onClick={() => handleDeleteClick(user)}
                   >
                     Delete
                   </button>
@@ -80,6 +122,83 @@ export default function UserManagement() {
           </tbody>
         </table>
       </div>
+
+      {isUpdateModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg">
+            <h2 className="text-2xl mb-4">Update User</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">User Name</label>
+              <input
+                type="text"
+                name="name"
+                value={selectedUser.name}
+                onChange={handleInputChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={selectedUser.email}
+                onChange={handleInputChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">Account Status</label>
+              <select
+                name="isAccountVerified"
+                value={action}
+                onChange={(e) => setAction(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              >
+                <option value="verify">Verify</option>
+                <option value="not verify">Not Verify</option>
+              </select>
+            </div>
+            <div className="mt-4">
+              <button
+                className="mr-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+                onClick={() => updateUser(selectedUser._id)}
+              >
+                Confirm
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
+                onClick={() => setIsUpdateModalOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg">
+            <h2 className="text-2xl mb-4t text-black">Delete User</h2>
+            <p className="text-black">Are you sure you want to delete this user?</p>
+            <div className="mt-4">
+              <button
+                className="mr-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                onClick={() => deleteUser(selectedUser._id)}
+              >
+                Confirm
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
