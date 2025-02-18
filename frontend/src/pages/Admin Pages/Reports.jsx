@@ -24,10 +24,11 @@ const ReportsPage = () => {
         }
 
         const labels = data.map(item => {
+          const day = item._id?.day;
           const month = item._id?.month;
           const year = item._id?.year;
-          if (month && year) {
-            const date = new Date(year, month - 1);
+          if (day && month && year) {
+            const date = new Date(year, month - 1, day);
             return format(date, "MMMM dd, yyyy"); // Format: "April 12, 2025"
           }
           return "Unknown";

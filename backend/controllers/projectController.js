@@ -60,6 +60,7 @@ export const getProjectReportsData = async (req, res) => {
       {
         $group: {
           _id: {
+            day: { $dayOfMonth: "$createdAt" },
             month: { $month: "$createdAt" },
             year: { $year: "$createdAt" }
           },
@@ -68,7 +69,7 @@ export const getProjectReportsData = async (req, res) => {
           totalCost: { $sum: { $ifNull: ["$totalCost", 0] } }
         }
       },
-      { $sort: { "_id.year": 1, "_id.month": 1 } }
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } }
     ]);
 
     res.status(200).json(projects);
