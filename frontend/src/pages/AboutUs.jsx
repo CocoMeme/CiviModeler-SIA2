@@ -36,7 +36,7 @@ const AboutUs = () => {
             { name: "Joey Ann Lavega", role: "Full Stack Developer", img: "/images/team1.jpg" },
             { name: "Andrei Co", role: "Full Stack Developer", img: "/images/team2.jpg" },
             { name: "Josh Ziemenn Tan", role: "Full Stack Developer", img: "/images/team3.jpg" },
-            { name: "Fatima Trinidad", role: "Full Stack Developer", img: "/images/team4.jpg" }
+            { name: "Fatima Trinidad", role: "Full Stack Developer", img: "/images/pic.jpg" }
           ].map((member, index) => (
             <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
               <img
