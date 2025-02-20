@@ -77,3 +77,13 @@ export const getProjectReportsData = async (req, res) => {
     res.status(500).json({ message: 'Error fetching reports data', error });
   }
 };
+
+// Fetch top 5 recent projects --- this is for the admin dashboard
+export const getRecentProjects = async (req, res) => {
+  try {
+    const projects = await projectModel.find().sort({ createdAt: -1 }).limit(5);
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching recent projects', error });
+  }
+};
