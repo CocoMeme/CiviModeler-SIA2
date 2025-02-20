@@ -32,3 +32,38 @@ export const getAllUsers = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 };
+
+// Add the updateUser function
+export const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isAccountVerified } = req.body;
+
+        const user = await userModel.findByIdAndUpdate(id, { isAccountVerified }, { new: true });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, message: "User updated successfully", user });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+// Add the deleteUser function
+export const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await userModel.findByIdAndDelete(id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, message: "User deleted successfully" });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};

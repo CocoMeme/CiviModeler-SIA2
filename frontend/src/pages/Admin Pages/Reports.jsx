@@ -1,105 +1,104 @@
-import { Line, Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Line } from "react-chartjs-2";
+import { Chart, registerables } from "chart.js";
+import { format } from "date-fns"; // Date formatting
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+Chart.register(...registerables);
 
-const lineData = {
-  labels: ["Month 1", "Month 2", "Month 3"],
-  datasets: [
-    {
-      label: "Actual Cost",
-      data: [40000, 25000, 30000],
-      borderColor: "#1f77b4",
-      backgroundColor: "rgba(31, 119, 180, 0.2)",
-      pointBackgroundColor: "#1f77b4",
-      borderWidth: 2,
-      tension: 0.4,
-    },
-    {
-      label: "Budgeted Cost/Period",
-      data: [70000, 30000, 50000],
-      borderColor: "#ff7f0e",
-      backgroundColor: "rgba(255, 127, 14, 0.2)",
-      pointBackgroundColor: "#ff7f0e",
-      borderWidth: 2,
-      tension: 0.4,
-    },
-  ],
-};
+const ReportsPage = () => {
+  const [lineData, setLineData] = useState(null);
+  const [projectData, setProjectData] = useState(null);
+  const [error, setError] = useState(null);
 
-const barData = {
-  labels: ["Construction", "Procurement", "Design"],
-  datasets: [
-    {
-      label: "Cost",
-      data: [450000, 200000, 50000],
-      backgroundColor: ["#228B22", "#E06639", "#1E4B8B"],
-      borderWidth: 1,
-      barThickness: 50,
-    },
-  ],
-};
+  useEffect(() => {
+    const fetchReportsData = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/project/reports-data`, { withCredentials: true });
+        const data = response.data;
 
-const options = {
-  plugins: {
-    legend: {
-      labels: {
-        color: "#fff",
-        font: { size: 14 },
-      },
-    },
-  },
-  scales: {
-    x: {
-      ticks: { color: "#fff" },
-      grid: { color: "rgba(255,255,255,0.2)" },
-    },
-    y: {
-      ticks: { color: "#fff" },
-      grid: { color: "rgba(255,255,255,0.2)" },
-    },
-  },
-};
+        console.log("API Response:", JSON.stringify(data, null, 2)); // Debugging
 
-const projectData = {
-    labels: ["01-Jan", "15-Jan", "22-Jan", "05-Feb", "19-Feb", "05-Mar", "19-Mar", "02-Apr", "16-Apr", "30-Apr", "14-May"],
-    datasets: [
-      {
-        label: "Total Projects",
-        data: [1.5, 1.0, 1.8, 2.2, 1.5, 2.7, 1.9, 3.5, 1.8, 2.1, 2.0],
-        borderColor: "#ff6384",
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
-        fill: true,
-      },
-    ],
-  };
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("No data received from the API");
+        }
 
-const Reports = () => {
+        const labels = data.map(item => {
+          const day = item._id?.day;
+          const month = item._id?.month;
+          const year = item._id?.year;
+          if (day && month && year) {
+            const date = new Date(year, month - 1, day);
+            return format(date, "MMMM dd, yyyy"); // Format: "April 12, 2025"
+          }
+          return "Unknown";
+        });
+
+        const totalProjects = data.map(item => item.totalProjects ?? 0);
+        const totalBudget = data.map(item => item.totalBudget ?? 0);
+        const totalCost = data.map(item => item.totalCost ?? 0);
+
+        setLineData({
+          labels,
+          datasets: [
+            {
+              label: "Total Budget",
+              data: totalBudget,
+              borderColor: "#1f77b4",
+              backgroundColor: "rgba(31, 119, 180, 0.2)",
+              pointBackgroundColor: "#1f77b4",
+              borderWidth: 2,
+              tension: 0.4,
+            },
+            {
+              label: "Total Cost",
+              data: totalCost,
+              borderColor: "#ff7f0e",
+              backgroundColor: "rgba(255, 127, 14, 0.2)",
+              pointBackgroundColor: "#ff7f0e",
+              borderWidth: 2,
+              tension: 0.4,
+            },
+          ],
+        });
+
+        setProjectData({
+          labels,
+          datasets: [
+            {
+              label: "Total Projects",
+              data: totalProjects,
+              borderColor: "#ff6384",
+              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              fill: true,
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("Error fetching reports data:", error);
+        setError(error.message);
+      }
+    };
+
+    fetchReportsData();
+  }, []);
+
   return (
-    <div className="flex text-white ">
-      <div className="flex-1 p-6">
-        <h1 className="text-3xl font-bold mb-6">Reports</h1>
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="p-6 bg-gray-800 shadow-lg rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Project Cost Over Time</h2>
-            <Line data={lineData} options={options} />
-          </div>
-
-          <div className="p-6 bg-gray-800 shadow-lg rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Project Breakdown per Phase</h2>
-            <Bar data={barData} options={{ ...options, indexAxis: 'y' }} />
-          </div>
-
-          <div className="p-4 bg-gray-800 shadow rounded-lg">
-          <h2 className="text-lg font-bold mb-2">Total Projects Over Time</h2>
-          <Line data={projectData} />
+    <div>
+      <h2 className="text-xl font-bold">Reports</h2>
+      {error && <p className="text-red-500">Error: {error}</p>}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="border-2 border-gray-300 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2">Total Cost and Budget Over Time</h3>
+          {lineData && <Line data={lineData} />}
         </div>
-
+        <div className="border-2 border-gray-300 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2">Total Projects Over Time</h3>
+          {projectData && <Line data={projectData} />}
         </div>
       </div>
     </div>
   );
 };
 
-export default Reports;
+export default ReportsPage;
