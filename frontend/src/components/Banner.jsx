@@ -46,7 +46,7 @@ const Banner = () => {
         </div>
         <div className="w-full md:w-2/3 flex justify-center items-center">
           <img
-            src="/images/sci-fi-14149.gif"
+            src="/images/CiviModeler Logo.gif"
             alt="Sci-Fi Visual"
             className="w-full h-auto"
           />
