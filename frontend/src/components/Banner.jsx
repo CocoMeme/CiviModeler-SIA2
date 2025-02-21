@@ -46,19 +46,12 @@ const Banner = () => {
         </div>
         <div className="w-full md:w-2/3 flex justify-center items-center">
           <img
-            src="/images/CiviModeler Logo.gif"
+            src="/images/Homepage.gif"
             alt="Sci-Fi Visual"
             className="w-full h-auto"
           />
         </div>
       </div>
-      {/* <div className="w-full flex justify-center py-4 px-52">
-        <img
-          src="/project images/CiviModeler B1.png"
-          alt="CiviModeler B1"
-          className="w-full h-auto"
-        />
-      </div> */}
     </>
   );
 };
