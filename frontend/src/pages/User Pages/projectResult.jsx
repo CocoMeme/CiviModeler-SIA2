@@ -197,8 +197,7 @@ export default function Result() {
   ))}
 </Grid>
 
-      
-      <Box sx={{ textAlign: 'center', mt: 3 }}>
+<Box sx={{ textAlign: 'center', mt: 3 }}>
         <Button
           variant="contained"
           onClick={() => setOpenDialog(true)}
@@ -207,6 +206,17 @@ export default function Result() {
           Confirm
         </Button>
       </Box>
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to save this to your account?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleDialogClose(false)} color="primary">Cancel</Button>
+          <Button onClick={() => handleDialogClose(true)} color="primary">Confirm</Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={contractorDialog} onClose={() => setContractorDialog(false)} fullWidth maxWidth="sm">
   <DialogTitle>Contractor Information</DialogTitle>
