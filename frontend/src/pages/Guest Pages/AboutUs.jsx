@@ -2,7 +2,7 @@ import React from 'react';
 
 const AboutUs = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-16">
+    <div className="min-h-screen bg-white text-black p-16">
       {/* About Section */}
       <div className="flex flex-col md:flex-row items-center justify-between">
         {/* Left Side - Logo */}
@@ -13,7 +13,7 @@ const AboutUs = () => {
         {/* Right Side - Text Content */}
         <div className="max-w-3xl text-right">
           <h1 className="text-6xl font-bold">We build homes with a personal touch</h1>
-          <p className="mt-6 text-xl text-gray-300 leading-relaxed">
+          <p className="mt-6 text-xl text-gray-700 leading-relaxed">
             <span className="text-orange-400 font-semibold">
               From dreams to blueprints to reality - CiviModeler can help.
             </span>
@@ -26,7 +26,7 @@ const AboutUs = () => {
       {/* Meet the Team Section */}
       <div className="mt-16 text-center">
         <h2 className="text-4xl font-bold">Meet the Team</h2>
-        <p className="text-lg text-gray-400 mt-2">
+        <p className="text-lg text-gray-600 mt-2">
           Our passionate professionals dedicated to your projects.
         </p>
 
@@ -38,14 +38,14 @@ const AboutUs = () => {
             { name: "Josh Ziemenn Tan", role: "Full Stack Developer", img: "/images/team3.jpg" },
             { name: "Fatima Trinidad", role: "Full Stack Developer", img: "/images/pic.jpg" }
           ].map((member, index) => (
-            <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+            <div key={index} className="bg-gray-200 p-6 rounded-lg shadow-lg text-center">
               <img
                 src={member.img}
                 alt={member.name}
                 className="w-40 h-40 mx-auto rounded-full border-4 border-yellow-400 shadow-md"
               />
-              <h3 className="text-xl font-semibold mt-4">{member.name}</h3>
-              <p className="text-gray-400">{member.role}</p>
+              <h3 className="text-xl font-semibold mt-4 text-gray-900">{member.name}</h3>
+              <p className="text-gray-600">{member.role}</p>
             </div>
           ))}
         </div>
