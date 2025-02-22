@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from '../../context/AppContext';
 import { FaSignOutAlt, FaUserCheck } from 'react-icons/fa';
 import { FaCircleUser } from "react-icons/fa6";
 import axios from 'axios';
