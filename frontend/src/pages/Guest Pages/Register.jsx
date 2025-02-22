@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaGoogle, FaArrowCircleRight } from "react-icons/fa";
 import axios from 'axios';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
 
 const Register = () => {

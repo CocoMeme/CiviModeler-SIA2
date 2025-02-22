@@ -47,7 +47,7 @@ const StarRating = ({ rating }) => {
 
 const Testimony = () => {
   return (
-    <div className="container mx-auto px-8 pt-24 pb-16">
+    <div className="container mx-auto px-8 pt-24 pb-16 min-h-screen">
       {/* Header */}
       <h3 className="text-center text-gray-500 uppercase tracking-widest text-lg">
         Testimonials

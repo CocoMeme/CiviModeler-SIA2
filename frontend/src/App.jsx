@@ -1,11 +1,11 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Home from "./pages/Guest Pages/Home";
+import Login from "./pages/Guest Pages/Login";
+import Register from "./pages/Guest Pages/Register";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import AboutUs from "./pages/AboutUs";
+import AboutUs from "./pages/Guest Pages/AboutUs";
 import GeneratingPage from "./components/GeneratingPage";
 import ProjectDetail from "./pages/User Pages/ProjectDetail";
 import Dashboard from "./pages/Admin Pages/Dashboard";
@@ -14,10 +14,9 @@ import AdminLayout from "./pages/Admin Pages/AdminLayout";
 import ProjectManagement from "./pages/Admin Pages/ProjectManagement";
 import UserManagement from "./pages/Admin Pages/UserManagement";
 import ProjectResult from "./pages/User Pages/projectResult";
-import EmailVerify from "./components/EmailVerify";
-import ResetPassord from "./components/ResetPassword";
+import EmailVerify from "./components/Auth Components/EmailVerify";
+import ResetPassord from "./components/Auth Components/ResetPassword";
 import ModelGenerator from "./pages/User Pages/ModelGenerator";
-// React Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ParentProfile from "./pages/User Pages/Profile Components/ParentProfile";
@@ -26,7 +25,9 @@ import UserHome from "./pages/User Pages/UserHome";
 import UserProjects from "./pages/User Pages/UserProjects";
 import Help from "./pages/User Pages/Help";
 import SampleProjects from "./pages/User Pages/SampleProjects";
-import Testimony from "./pages/User Pages/Testimony";
+import Testimony from "./pages/Guest Pages/Testimony";
+import AllProjects from "./components/Project Components/AllProjects";
+import Projects from "./pages/Guest Pages/Projects";
 
 
 
@@ -51,6 +52,7 @@ const App = () => {
                 <Route path="/project-detail" element={<ProjectDetail />} />
                 <Route path="/profile" element={<ParentProfile/>} />
                 <Route path="/model-generator" element={<ModelGenerator />} />
+                <Route path="/projects" element={<Projects />} />
                 <Route path="/testimony" element={<Testimony />} />
 
               </Routes>
