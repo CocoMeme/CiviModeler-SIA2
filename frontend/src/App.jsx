@@ -26,6 +26,8 @@ import UserHome from "./pages/User Pages/UserHome";
 import UserProjects from "./pages/User Pages/UserProjects";
 import Help from "./pages/User Pages/Help";
 import SampleProjects from "./pages/User Pages/SampleProjects";
+import Testimony from "./pages/User Pages/Testimony";
+
 
 
 const App = () => {
@@ -47,9 +49,10 @@ const App = () => {
                 <Route path="/reset-password" element={<ResetPassord />} />
                 <Route path="/loading" element={<GeneratingPage />} />
                 <Route path="/project-detail" element={<ProjectDetail />} />
-                {/* <Route path="/project-result" element={<ProjectResult />} /> */}
                 <Route path="/profile" element={<ParentProfile/>} />
                 <Route path="/model-generator" element={<ModelGenerator />} />
+                <Route path="/testimony" element={<Testimony />} />
+
               </Routes>
               <Footer />
             </>
@@ -62,6 +65,7 @@ const App = () => {
           <Route path="sample-projects" element={<SampleProjects />} />
           <Route path="project-result" element={<ProjectResult />} />
           <Route path="user-projects" element={<UserProjects />} />
+          
           <Route path="help" element={<Help />} />
         </Route>
 
