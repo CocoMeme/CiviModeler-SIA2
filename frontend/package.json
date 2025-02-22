@@ -24,6 +24,7 @@
     "react-multi-carousel": "^2.8.5",
     "react-router-dom": "^7.1.5",
     "react-toastify": "^11.0.3",
+    "recharts": "^2.15.1",
     "three": "^0.173.0"
   },
   "devDependencies": {
