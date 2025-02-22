@@ -5,8 +5,6 @@ import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-
-
 export default function Result() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -83,21 +81,14 @@ export default function Result() {
     }
   };
 
-  // const materialData = result
-  // ? Object.entries(result.materials).map(([material, details]) => ({
-  //     name: material,
-  //     totalCost: details.total_price
-  //   }))
-  // : [];
-
-  const materialData = [
-    { name: 'Cement', totalCost: 5000 },
-    { name: 'Steel Bars', totalCost: 8000 },
-    { name: 'Paint', totalCost: 2000 },
-    { name: 'Bricks', totalCost: 4000 },
-    { name: 'Glass', totalCost: 3000 }
-  ];
-  
+  const materialData = result
+    ? Object.entries(result.materials)
+        .map(([material, details]) => ({
+          name: material,
+          quantity: details.quantity
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : [];
 
   return (
     <Box sx={{ maxWidth: 1000, margin: 'auto', padding: 4, backgroundColor: '#f8f9fa', borderRadius: 2, boxShadow: 3 }}>
@@ -154,21 +145,32 @@ export default function Result() {
         </Table>
       </TableContainer>
 
-
-      <Typography variant="h6" fontWeight="bold" sx={{ mt: 4, textAlign: 'center' }}>
-  Material Cost Breakdown
+      <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+  <strong>Material Units:</strong><br />
+  Cement: per 40kg bag<br />
+  Sand: per cubic meter<br />
+  Gravel: per cubic meter<br />
+  Bricks: per piece (4" CHB)<br />
+  Steel: per 6m (10mm rebar)<br />
+  Wood: per sheet (1/2" plywood)<br />
+  Tiles: estimated per sqm<br />
+  Paint: per gallon<br />
+  Roofing: per piece (G.I. sheet)
 </Typography>
 
-<ResponsiveContainer width="100%" height={300}>
-  <BarChart layout="vertical" data={materialData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-    <XAxis type="number" />
-    <YAxis dataKey="name" type="category" width={100} />
-    <Tooltip />
-    <Legend />
-    <Bar dataKey="totalCost" fill="#9c27b0" barSize={30} />
-  </BarChart>
-</ResponsiveContainer>
-      
+      <Typography variant="h6" fontWeight="bold" sx={{ mt: 4, textAlign: 'center' }}>
+        Material Quantity Breakdown
+      </Typography>
+
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart layout="vertical" data={materialData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <XAxis type="number" />
+          <YAxis dataKey="name" type="category" width={100} />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="quantity" fill="#9c27b0" barSize={30} />
+        </BarChart>
+      </ResponsiveContainer>
 
       <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic', color: 'gray', textAlign: 'center' }}>
         *Disclaimer: The prices listed above are estimates and may vary depending on the contractor, supplier, and market conditions. 
@@ -176,28 +178,28 @@ export default function Result() {
       </Typography>
       
       <Typography variant="h6" fontWeight="bold" sx={{ mt: 4 }}>Choose a Contractor</Typography>
-<Grid container spacing={2} sx={{ mt: 2 }}>
-  {[1, 2, 3, 4, 5].map((num) => (
-    <Grid item xs={2.4} key={num}>
-      <Button 
-        variant="contained" 
-        sx={{ 
-          width: '100%', 
-          padding: 3, 
-          fontSize: 16, 
-          textTransform: 'none', 
-          backgroundColor: 'purple', 
-          '&:hover': { backgroundColor: 'darkpurple' } 
-        }}
-        onClick={() => setContractorDialog(true)}
-      >
-        Contractor {num}
-      </Button>
-    </Grid>
-  ))}
-</Grid>
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        {[1, 2, 3, 4, 5].map((num) => (
+          <Grid item xs={2.4} key={num}>
+            <Button 
+              variant="contained" 
+              sx={{ 
+                width: '100%', 
+                padding: 3, 
+                fontSize: 16, 
+                textTransform: 'none', 
+                backgroundColor: 'purple', 
+                '&:hover': { backgroundColor: 'darkpurple' } 
+              }}
+              onClick={() => setContractorDialog(true)}
+            >
+              Contractor {num}
+            </Button>
+          </Grid>
+        ))}
+      </Grid>
 
-<Box sx={{ textAlign: 'center', mt: 3 }}>
+      <Box sx={{ textAlign: 'center', mt: 3 }}>
         <Button
           variant="contained"
           onClick={() => setOpenDialog(true)}
@@ -219,33 +221,32 @@ export default function Result() {
       </Dialog>
 
       <Dialog open={contractorDialog} onClose={() => setContractorDialog(false)} fullWidth maxWidth="sm">
-  <DialogTitle>Contractor Information</DialogTitle>
-  <DialogContent>
-    <Typography variant="h6" fontWeight="bold">Name:</Typography>
-    <Typography>John Doe</Typography>
+        <DialogTitle>Contractor Information</DialogTitle>
+        <DialogContent>
+          <Typography variant="h6" fontWeight="bold">Name:</Typography>
+          <Typography>John Doe</Typography>
 
-    <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>License Number:</Typography>
-    <Typography>123456789</Typography>
+          <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>License Number:</Typography>
+          <Typography>123456789</Typography>
 
-    <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Business Address:</Typography>
-    <Typography>123 Main Street, City, Country</Typography>
+          <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Business Address:</Typography>
+          <Typography>123 Main Street, City, Country</Typography>
 
-    <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Contact Information:</Typography>
-    <Typography>(123) 456-7890 | email@example.com</Typography>
+          <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Contact Information:</Typography>
+          <Typography>(123) 456-7890 | email@example.com</Typography>
 
-    <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Experience:</Typography>
-    <Typography>10+ years in residential and commercial projects</Typography>
+          <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Experience:</Typography>
+          <Typography>10+ years in residential and commercial projects</Typography>
 
-    <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Contract Terms:</Typography>
-    <Typography>Standard terms and conditions apply.</Typography>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setContractorDialog(false)} variant="contained" sx={{ backgroundColor: 'purple', color: 'white' }}>
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
-
+          <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Contract Terms:</Typography>
+          <Typography>Standard terms and conditions apply.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setContractorDialog(false)} variant="contained" sx={{ backgroundColor: 'purple', color: 'white' }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
