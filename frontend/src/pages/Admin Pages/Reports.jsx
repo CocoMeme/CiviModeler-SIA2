@@ -85,19 +85,22 @@ const ReportsPage = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-bold">Reports</h2>
+      <h2 className="text-xl font-bold text-white mb-6">Reports</h2> 
+
       {error && <p className="text-red-500">Error: {error}</p>}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="border-2 border-gray-300 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2">Total Cost and Budget Over Time</h3>
-          {lineData && <Line data={lineData} />}
-        </div>
-        <div className="border-2 border-gray-300 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2">Total Projects Over Time</h3>
-          {projectData && <Line data={projectData} />}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+  <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
+    {lineData && <Line data={lineData} />}
+  </div>
+  <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
+    {projectData && <Line data={projectData} />}
+  </div>
+</div>
+
       </div>
-    </div>
+   
   );
 };
 
