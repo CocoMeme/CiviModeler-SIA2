@@ -138,17 +138,18 @@ const Dashboard = () => {
             </Button>
           </div>
           <table className="min-w-full bg-gray-800 border-collapse ">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b text-left">Name</th>
-                <th className="py-2 px-4 border-b text-left">License Number</th>
-                <th className="py-2 px-4 border-b text-left">Business Address</th>
-                <th className="py-2 px-4 border-b text-left">Contact Number</th>
-                <th className="py-2 px-4 border-b text-left">Experience</th>
-                <th className="py-2 px-4 border-b text-left">Contract Terms</th>
-                <th className="py-2 px-4 border-b text-left">Actions</th>
-              </tr>
-            </thead>
+          <thead className="bg-white text-black">
+  <tr>
+    <th className="py-2 px-4 border-b text-left">Name</th>
+    <th className="py-2 px-4 border-b text-left">License Number</th>
+    <th className="py-2 px-4 border-b text-left">Business Address</th>
+    <th className="py-2 px-4 border-b text-left">Contact Number</th>
+    <th className="py-2 px-4 border-b text-left">Experience</th>
+    <th className="py-2 px-4 border-b text-left">Contract Terms</th>
+    <th className="py-2 px-4 border-b text-left">Actions</th>
+  </tr>
+</thead>
+
             <tbody>
               {contractors.map((contractor) => (
                 <tr key={contractor._id}>
