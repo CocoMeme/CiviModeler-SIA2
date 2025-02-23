@@ -7,6 +7,7 @@ import authRouter from './routes/authRoute.js';
 import userRouter from './routes/userRoute.js';
 import projectRouter from './routes/projectRoute.js';
 import contratorRouter from './routes/contractorRoute.js';
+import testimonialRouter from './routes/testimonialRoute.js';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -25,6 +26,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/project", projectRouter);
 app.use("/api/contractor", contratorRouter);
+app.use("/api/testimonials", testimonialRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
