@@ -4,7 +4,7 @@ import userAuth from "../middleware/userAuth.js";
 
 const testimonialRouter = express.Router();
 
-testimonialRouter.get("/all", userAuth, getAllTestimonials);
-testimonialRouter.post("/create", createTestimonial);
+testimonialRouter.get("/all", getAllTestimonials);
+testimonialRouter.post("/create", userAuth,createTestimonial);
 
 export default testimonialRouter;
