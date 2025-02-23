@@ -23,6 +23,7 @@ const projectSchema = new mongoose.Schema({
   ],
   totalCost: { type: Number },
   thumbnail: { type: String },
+  contractorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contractor' },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }
 }, { timestamps: true });
 

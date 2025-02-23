@@ -40,3 +40,17 @@ export const deleteContractor = async (req, res) => {
     res.status(500).json({ message: 'Error deleting contractor', error });
   }
 };
+
+
+// Get contractor by ID
+export const getContractorById = async (req, res) => {
+  try {
+    const contractor = await contractorModel.findById(req.params.id);
+    if (!contractor) {
+      return res.status(404).json({ message: 'Contractor not found' });
+    }
+    res.status(200).json(contractor);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching contractor', error });
+  }
+};
