@@ -1,6 +1,10 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Filter } from "bad-words";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 // Star rating component
 const StarRating = ({ rating, setRating }) => {
@@ -21,12 +25,36 @@ const StarRating = ({ rating, setRating }) => {
   );
 };
 
+// Custom arrow components
+const NextArrow = (props) => {
+  const { className, style, onClick } = props;
+  return (
+    <div
+      className={className}
+      style={{ ...style, display: "block", background: "purple" }}
+      onClick={onClick}
+    />
+  );
+};
+
+const PrevArrow = (props) => {
+  const { className, style, onClick } = props;
+  return (
+    <div
+      className={className}
+      style={{ ...style, display: "block", background: "purple" }}
+      onClick={onClick}
+    />
+  );
+};
+
 const Testimony = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [name, setName] = useState("");
   const [position, setPosition] = useState("");
   const [quote, setQuote] = useState("");
   const [rating, setRating] = useState(0);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -39,10 +67,11 @@ const Testimony = () => {
         
         console.log("API Response:", response.data);
   
-        if (response.data.success) {
-          setTestimonials(response.data.testimonials || []); // Ensure it's an array
+        // Check if the response data is an array
+        if (Array.isArray(response.data)) {
+          setTestimonials(response.data); // Set testimonials directly
         } else {
-          console.error("API Error:", response.data.message);
+          console.error("API Error: Unexpected response format");
         }
       } catch (error) {
         console.error("Error fetching testimonials:", error.message, error.response?.data);
@@ -52,13 +81,59 @@ const Testimony = () => {
     fetchTestimonials();
   }, []);
   
-  
-
-  function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log({ name, position, quote, rating });
-  }
+    const filter = new Filter();
+    const filteredName = filter.clean(name);
+    const filteredPosition = filter.clean(position);
+    const filteredQuote = filter.clean(quote);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/testimonials/create`,
+        { name: filteredName, position: filteredPosition, quote: filteredQuote, rating },
+        { withCredentials: true }
+      );
+      console.log("Testimonial submitted:", response.data);
+      setTestimonials([...testimonials, response.data]); // Add the new testimonial to the list
+      setName("");
+      setPosition("");
+      setQuote("");
+      setRating(0);
+      setError(null);
+    } catch (error) {
+      console.error("Error submitting testimonial:", error.message, error.response?.data);
+      setError(error.response?.data?.message || "An error occurred while submitting the testimonial.");
+    }
+  };
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    nextArrow: <NextArrow />,
+    prevArrow: <PrevArrow />,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+          infinite: true,
+          dots: true
+        }
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1
+        }
+      }
+    ]
+  };
 
   return (
     <div className="container mx-auto px-8 pt-24 pb-16 min-h-screen">
@@ -75,31 +150,32 @@ const Testimony = () => {
         get it right.
       </p>
 
-      {/* Testimonial Cards */}
-      <div className="grid md:grid-cols-3 gap-10">
+      {/* Testimonial Carousel */}
+      <Slider {...settings}>
         {testimonials.map((testimonial, index) => (
-          <div
-            key={index}
-            className="bg-white p-8 shadow-2xl rounded-2xl text-center border-t-4 border-purple-500 
-                       transition-transform transform hover:scale-105 hover:shadow-3xl hover:border-purple-700"
-          >
-            <img
-              src={testimonial.image}
-              alt={testimonial.name}
-              className="w-24 h-24 mx-auto rounded-full border-4 border-purple-500 mb-6 transition-transform transform hover:scale-110"
-            />
-            <p className="text-gray-600 italic text-lg">❝ {testimonial.quote} ❞</p>
+          <div key={index} className="p-4">
+            <div
+              className="bg-white p-8 shadow-2xl rounded-2xl text-center border-t-4 border-purple-500 
+                         transition-transform transform hover:scale-105 hover:shadow-3xl hover:border-purple-700"
+            >
+              <img
+                src={testimonial.image}
+                alt={testimonial.name}
+                className="w-24 h-24 mx-auto rounded-full border-4 border-purple-500 mb-6 transition-transform transform hover:scale-110"
+              />
+              <p className="text-gray-600 italic text-lg">❝ {testimonial.quote} ❞</p>
 
-            {/* Star Rating */}
-            <StarRating rating={testimonial.rating} />
+              {/* Star Rating */}
+              <StarRating rating={testimonial.rating} />
 
-            <h3 className="text-purple-700 font-extrabold text-2xl mt-6">
-              {testimonial.name}
-            </h3>
-            <p className="text-gray-500 text-lg">{testimonial.position}</p>
+              <h3 className="text-purple-700 font-extrabold text-2xl mt-6">
+                {testimonial.name}
+              </h3>
+              <p className="text-gray-500 text-lg">{testimonial.position}</p>
+            </div>
           </div>
         ))}
-      </div>
+      </Slider>
 
       {/* Submit Feedback Form */}
       <div className="mt-16">
@@ -107,6 +183,7 @@ const Testimony = () => {
           Submit Your Feedback
         </h2>
         <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white p-8 shadow-2xl rounded-2xl">
+          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
               Name

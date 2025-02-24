@@ -1,4 +1,4 @@
-import Testimonial from '../models/testimonialModel.js';
+import testimonialModel from '../models/testimonialModel.js';
 
 // const convertRatingToStars = (rating) => {
 //     return '★'.repeat(rating) + '☆'.repeat(5 - rating);
@@ -6,7 +6,7 @@ import Testimonial from '../models/testimonialModel.js';
 
 export const getAllTestimonials = async (req, res) => {
   try {
-    const testimonials = await Testimonial.find();
+    const testimonials = await testimonialModel.find();
     res.json(testimonials);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -15,7 +15,7 @@ export const getAllTestimonials = async (req, res) => {
 
 
 export const createTestimonial = async (req, res) => {
-  const testimonial = new Testimonial({
+  const testimonial = new testimonialModel({
     name: req.body.name,
     position: req.body.position,
     quote: req.body.quote,
