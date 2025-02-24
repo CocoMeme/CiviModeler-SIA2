@@ -79,10 +79,10 @@ export default function ProjectManagement() {
         <table className="min-w-full bg-gray-800 shadow-md overflow-hidden">
           <thead className="bg-white text-black">
             <tr>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Project ID</th>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Project Name</th>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Budget</th>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Actions</th>
+              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm text-center">Project ID</th>
+              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm text-center">Project Name</th>
+              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm text-center">Budget</th>
+              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-300">
