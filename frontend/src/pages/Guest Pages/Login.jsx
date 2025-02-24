@@ -9,52 +9,54 @@ const Login = () => {
   const navigate = useNavigate();
   const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  
-  // Update formData on input change
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  // Handle login submission logic similar to register
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.email || !formData.password) {
+      return toast.error("Please fill in all fields.");
+    }
+    setLoading(true);
     try {
       axios.defaults.withCredentials = true;
-      const { data } = await axios.post(backendUrl + '/api/auth/login', {
-        email: formData.email,
-        password: formData.password
-      });
+      const { data } = await axios.post(`${backendUrl}/api/auth/login`, formData);
       if (data.success) {
         setIsLoggedin(true);
         getUserData();
+        toast.success("Login successful!");
         navigate('/');
       } else {
-        toast.error(data.error);
+        toast.error(data.error || "Invalid credentials.");
       }
     } catch (error) {
-      toast.error('An error occurred. Please try again.');
+      if (error.response && error.response.status === 401) {
+        toast.error("Incorrect email or password.");
+      } else if (error.response && error.response.status === 404) {
+        toast.error("Email not found.");
+      } else {
+        toast.error("Invalid Credentials");
+      }
     }
+    setLoading(false);
   };
 
-  const handleGoogleSignIn = () => {}
+  const handleGoogleSignIn = () => {};
 
   return (
     <div className="h-[100vh] flex justify-center items-center">
       <div className="w-full max-w-sm mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div className="flex items-center justify-center mb-4">
-          <img 
-            src="../../public/images/CiviModeler - NBG.png" 
-            alt="Logo" 
-            className="size-6 mr-1" 
-          />
+          <img src="../../public/images/CiviModeler - NBG.png" alt="Logo" className="size-6 mr-1" />
           <h2 className="text-xl font-semibold">CiviModeler | Login</h2>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-              Email
-            </label>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
@@ -65,9 +67,7 @@ const Login = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Password
-            </label>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
@@ -78,22 +78,19 @@ const Login = () => {
             />
           </div>
           <p className="align-baseline font-medium text-sm text-center">
-            Haven't an account?{" "}
-            <Link to="/register" className="font-extrabold hover:text-green-500">
-              Register
-            </Link>{" "}
-            here!
+            Haven't an account? <Link to="/register" className="font-extrabold hover:text-green-500">Register</Link> here!
           </p>
           <div className="mt-4">
             <button
               type="submit"
+              disabled={loading}
               className="w-full flex flex-wrap gap-1 items-center justify-center bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-8 rounded focus:outline-none transition-all duration-200 cursor-pointer"
             >
               <FaArrowCircleRight />
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </div>
-          <p onClick={()=>navigate('/reset-password')} className="align-baseline font-light text-xs from-neutral-500 to-neutral-700 text-right cursor-pointer mt-2 mr-2">
+          <p onClick={() => navigate('/reset-password')} className="align-baseline font-light text-xs from-neutral-500 to-neutral-700 text-right cursor-pointer mt-2 mr-2">
             Forgot Password?
           </p>
         </form>
