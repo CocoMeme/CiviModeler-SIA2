@@ -1,34 +1,44 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-const HouseModelView = ({ modelData }) => {
-  const modelRef = useRef();
+const HouseModelViewer = ({ modelData }) => {
+  const [gltf, setGltf] = useState(null);
 
   useEffect(() => {
     if (modelData) {
       const loader = new GLTFLoader();
-      const parsedData = JSON.parse(modelData); // Parse the stringified GLTF data
-      loader.parse(parsedData, "", (gltf) => {
-        if (modelRef.current) {
-          modelRef.current.add(gltf.scene);
+      const blob = new Blob([JSON.stringify(modelData)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      loader.load(
+        url,
+        (gltf) => {
+          console.log("Model loaded successfully:", gltf);
+          setGltf(gltf);
+        },
+        undefined,
+        (error) => {
+          console.error("Error loading GLTF model:", error);
         }
-      });
+      );
     }
   }, [modelData]);
 
   return (
-    <Canvas
-      style={{ width: "100vw", height: "100vh" }} // Adjusts to full screen
-      camera={{ position: [5, 3, 10], fov: 50 }} // Adjust camera as needed
-    >
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      <group ref={modelRef} />
-      <OrbitControls />
-    </Canvas>
+    <div style={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
+      <Canvas 
+        camera={{ position: [5, 5, 5], fov: 50 }} 
+        style={{ width: "100%", height: "100%" }}
+      >
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 10]} />
+        <OrbitControls />
+        {gltf ? <primitive object={gltf.scene} /> : <mesh><boxGeometry args={[1, 1, 1]} /><meshStandardMaterial color="orange" /></mesh>}
+      </Canvas>
+    </div>
   );
 };
 
-export default HouseModelView;
+export default HouseModelViewer;
