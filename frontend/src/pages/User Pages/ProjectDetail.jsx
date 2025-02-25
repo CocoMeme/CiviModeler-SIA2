@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '/styles/ProjectDetail.css?url';
 import { AppContext } from '../../context/AppContext';
+import { useContext } from 'react';
 
 const steps = ['Client Details', 'Project Details', 'Setting-up'];
 
@@ -72,13 +73,13 @@ export default function ProjectDetail() {
 
   const handleGenerateModel = async () => {
     try {
-      const response = await axios.post('http://localhost:5001/generate-model', {
-        size: formData.locationSize,
-        design_style: formData.designStyle
+      const response = await axios.post(`${backendUrl}/api/project/generate-3d`, {
+        prompt: formData.projectDescription  
       });
-      navigate('/model-generator', { state: { modelUrl: response.data.model_url } });
+      console.log("Backend response:", response.data);
+      navigate('/house-model-viewer', { state: { modelData: response.data.ModelData } });
     } catch (error) {
-      console.error('Error generating model:', error);
+      console.error("Error generating model:", error);
     }
   };
   
