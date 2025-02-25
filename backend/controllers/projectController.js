@@ -116,7 +116,7 @@ export const generate3DHouse = async (req, res) => {
 
     res.status(200).json({
       message: "3D model generated successfully!",
-      modelUrl: data.modelUrl // Ensure this is the correct path to the model URL
+      ModelData: data.ModelData 
     });
   } catch (error) {
     console.error("Error generating 3D model:", error);

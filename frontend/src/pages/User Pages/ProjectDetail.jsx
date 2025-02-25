@@ -71,17 +71,23 @@ export default function ProjectDetail() {
     }
   };
 
+
   const handleGenerateModel = async () => {
     try {
       const response = await axios.post(`${backendUrl}/api/project/generate-3d`, {
         prompt: formData.projectDescription  
       });
+  
       console.log("Backend response:", response.data);
+  
+      // Navigate to viewer page with the model data
       navigate('/house-model-viewer', { state: { modelData: response.data.ModelData } });
+  
     } catch (error) {
       console.error("Error generating model:", error);
     }
   };
+  
   
   return (
     <Box sx={{ width: '100%', maxWidth: 600, margin: 'auto', padding: 4, fontFamily: 'Outfit, sans-serif', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}> 

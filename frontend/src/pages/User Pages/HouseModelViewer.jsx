@@ -1,29 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const HouseModelViewer = ({ modelData }) => {
-  const [gltf, setGltf] = useState(null);
+  const [gltfScene, setGltfScene] = useState(null);
 
   useEffect(() => {
     if (modelData) {
-      const loader = new GLTFLoader();
-      const jsonString = JSON.stringify(modelData);
-      const arrayBuffer = new TextEncoder().encode(jsonString).buffer;
+      try {
+        const loader = new GLTFLoader();
 
-      loader.parse(
-        arrayBuffer,
-        "",
-        (gltf) => {
-          console.log("Model loaded successfully:", gltf);
-          setGltf(gltf);
-        },
-        (error) => {
-          console.error("Error loading GLTF model:", error);
-        }
-      );
+        // Ensure modelData is an actual JSON object, not a string
+        const gltfJson = typeof modelData === "string" ? JSON.parse(modelData) : modelData;
+
+        loader.parse(
+          JSON.stringify(gltfJson), // Convert back to a string
+          "", // No base path
+          (gltf) => {
+            setGltfScene(gltf.scene);
+          },
+          (error) => {
+            console.error("Error parsing GLTF model:", error);
+          }
+        );
+      } catch (error) {
+        console.error("Error processing GLTF model:", error);
+      }
     }
   }, [modelData]);
 
@@ -33,7 +37,7 @@ const HouseModelViewer = ({ modelData }) => {
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 10]} />
         <OrbitControls />
-        {gltf ? <primitive object={gltf.scene} /> : <PlaceholderModel />}
+        {gltfScene ? <primitive object={gltfScene} /> : <PlaceholderModel />}
       </Canvas>
     </div>
   );
