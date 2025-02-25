@@ -1,5 +1,5 @@
 import express from 'express';
-import { createProject, getAllProject, getDashboardData, getUserProjects, getProjectReportsData, getRecentProjects } from '../controllers/projectController.js';
+import { createProject, getAllProject, getDashboardData, getUserProjects, getProjectReportsData, getRecentProjects, generate3DHouse } from '../controllers/projectController.js';
 import userAuth from '../middleware/userAuth.js';
 
 const router = express.Router();
@@ -10,4 +10,6 @@ router.get('/get-user-projects/:userId', userAuth, getUserProjects); // Updated 
 router.get('/dashboard-data', userAuth, getDashboardData);
 router.get('/reports-data', getProjectReportsData);
 router.get('/recent-projects', getRecentProjects);
+router.post('/generate-3d', generate3DHouse);
+
 export default router;
