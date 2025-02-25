@@ -1,21 +1,18 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Radio, RadioGroup, FormControlLabel } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function Result() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { backendUrl, userData } = useContext(AppContext);
   const { clientName, email, phoneNumber, companyName, projectName, locationSize, projectBudget, projectDescription, result, designStyle } = location.state || {};
+
   const [openDialog, setOpenDialog] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [contractorDialog, setContractorDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [contractors, setContractors] = useState([]);
   const [selectedContractor, setSelectedContractor] = useState(null);
+  const [infoDialog, setInfoDialog] = useState({ open: false, content: '' });
 
   useEffect(() => {
     const fetchContractors = async () => {
@@ -35,233 +32,202 @@ export default function Result() {
     try {
       if (!userData) {
         console.error('User data not available');
-        setErrorMessage('User is not logged in');
         return;
       }
 
-      const projectUrl = backendUrl.endsWith('/')
-        ? `${backendUrl}api/project/create`
-        : `${backendUrl}/api/project/create`;
-
       const projectData = {
-        projectName: projectName,
+        projectName,
         size: Number(locationSize),
         budget: Number(projectBudget),
         style: designStyle,
-        projectDescription: projectDescription,
+        projectDescription,
         author: userData.name,
-        clientDetails: {
-          clientName: clientName,
-          email: email,
-          phoneNumber: phoneNumber,
-          companyName: companyName
-        },
+        clientDetails: { clientName, email, phoneNumber, companyName },
         materials: Object.entries(result.materials).map(([material, details]) => ({
-          material: material,
+          material,
           quantity: details.quantity,
           unitPrice: details.unit_price,
           totalPrice: details.total_price
         })),
         totalCost: result.total_cost,
         userId: userData._id,
-        contractorId: selectedContractor?._id // Include selected contractor ID
+        contractorId: selectedContractor?._id
       };
 
-      const projectResponse = await axios.post(projectUrl, projectData);
+      const response = await axios.post(`${backendUrl}/api/project/create`, projectData);
 
-      if (projectResponse.status === 201) {
-        setIsConfirmed(true);
+      if (response.status === 201) {
         alert('Data saved to your account.');
       } else {
         throw new Error('Failed to create project');
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.error 
-        ? String(error.response.data.error) 
-        : error.message || 'An error occurred';
-      setErrorMessage(errorMsg);
       console.error('Error processing request:', error);
     }
     setOpenDialog(false);
   };
 
-  const handleDialogClose = (confirm) => {
-    if (confirm) {
-      handleConfirm();
-    } else {
-      setOpenDialog(false);
-    }
-  };
-
-  const handleContractorSelect = (contractor) => {
-    setSelectedContractor(contractor);
-    setContractorDialog(true);
-  };
-
   const materialData = result
-    ? Object.entries(result.materials)
-        .map(([material, details]) => ({
-          name: material,
-          quantity: details.quantity
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name))
+    ? Object.entries(result.materials).map(([material, details]) => ({
+      name: material,
+      quantity: details.quantity
+    }))
     : [];
 
   return (
-    <Box sx={{ maxWidth: 1000, margin: 'auto', padding: 4, backgroundColor: '#f8f9fa', borderRadius: 2, boxShadow: 3 }}>
-      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom color="purple">
-        Project Result
-      </Typography>
-      
-      <Grid container spacing={3}>
-        <Grid item xs={6}>
-          <Paper sx={{ padding: 3, borderRadius: 2 }} elevation={3}>
-            <Typography variant="h6" fontWeight="bold">Client Details</Typography>
-            <Typography>Name: {clientName}</Typography>
-            <Typography>Email: {email}</Typography>
-            <Typography>Phone Number: {phoneNumber}</Typography>
-            <Typography>Company Name: {companyName}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={6}>
-          <Paper sx={{ padding: 3, borderRadius: 2 }} elevation={3}>
-            <Typography variant="h6" fontWeight="bold">Project Details</Typography>
-            <Typography>Project Name: {projectName}</Typography>
-            <Typography>Location Size: {locationSize} sqft</Typography>
-            <Typography>Project Budget: ₱{projectBudget}</Typography>
-            <Typography>Project Description: {projectDescription}</Typography>
-            <Typography>Design Style: {designStyle}</Typography> {/* Display design style */}
-          </Paper>
-        </Grid>
-      </Grid>
-      
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3, mt: 3 }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#9c27b0' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Material</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Quantity</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Unit Price (₱)</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total Price (₱)</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {result && Object.entries(result.materials).map(([material, details]) => (
-              <TableRow key={material} hover>
-                <TableCell>{material}</TableCell>
-                <TableCell>{details.quantity}</TableCell>
-                <TableCell>{details.unit_price.toFixed(2)}</TableCell>
-                <TableCell>{details.total_price.toFixed(2)}</TableCell>
-              </TableRow>
-            ))}
-            <TableRow sx={{ backgroundColor: '#f4f4f4' }}>
-              <TableCell colSpan={3} sx={{ fontWeight: 'bold' }}>Total Estimated Cost</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>₱{result?.total_cost.toFixed(2)}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
+    <div className="container mx-auto">
+      {/* Header */}
+      <img className="rounded-lg mb-4 w-full" src="/project images/H5.png" alt="CiviModeler H5" />
 
-      <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
-        <strong>Material Units:</strong><br />
-        Cement: per 40kg bag<br />
-        Sand: per cubic meter<br />
-        Gravel: per cubic meter<br />
-        Bricks: per piece (4" CHB)<br />
-        Steel: per 6m (10mm rebar)<br />
-        Wood: per sheet (1/2" plywood)<br />
-        Tiles: estimated per sqm<br />
-        Paint: per gallon<br />
-        Roofing: per piece (G.I. sheet)
-      </Typography>
+      {/* Main Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-      <Typography variant="h6" fontWeight="bold" sx={{ mt: 4, textAlign: 'center' }}>
-        Material Quantity Breakdown
-      </Typography>
+        {/* Left Side - Client, Project & Contractor Details */}
+        <div className="lg:col-span-1 flex flex-col h-full">
 
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart layout="vertical" data={materialData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <XAxis type="number" />
-          <YAxis dataKey="name" type="category" width={100} />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="quantity" fill="#9c27b0" barSize={30} />
-        </BarChart>
-      </ResponsiveContainer>
+          {/* Client Details */}
+          <div className="bg-white p-4 shadow-lg rounded-lg">
+            <div className="flex justify-between items-center border-b pb-2">
+              <h2 className="text-lg font-semibold">Client Details</h2>
+              <button onClick={() => setInfoDialog({ open: true, content: 'Client details include essential contact information for project management.' })}>⋮</button>
+            </div>
+            <div className="mt-4">
+              <p><strong>Name:</strong> {clientName}</p>
+              <p><strong>Email:</strong> {email}</p>
+              <p><strong>Phone Number:</strong> {phoneNumber}</p>
+              <p><strong>Company Name:</strong> {companyName}</p>
+            </div>
+          </div>
 
-      <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic', color: 'gray', textAlign: 'center' }}>
-        *Disclaimer: The prices listed above are estimates and may vary depending on the contractor, supplier, and market conditions. 
-        The material prices are based on publicly available data from <a href="https://philconprices.com/category/list-of-construction-materials-prices-in-the-philippines/" target="_blank" rel="noopener noreferrer">Philcon Prices</a>.
-      </Typography>
-      
-      <Typography variant="h6" fontWeight="bold" sx={{ mt: 4 }}>Choose a Contractor</Typography>
-      <RadioGroup value={selectedContractor?._id} onChange={(e) => handleContractorSelect(contractors.find(c => c._id === e.target.value))}>
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          {contractors.map((contractor) => (
-            <Grid item xs={2.4} key={contractor._id}>
-              <FormControlLabel
-                value={contractor._id}
-                control={<Radio />}
-                label={contractor.name}
-                onClick={() => handleContractorSelect(contractor)}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      </RadioGroup>
+          {/* Project Details */}
+          <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
+            <div className="flex justify-between items-center border-b pb-2">
+              <h2 className="text-lg font-semibold">Project Details</h2>
+              <button onClick={() => setInfoDialog({ open: true, content: 'Project details outline the scope, budget, and design style for planning and execution.' })}>⋮</button>
+            </div>
+            <div className="mt-4">
+              <p><strong>Project Name:</strong> {projectName}</p>
+              <p><strong>Location Size:</strong> {locationSize} sqft</p>
+              <p><strong>Project Budget:</strong> ₱{projectBudget}</p>
+              <p><strong>Project Description:</strong> {projectDescription}</p>
+              <p><strong>Design Style:</strong> {designStyle}</p>
+            </div>
+          </div>
 
-      <Box sx={{ textAlign: 'center', mt: 3 }}>
-        <Button
-          variant="contained"
-          onClick={() => setOpenDialog(true)}
-          sx={{ backgroundColor: '#9c27b0', fontWeight: 'bold', px: 4, py: 1, '&:hover': { backgroundColor: '#9c27b0' } }}
-        >
-          Confirm
-        </Button>
-      </Box>
+          {/* Contractor Selection */}
+          <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
+            <div className="flex justify-between items-center border-b pb-2">
+              <h2 className="text-lg font-semibold">Choose a Contractor</h2>
+              <button onClick={() => setInfoDialog({ open: true, content: 'Select a contractor for your project before confirming.' })}>⋮</button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {contractors.map((contractor) => (
+                <button
+                  key={contractor._id}
+                  className={`p-2 border rounded w-full text-left transition-all duration-300 ${selectedContractor?._id === contractor._id ? 'bg-purple-700 text-white' : 'bg-white hover:bg-gray-100'
+                    }`}
+                  onClick={() => setSelectedContractor(contractor)}
+                >
+                  <h2 className='font-bold'>{contractor.name}</h2>
+                  <p>
+                    <span className="font-sm">License Number:</span> {contractor.licenseNumber}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Confirmation</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to save this to your account?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => handleDialogClose(false)} color="primary">Cancel</Button>
-          <Button onClick={() => handleDialogClose(true)} color="primary">Confirm</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={contractorDialog} onClose={() => setContractorDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Contractor Information</DialogTitle>
-        <DialogContent>
+          {/* Contractor Modal */}
           {selectedContractor && (
-            <>
-              <Typography variant="h6" fontWeight="bold">Name:</Typography>
-              <Typography>{selectedContractor.name}</Typography>
-
-              <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>License Number:</Typography>
-              <Typography>{selectedContractor.licenseNumber}</Typography>
-
-              <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Business Address:</Typography>
-              <Typography>{selectedContractor.businessAddress}</Typography>
-
-              <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Contact Information:</Typography>
-              <Typography>{selectedContractor.contactNumber}</Typography>
-
-              <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Experience:</Typography>
-              <Typography>{selectedContractor.experience}</Typography>
-
-              <Typography variant="h6" fontWeight="bold" sx={{ mt: 2 }}>Contract Terms:</Typography>
-              <Typography>{selectedContractor.contractTerms}</Typography>
-            </>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+                <h2 className="text-lg font-semibold border-b pb-2">{selectedContractor.name}</h2>
+                <div className="mt-4">
+                  <p><strong>License Number:</strong> {selectedContractor.licenseNumber}</p>
+                  <p><strong>Business Address:</strong> {selectedContractor.businessAddress}</p>
+                  <p><strong>Contact Number:</strong> {selectedContractor.contactNumber}</p>
+                  <p><strong>Experience:</strong> {selectedContractor.experience}</p>
+                  <p className="text-gray-500 text-sm italic">Years of experience may vary based on project type and location.</p>
+                  <p><strong>Contract Terms:</strong> {selectedContractor.contractTerms}</p>
+                </div>
+                <div className="text-right mt-4">
+                  <button
+                    className="px-4 py-2 bg-purple-700 text-white rounded"
+                    onClick={() => setSelectedContractor(null)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setContractorDialog(false)} variant="contained" sx={{ backgroundColor: 'purple', color: 'white' }}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+
+
+
+
+        </div>
+
+        {/* Right Side - Graph & Material Table */}
+        <div className="lg:col-span-2 flex flex-col h-full">
+          {/* Material Graph */}
+          <div className="bg-white p-4 shadow-lg rounded-lg">
+            <h2 className="text-lg font-semibold border-b pb-2">Material Quantity Breakdown</h2>
+            <div className="flex-grow flex justify-center items-center">
+              <ResponsiveContainer width="100%" height={450}>
+                <BarChart layout="vertical" data={materialData}>
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="quantity" fill="#9c27b0" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Material Table */}
+          <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
+            <h2 className="text-lg font-semibold border-b pb-2">Material Table</h2>
+            <div className="overflow-x-auto mt-4">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead className="bg-purple-700">
+                  <tr className=''>
+                    <th className="p-2">Material</th>
+                    <th className="p-2">Quantity</th>
+                    <th className="p-2">Unit Price (₱)</th>
+                    <th className="p-2">Total Price (₱)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result && Object.entries(result.materials).map(([material, details]) => (
+                    <tr key={material} className="border-b border-gray-300">
+                      <td className="p-2">{material}</td>
+                      <td className="p-2">{details.quantity}</td>
+                      <td className="p-2">{details.unit_price.toFixed(2)}</td>
+                      <td className="p-2">{details.total_price.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                {/* Total Cost Row */}
+                <tfoot>
+                  <tr className="bg-gray-200 font-bold">
+                    <td colSpan={3} className="p-2 text-left">Total Estimated Cost</td>
+                    <td className="p-2">₱{result?.total_cost.toFixed(2) || '0.00'}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Confirm Button */}
+      <div className="text-center mt-6">
+        <button className="px-6 py-2 bg-purple-700 text-white font-bold rounded hover:bg-purple-800" onClick={handleConfirm}>
+          Confirm
+        </button>
+      </div>
+    </div>
   );
 }
