@@ -1,6 +1,4 @@
-const cloudinary = require('cloudinary').v2;
-
-// ...existing code or comments if any...
+import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary using environment variables
 cloudinary.config({
@@ -9,4 +7,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-module.exports = cloudinary;
+const uploadImage = (filePath) => {
+  return cloudinary.uploader.upload(filePath);
+};
+
+export default { cloudinary, uploadImage };

@@ -1,5 +1,8 @@
 import projectModel from '../models/projectModel.js';
 import userModel from '../models/userModel.js';
+import axios from 'axios';
+import cloudinary from '../config/cloudinary.js';
+import Project from '../models/projectModel.js';
 
 // Create a new project
 export const createProject = async (req, res) => {
@@ -121,5 +124,41 @@ export const generate3DHouse = async (req, res) => {
   } catch (error) {
     console.error("Error generating 3D model:", error);
     res.status(500).json({ message: "Failed to generate 3D model", error: error.message });
+  }
+};
+
+export const create3DModel = async (req, res) => {
+  try {
+    const { prompt, projectId } = req.body;
+
+    // Make a POST request to the Sloyd API
+    const sloydResponse = await axios.post('https://api.sloyd.ai/create', {
+      prompt,
+      // Include any required credentials here
+    });
+
+    const { interactionId, confidenceScore, responseEncoding, modelOutputType, modelData } = sloydResponse.data;
+
+    // Upload the model file to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(modelData, {
+      resource_type: 'raw',
+    });
+
+    // Update the project document in MongoDB
+    const project = await Project.findById(projectId);
+    project.sloyd = {
+      interactionId,
+      confidenceScore,
+      responseEncoding,
+      modelOutputType,
+      modelUrl: uploadResponse.secure_url,
+      thumbnailPreview: uploadResponse.secure_url, // Adjust if needed
+    };
+    await project.save();
+
+    res.json(project);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
   }
 };

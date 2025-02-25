@@ -85,6 +85,55 @@ export default function Result() {
         {/* Left Side - Client, Project & Contractor Details */}
         <div className="lg:col-span-1 flex flex-col h-full">
 
+          {/* Project Configuration */}
+          <div className="bg-white p-4 shadow-lg rounded-lg mb-4">
+            <div className="flex justify-between items-center border-b pb-2">
+              <h2 className="text-lg font-semibold">Project Configuration</h2>
+              <button onClick={() => setInfoDialog({ open: true, content: 'Configure your project settings before generating a model or confirming the project.' })}>⋮</button>
+            </div>
+            <div className="mt-4">
+              <p className="text-gray-600 text-sm">
+                Clicking "Confirm" will save all project details, including client, contractor, and material data, and create a new record in the database.
+              </p>
+            </div>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                className="px-4 py-2 bg-purple-700 text-white font-bold rounded hover:bg-purple-800 transition-all"
+                onClick={() => setOpenDialog(true)}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+
+          {/* Confirmation Modal */}
+          {openDialog && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white p-6 rounded shadow-lg max-w-md w-full relative">
+                <h2 className="text-lg font-semibold border-b pb-2">Confirm Project Save</h2>
+                <p className="mt-4 text-gray-600">
+                  Are you sure you want to save this project? This action will create a **permanent record** in the database with all provided information.
+                </p>
+                <div className="flex justify-end mt-6 gap-2">
+                  <button
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-all"
+                    onClick={() => setOpenDialog(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
+                    onClick={handleConfirm}
+                  >
+                    Yes, Save Project
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+
+
           {/* Client Details */}
           <div className="bg-white p-4 shadow-lg rounded-lg">
             <div className="flex justify-between items-center border-b pb-2">
@@ -139,7 +188,7 @@ export default function Result() {
 
           {/* Contractor Modal */}
           {selectedContractor && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
               <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
                 <h2 className="text-lg font-semibold border-b pb-2">{selectedContractor.name}</h2>
                 <div className="mt-4">
@@ -152,7 +201,7 @@ export default function Result() {
                 </div>
                 <div className="text-right mt-4">
                   <button
-                    className="px-4 py-2 bg-purple-700 text-white rounded"
+                    className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
                     onClick={() => setSelectedContractor(null)}
                   >
                     Close
@@ -163,14 +212,14 @@ export default function Result() {
           )}
 
 
-
-
         </div>
 
         {/* Right Side - Graph & Material Table */}
         <div className="lg:col-span-2 flex flex-col h-full">
+
+
           {/* Material Graph */}
-          <div className="bg-white p-4 shadow-lg rounded-lg">
+          <div className="bg-white p-4 shadow-lg rounded-lg relative z-0">
             <h2 className="text-lg font-semibold border-b pb-2">Material Quantity Breakdown</h2>
             <div className="flex-grow flex justify-center items-center">
               <ResponsiveContainer width="100%" height={450}>
@@ -184,6 +233,7 @@ export default function Result() {
               </ResponsiveContainer>
             </div>
           </div>
+
 
           {/* Material Table */}
           <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
@@ -222,12 +272,6 @@ export default function Result() {
         </div>
       </div>
 
-      {/* Confirm Button */}
-      <div className="text-center mt-6">
-        <button className="px-6 py-2 bg-purple-700 text-white font-bold rounded hover:bg-purple-800" onClick={handleConfirm}>
-          Confirm
-        </button>
-      </div>
     </div>
   );
 }

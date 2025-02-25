@@ -24,7 +24,15 @@ const projectSchema = new mongoose.Schema({
   totalCost: { type: Number },
   thumbnail: { type: String },
   contractorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contractor' },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+  sloyd: {
+    interactionId: { type: String },
+    confidenceScore: { type: Number },
+    responseEncoding: { type: String },
+    modelOutputType: { type: String },
+    modelUrl: { type: String },
+    thumbnailPreview: { type: String },
+  },
 }, { timestamps: true });
 
 const projectModel = mongoose.models.project || mongoose.model("project", projectSchema);
