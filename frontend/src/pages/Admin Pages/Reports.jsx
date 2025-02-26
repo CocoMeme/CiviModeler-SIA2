@@ -3,6 +3,8 @@ import axios from "axios";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { format } from "date-fns"; // Date formatting
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 Chart.register(...registerables);
 
@@ -83,24 +85,41 @@ const ReportsPage = () => {
     fetchReportsData();
   }, []);
 
+  const handleDownloadPDF = () => {
+    const reportElement = document.getElementById("report-container");
+
+    html2canvas(reportElement, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 190; // mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.save("report.pdf");
+    });
+  };
+
   return (
     <div>
-      <h2 className="text-xl font-bold text-white mb-6">Reports</h2> 
+      <h2 className="text-xl font-bold text-white mb-6">Reports</h2>
 
-      {error && <p className="text-red-500">Error: {error}</p>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-  <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
-    {lineData && <Line data={lineData} />}
-  </div>
-  <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
-    {projectData && <Line data={projectData} />}
-  </div>
-</div>
+      <button 
+        onClick={handleDownloadPDF} 
+        className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md mb-4"
+      >
+        Export as PDF
+      </button>
 
+      <div id="report-container" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
+          {lineData && <Line data={lineData} />}
+        </div>
+        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
+          {projectData && <Line data={projectData} />}
+        </div>
       </div>
-   
+    </div>
   );
 };
 

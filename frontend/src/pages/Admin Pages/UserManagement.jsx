@@ -88,39 +88,42 @@ export default function UserManagement() {
     <div className="p-6 bg-gray-900 min-h-screen text-white">
       <h1 className="text-3xl font-bold mb-6 text-center">User Management</h1>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-gray-800 shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-white text-black">
-            <tr>
-              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">User Name</th>
-              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">Email</th>
-              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">Account Status</th>
-              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-300">
-            {users.map((user) => (
-              <tr key={user._id} className="border-b border-gray-700">
-                <td className="w-1/4 py-4 px-6 text-center">{user.name}</td>
-                <td className="w-1/4 py-4 px-6 text-center">{user.email}</td>
-                <td className="w-1/4 py-4 px-6 text-center">{user.isAccountVerified ? "Verified" : "Not Verified"}</td>
-                <td className="w-1/4 py-4 px-4 text-center">
-                  <button
-                    className="mr-2 bg-blue-500 text-white px-5 py-3 text-lg rounded-lg hover:bg-blue-700"
-                    onClick={() => handleUpdateClick(user)}
-                  >
-                    Update
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-5 py-3 text-lg rounded-lg hover:bg-red-700"
-                    onClick={() => handleDeleteClick(user)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <table className="min-w-full table-fixed bg-gray-800 shadow-md rounded-lg overflow-hidden">
+  <thead className="bg-white text-black">
+    <tr>
+      <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm text-center">User Name</th>
+      <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm text-center">Email</th>
+      <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm text-center">Account Status</th>
+      <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm text-center">Actions</th>
+    </tr>
+  </thead>
+  <tbody className="text-gray-300">
+    {users.map((user) => (
+      <tr key={user._id} className="border-b border-gray-700">
+        <td className="w-1/4 py-4 px-6 text-center">{user.name}</td>
+        <td className="w-1/4 py-4 px-6 text-center">{user.email}</td>
+        <td className="w-1/4 py-4 px-6 text-center">
+          {user.isAccountVerified ? "Verified" : "Not Verified"}
+        </td>
+        <td className="w-1/4 py-4 px-6 text-center">
+          <button
+            className="mr-2 bg-blue-500 text-white px-5 py-3 text-lg rounded-lg hover:bg-blue-700"
+            onClick={() => handleUpdateClick(user)}
+          >
+            Update
+          </button>
+          <button
+            className="bg-red-500 text-white px-5 py-3 text-lg rounded-lg hover:bg-red-700"
+            onClick={() => handleDeleteClick(user)}
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
       </div>
 
       {isUpdateModalOpen && (
