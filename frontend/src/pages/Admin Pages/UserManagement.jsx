@@ -89,29 +89,29 @@ export default function UserManagement() {
       <h1 className="text-3xl font-bold mb-6 text-center">User Management</h1>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-gray-800 shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-gray-700 text-white">
+          <thead className="bg-white text-black">
             <tr>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">User Name</th>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Email</th>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Account Status</th>
-              <th className="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Actions</th>
+              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">User Name</th>
+              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">Email</th>
+              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">Account Status</th>
+              <th className="w-1/4 py-4 px-6 uppercase font-semibold text-sm">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-300">
             {users.map((user) => (
               <tr key={user._id} className="border-b border-gray-700">
-                <td className="w-1/4 py-3 px-4 text-center">{user.name}</td>
-                <td className="w-1/4 py-3 px-4 text-center">{user.email}</td>
-                <td className="w-1/4 py-3 px-4 text-center">{user.isAccountVerified ? "Verified" : "Not Verified"}</td>
-                <td className="w-1/4 py-3 px-2 text-center">
+                <td className="w-1/4 py-4 px-6 text-center">{user.name}</td>
+                <td className="w-1/4 py-4 px-6 text-center">{user.email}</td>
+                <td className="w-1/4 py-4 px-6 text-center">{user.isAccountVerified ? "Verified" : "Not Verified"}</td>
+                <td className="w-1/4 py-4 px-4 text-center">
                   <button
-                    className="mr-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    className="mr-2 bg-blue-500 text-white px-5 py-3 text-lg rounded-lg hover:bg-blue-700"
                     onClick={() => handleUpdateClick(user)}
                   >
                     Update
                   </button>
                   <button
-                    className="mr-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                    className="bg-red-500 text-white px-5 py-3 text-lg rounded-lg hover:bg-red-700"
                     onClick={() => handleDeleteClick(user)}
                   >
                     Delete
@@ -125,9 +125,9 @@ export default function UserManagement() {
 
       {isUpdateModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg">
-            <h2 className="text-2xl mb-4">Update User</h2>
-            <div className="mb-4">
+          <div className="bg-white p-10 rounded-2xkl w-1/3 shadow-lg">
+          <h2 className="text-4xl font-bold mb-6 text-center text-black">Update User</h2>
+          <div className="mb-6">
               <label className="block text-gray-700 text-sm font-bold mb-2">User Name</label>
               <input
                 type="text"
@@ -179,10 +179,10 @@ export default function UserManagement() {
 
       {isDeleteModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg">
-            <h2 className="text-2xl mb-4t text-black">Delete User</h2>
-            <p className="text-black">Are you sure you want to delete this user?</p>
-            <div className="mt-4">
+          <div className="bg-white p-8 rounded-2xl w-1/3 shadow-lg">
+          <h2 className="text-3xl font-bold mb-6 text-black text-center">Delete User</h2>
+          <p className="text-lg text-black text-center">Are you sure you want to delete this user?</p>
+          <div className="mt-6 flex justify-center space-x-4">
               <button
                 className="mr-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
                 onClick={() => deleteUser(selectedUser._id)}
