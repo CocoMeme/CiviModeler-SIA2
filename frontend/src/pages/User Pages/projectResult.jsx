@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function Result() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { backendUrl, userData } = useContext(AppContext);
   const { clientName, email, phoneNumber, companyName, projectName, locationSize, projectBudget, projectDescription, result, designStyle } = location.state || {};
 
@@ -13,6 +14,7 @@ export default function Result() {
   const [contractors, setContractors] = useState([]);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [infoDialog, setInfoDialog] = useState({ open: false, content: '' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchContractors = async () => {
@@ -28,7 +30,9 @@ export default function Result() {
   }, [backendUrl]);
 
   const handleConfirm = async () => {
-    setOpenDialog(true);
+    setOpenDialog(false);
+    setLoading(true);
+
     try {
       if (!userData) {
         console.error('User data not available');
@@ -57,15 +61,32 @@ export default function Result() {
       const response = await axios.post(`${backendUrl}/api/project/create`, projectData);
 
       if (response.status === 201) {
-        alert('Data saved to your account.');
+        console.log("Project created successfully. Fetching user projects...");
+
+        // Fetch updated projects to find the newly created one
+        const userProjectsResponse = await fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}`, { credentials: 'include' });
+        const userProjectsData = await userProjectsResponse.json();
+
+        if (userProjectsData.success) {
+          const createdProject = userProjectsData.projects.find(p => p.projectName === projectName);
+          if (createdProject) {
+            navigate('/user/project-overview', { state: createdProject });
+          } else {
+            console.error("New project not found in user projects list.");
+          }
+        } else {
+          console.error("Failed to fetch updated user projects.");
+        }
       } else {
         throw new Error('Failed to create project');
       }
     } catch (error) {
       console.error('Error processing request:', error);
+    } finally {
+      setLoading(false);
     }
-    setOpenDialog(false);
   };
+
 
   const materialData = result
     ? Object.entries(result.materials).map(([material, details]) => ({
@@ -89,7 +110,7 @@ export default function Result() {
           <div className="bg-white p-4 shadow-lg rounded-lg mb-4">
             <div className="flex justify-between items-center border-b pb-2">
               <h2 className="text-lg font-semibold">Project Configuration</h2>
-              <button onClick={() => setInfoDialog({ open: true, content: 'Configure your project settings before generating a model or confirming the project.' })}>⋮</button>
+              <button onClick={() => setOpenDialog(true)}>⋮</button>
             </div>
             <div className="mt-4">
               <p className="text-gray-600 text-sm">
@@ -128,6 +149,16 @@ export default function Result() {
                     Yes, Save Project
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Loading Spinner */}
+          {loading && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-purple-700 rounded-full animate-spin"></div>
+                <p className="mt-2 text-white">Saving project...</p>
               </div>
             </div>
           )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext.jsx';
 import '../../../public/styles/RecentProjectSidebar.css';
 
@@ -7,6 +8,7 @@ const defaultImage3 = '/project images/T3.png';
 const RecentProjectSidebar = () => {
   const [userProjects, setUserProjects] = useState([]);
   const { backendUrl, userData } = useContext(AppContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (userData && userData._id) {
@@ -26,12 +28,16 @@ const RecentProjectSidebar = () => {
     }
   }, [userData, backendUrl]);
 
+  const handleProjectClick = (project) => {
+    navigate('/user/project-overview', { state: project });
+  };
+
   return (
     <div className="recent-project-sidebar">
       {userProjects.length ? (
         <ul className="project-list">
           {userProjects.map((project) => (
-            <li key={project._id} className="project-item">
+            <li key={project._id} className="project-item" onClick={() => handleProjectClick(project)}>
               <img
                 src={project.thumbnail || defaultImage3}
                 alt={project.projectName}

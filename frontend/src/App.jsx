@@ -28,6 +28,7 @@ import SampleProjects from "./pages/User Pages/SampleProjects";
 import Testimony from "./pages/Guest Pages/Testimony";
 import Projects from "./pages/Guest Pages/Projects";
 import HouseModelViewer from "./pages/User Pages/HouseModelViewer";
+import ProjectOverview from "./pages/User Pages/ProjectOverview";
 
 
 const App = () => {
@@ -70,6 +71,8 @@ const App = () => {
           <Route path="project-result" element={<ProjectResult />} />
           <Route path="user-projects" element={<UserProjects />} />
           <Route path="help" element={<Help />} />
+
+          <Route path="project-overview" element={<ProjectOverview />} />
         </Route>
 
         {/* Admin Interface */}

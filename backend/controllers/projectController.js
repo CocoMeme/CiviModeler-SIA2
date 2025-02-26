@@ -38,6 +38,20 @@ export const getUserProjects = async (req, res) => {
   }
 };
 
+// Fetch specific project data
+export const getProjectData = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await projectModel.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    res.status(200).json(project);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching project data', error });
+  }
+};
+
 export const getDashboardData = async (req, res) => {
   try {
     const totalUsers = await userModel.countDocuments();
