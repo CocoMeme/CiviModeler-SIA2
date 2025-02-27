@@ -29,6 +29,7 @@ import Testimony from "./pages/Guest Pages/Testimony";
 import Projects from "./pages/Guest Pages/Projects";
 import HouseModelViewer from "./pages/User Pages/HouseModelViewer";
 import ProjectOverview from "./pages/User Pages/ProjectOverview";
+import ProjectViewer from "./pages/User Pages/Project Viewing Components/ProjectViewer";
 
 
 const App = () => {
@@ -73,6 +74,7 @@ const App = () => {
           <Route path="help" element={<Help />} />
 
           <Route path="project-overview" element={<ProjectOverview />} />
+          <Route path="project-viewer" element={<ProjectViewer />} />
         </Route>
 
         {/* Admin Interface */}

@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function ProjectOverview() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { backendUrl, userData } = useContext(AppContext);
   const projectData = location.state;
 
@@ -16,6 +17,9 @@ export default function ProjectOverview() {
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [infoDialog, setInfoDialog] = useState({ open: false, content: '' });
   const [loading, setLoading] = useState(true);
+  const [clientDetailsState, setClientDetailsState] = useState(clientDetails || {});
+  const [projectDetailsState, setProjectDetailsState] = useState(rest || {});
+  const [projectUpdated, setProjectUpdated] = useState(false);
 
   useEffect(() => {
     const fetchContractors = async () => {
@@ -32,46 +36,60 @@ export default function ProjectOverview() {
     // Random loading time between 300ms to 1s
     const loadingTime = Math.random() * (1000 - 300) + 300;
     setTimeout(() => setLoading(false), loadingTime);
-  }, [backendUrl]);
+  }, [backendUrl, projectData._id]); // Add projectData._id to dependencies
 
   const handleConfirm = async () => {
-    setOpenDialog(true);
     try {
-      if (!userData) {
-        console.error('User data not available');
-        return;
-      }
-
-      const projectData = {
-        projectName: rest.projectName,
-        size: Number(rest.size),
-        budget: Number(rest.budget),
-        style: rest.style,
-        projectDescription: rest.projectDescription,
-        author: userData.name,
-        clientDetails: { clientName: clientDetails.clientName, email: clientDetails.email, phoneNumber: clientDetails.phoneNumber, companyName: clientDetails.companyName },
-        materials: Object.entries(materials).map(([material, details]) => ({
-          material,
-          quantity: details.quantity,
-          unitPrice: details.unit_price,
-          totalPrice: details.total_price
-        })),
-        totalCost: totalCost,
-        userId: userData._id,
-        contractorId: selectedContractor?._id
+      const updatedProject = {
+        clientDetails: {
+          clientName: clientDetailsState.clientName,
+          email: clientDetailsState.email,
+          phoneNumber: clientDetailsState.phoneNumber,
+          companyName: clientDetailsState.companyName,
+        },
+        ...projectDetailsState,
       };
 
-      const response = await axios.post(`${backendUrl}/api/project/create`, projectData);
-
-      if (response.status === 201) {
-        alert('Data saved to your account.');
-      } else {
-        throw new Error('Failed to create project');
-      }
+      const response = await axios.put(`${backendUrl}/api/project/${projectData._id}`, updatedProject);
+      console.log('Project updated successfully:', response.data);
+      setOpenDialog(false);
+      setProjectUpdated(true); // Set the flag to true
     } catch (error) {
-      console.error('Error processing request:', error);
+      console.error('Error updating project:', error);
     }
-    setOpenDialog(false);
+  };
+
+  // Fetch updated project data when projectUpdated flag is true
+  useEffect(() => {
+    if (projectUpdated) {
+      const fetchUpdatedProject = async () => {
+        try {
+          const response = await axios.get(`${backendUrl}/api/project/${projectData._id}`);
+          const updatedProjectData = response.data;
+          setClientDetailsState(updatedProjectData.clientDetails || {});
+          setProjectDetailsState(updatedProjectData || {});
+          setProjectUpdated(false); // Reset the flag
+        } catch (error) {
+          console.error('Error fetching updated project data:', error);
+        }
+      };
+
+      fetchUpdatedProject();
+    }
+  }, [projectUpdated, backendUrl, projectData._id]);
+
+  const handleClientDetailsChange = (e) => {
+    const { name, value } = e.target;
+    setClientDetailsState((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleProjectDetailsChange = (e) => {
+    const { name, value } = e.target;
+    setProjectDetailsState((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleGoTo3D = () => {
+    navigate('/user/project-viewer', { state: { modelUrl: sloyd?.modelUrl } });
   };
 
   const materialData = materials
@@ -119,8 +137,8 @@ export default function ProjectOverview() {
                   Update
                 </button>
                 <button
-                  className="px-4 py-2 bg-lime-700 text-white font-bold rounded hover:bg-lime-800 transition-all bg-"
-                  onClick={() => setOpenDialog(true)}
+                  className="px-4 py-2 bg-lime-700 text-white font-bold rounded hover:bg-lime-800 transition-all"
+                  onClick={handleGoTo3D}
                 >
                   Go to 3D
                 </button>
@@ -153,17 +171,25 @@ export default function ProjectOverview() {
               </div>
             )}
 
+
             {/* Client Details */}
             <div className="bg-white p-4 shadow-lg rounded-lg">
               <div className="flex justify-between items-center border-b pb-2">
                 <h2 className="text-lg font-semibold">Client Details</h2>
                 <button onClick={() => setInfoDialog({ open: true, content: 'Client details include essential contact information for project management.' })}>⋮</button>
               </div>
-              <div className="mt-4">
-                <p><strong>Name:</strong> {clientDetails?.clientName}</p>
-                <p><strong>Email:</strong> {clientDetails?.email}</p>
-                <p><strong>Phone Number:</strong> {clientDetails?.phoneNumber}</p>
-                <p><strong>Company Name:</strong> {clientDetails?.companyName}</p>
+              <div className="mt-4 grid grid-cols-3 gap-2 items-center">
+                <label className="text-left pr-2 col-span-1"><strong>Name:</strong></label>
+                <input type="text" name="clientName" value={clientDetailsState.clientName || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
+
+                <label className="text-left pr-2 col-span-1"><strong>Email:</strong></label>
+                <input type="email" name="email" value={clientDetailsState.email || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
+
+                <label className="text-left pr-2 col-span-1"><strong>Phone Number:</strong></label>
+                <input type="text" name="phoneNumber" value={clientDetailsState.phoneNumber || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
+
+                <label className="text-left pr-2 col-span-1"><strong>Company Name:</strong></label>
+                <input type="text" name="companyName" value={clientDetailsState.companyName || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
               </div>
             </div>
 
@@ -173,14 +199,24 @@ export default function ProjectOverview() {
                 <h2 className="text-lg font-semibold">Project Details</h2>
                 <button onClick={() => setInfoDialog({ open: true, content: 'Project details outline the scope, budget, and design style for planning and execution.' })}>⋮</button>
               </div>
-              <div className="mt-4">
-                <p><strong>Project Name:</strong> {rest.projectName}</p>
-                <p><strong>Location Size:</strong> {rest.size} sqft</p>
-                <p><strong>Project Budget:</strong> ₱{rest.budget}</p>
-                <p><strong>Project Description:</strong> {rest.projectDescription}</p>
-                <p><strong>Design Style:</strong> {rest.style}</p>
+              <div className="mt-4 grid grid-cols-3 gap-2 items-center">
+                <label className="text-left pr-2 col-span-1"><strong>Project Name:</strong></label>
+                <input type="text" name="projectName" value={projectDetailsState.projectName || ''} onChange={handleProjectDetailsChange} className="col-span-2 w-full p-2 border rounded" />
+
+                <label className="text-left pr-2 col-span-1"><strong>Location Size:</strong></label>
+                <input type="number" name="size" value={projectDetailsState.size || ''} onChange={handleProjectDetailsChange} className="col-span-2 w-full p-2 border rounded" />
+
+                <label className="text-left pr-2 col-span-1"><strong>Project Budget:</strong></label>
+                <input type="number" name="budget" value={projectDetailsState.budget || ''} onChange={handleProjectDetailsChange} className="col-span-2 w-full p-2 border rounded" />
+
+                <label className="text-left pr-2 col-span-1"><strong>Design Style:</strong></label>
+                <input type="text" name="style" value={projectDetailsState.style || ''} onChange={handleProjectDetailsChange} className="col-span-2 w-full p-2 border rounded" />
+
+                <label className="text-left pr-2 col-span-1"><strong>Project Description:</strong></label>
+                <textarea name="projectDescription" value={projectDetailsState.projectDescription || ''} onChange={handleProjectDetailsChange} className="col-span-2 w-full p-2 border rounded" />
               </div>
             </div>
+
 
             {/* Contractor Selection */}
             <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
@@ -270,7 +306,7 @@ export default function ProjectOverview() {
                         <td className="p-2">{details.material}</td>
                         <td className="p-2">{details.quantity}</td>
                         <td className="p-2">{details.unitPrice.toFixed(2)}</td>
-                        <td className="p-2">{details.totalPrice.toFixed(2)}</td>
+                        <td className="p-2">₱ {details.totalPrice.toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -278,7 +314,7 @@ export default function ProjectOverview() {
                   <tfoot>
                     <tr className="bg-gray-200 font-bold">
                       <td colSpan={3} className="p-2 text-left">Total Estimated Cost</td>
-                      <td className="p-2">₱{totalCost?.toFixed(2) || '0.00'}</td>
+                      <td className="p-2">₱ {totalCost?.toFixed(2) || '0.00'}</td>
                     </tr>
                   </tfoot>
                 </table>

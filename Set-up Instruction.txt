@@ -11,8 +11,8 @@ INSTALLATION:
 2.4. pip install flask-cors
 
 RUNNING PROJECT:
-3.1. In terminal, go to CiviModeler directory then run:
-3.2. python backend/python/train_model.py
+3.1. In terminal, go to CiviModeler/backend/python/ directory then run:
+3.2. python train_model.py
 3.3. Use "npm run dev" for running both frontend and backend
 
 
