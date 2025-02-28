@@ -185,31 +185,48 @@ export default function ProjectManagement() {
         </Box>
       </Modal>
 
+
       {/* Materials Modal */}
-      <Modal open={openMaterialsModal} onClose={handleCloseMaterialsModal}>
-        <Box sx={{ ...modalStyle, width: '50%', maxWidth: 600, p: 4 }}>
-          <Typography variant="h6" className="mb-4 font-semibold text-center">Materials</Typography>
-          {selectedProject && selectedProject.materials ? (
-            <Box sx={{ mt: 2 }}>
-              {selectedProject.materials.map((material, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography>Material: {material.material}</Typography>
-                  <Typography>Quantity: {material.quantity}</Typography>
-                  <Typography>Unit Price: ₱{material.unitPrice.toLocaleString()}</Typography>
-                  <Typography>Total Price: ₱{material.totalPrice.toLocaleString()}</Typography>
-                </Box>
-              ))}
-            </Box>
-          ) : (
-            <Typography>No materials available.</Typography>
-          )}
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Button variant="contained" color="primary" onClick={handleCloseMaterialsModal}>
-              Close
-            </Button>
+    <Modal open={openMaterialsModal} onClose={handleCloseMaterialsModal}>
+      <Box sx={{ ...modalStyle, width: '50%', maxWidth: 600, p: 4 }}>
+        <Typography variant="h6" className="mb-4 font-semibold text-center">Materials</Typography>
+        {selectedProject && selectedProject.materials ? (
+          <Box sx={{ mt: 2 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={{ border: '1px solid black', padding: '8px', color: 'black' }}>Material</th>
+                  <th style={{ border: '1px solid black', padding: '8px', color: 'black' }}>Quantity</th>
+                  <th style={{ border: '1px solid black', padding: '8px', color: 'black' }}>Unit Price</th>
+                  <th style={{ border: '1px solid black', padding: '8px', color: 'black' }}>Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedProject.materials.map((material, index) => (
+                  <tr key={index}>
+                    <td style={{ border: '1px solid black', padding: '8px' }}>{material.material}</td>
+                    <td style={{ border: '1px solid black', padding: '8px' }}>{material.quantity}</td>
+                    <td style={{ border: '1px solid black', padding: '8px' }}>₱{material.unitPrice.toLocaleString()}</td>
+                    <td style={{ border: '1px solid black', padding: '8px' }}>₱{material.totalPrice.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <Typography variant="h6" className="mt-4 text-center">
+              Total: ₱{selectedProject.materials.reduce((acc, material) => acc + material.totalPrice, 0).toLocaleString()}
+            </Typography>
           </Box>
+        ) : (
+          <Typography>No materials available.</Typography>
+        )}
+        <Box sx={{ mt: 3, textAlign: 'center' }}>
+          <Button variant="contained" color="primary" onClick={handleCloseMaterialsModal}>
+            Close
+          </Button>
         </Box>
-      </Modal>
+      </Box>
+    </Modal>
+
 
       {/* Contractor Modal */}
       <Modal open={openContractorModal} onClose={handleCloseContractorModal}>
