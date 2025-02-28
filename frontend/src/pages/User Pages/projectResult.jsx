@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Result() {
   const location = useLocation();
@@ -30,6 +32,11 @@ export default function Result() {
   }, [backendUrl]);
 
   const handleConfirm = async () => {
+    if (!selectedContractor) {
+      toast.error('Please select a contractor before confirming.');
+      return;
+    }
+
     setOpenDialog(false);
     setLoading(true);
 
