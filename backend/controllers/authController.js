@@ -81,7 +81,11 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        return res.json({ success: true, message: "User logged in successfully" });
+        return res.json({ 
+            success: true, 
+            message: "User logged in successfully",
+            isAdmin: user.isAdmin // Include isAdmin in the response
+        });
 
     } catch (error) {
         res.json({ success: false, message: error.message });
