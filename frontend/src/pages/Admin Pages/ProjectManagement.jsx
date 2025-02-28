@@ -217,10 +217,12 @@ export default function ProjectManagement() {
           <Typography variant="h6" className="mb-4 font-semibold text-center">Contractor Details</Typography>
           {contractorDetails ? (
             <Box sx={{ mt: 2 }}>
-              <Typography>Name: {contractorDetails.contractorName}</Typography>
-              <Typography>Email: {contractorDetails.email}</Typography>
-              <Typography>Phone: {contractorDetails.phoneNumber}</Typography>
-              <Typography>Company: {contractorDetails.companyName}</Typography>
+              <Typography>Name: {contractorDetails.name}</Typography>
+              <Typography>Email: {contractorDetails.licenseNumber}</Typography>
+              <Typography>Phone: {contractorDetails.businessAddress}</Typography>
+              <Typography>Company: {contractorDetails.contactNumber}</Typography>
+              <Typography>Company: {contractorDetails.experience}</Typography>
+              <Typography>Company: {contractorDetails.contractTerms}</Typography>
             </Box>
           ) : (
             <Typography>No contractor details available.</Typography>
