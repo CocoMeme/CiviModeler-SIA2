@@ -29,11 +29,7 @@ const Login = () => {
         setIsLoggedin(true);
         getUserData();
         toast.success("Login successful!");
-        if (data.user.isAdmin) {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/');
-        }
+        navigate('/');
       } else {
         toast.error(data.error || "Invalid credentials.");
       }
