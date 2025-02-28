@@ -25,6 +25,7 @@ export default function ProjectManagement() {
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState(null);
+  const [contractorDetails, setContractorDetails] = useState(null);
   const [openClientModal, setOpenClientModal] = useState(false);
   const [openMaterialsModal, setOpenMaterialsModal] = useState(false);
   const [openContractorModal, setOpenContractorModal] = useState(false);
@@ -66,8 +67,18 @@ export default function ProjectManagement() {
 
   const handleCloseMaterialsModal = () => setOpenMaterialsModal(false);
 
-  const handleOpenContractorModal = (project) => {
+  const handleOpenContractorModal = async (project) => {
     setSelectedProject(project);
+    if (project.contractorId) {
+      try {
+        const response = await axios.get(`${backendUrl}/api/contractor/${project.contractorId}`);
+        setContractorDetails(response.data);
+      } catch (error) {
+        console.error('Error fetching contractor:', error);
+      }
+    } else {
+      setContractorDetails(null);
+    }
     setOpenContractorModal(true);
   };
 
@@ -204,12 +215,12 @@ export default function ProjectManagement() {
       <Modal open={openContractorModal} onClose={handleCloseContractorModal}>
         <Box sx={{ ...modalStyle, width: '50%', maxWidth: 600, p: 4 }}>
           <Typography variant="h6" className="mb-4 font-semibold text-center">Contractor Details</Typography>
-          {selectedProject && selectedProject.contractorDetails ? (
+          {contractorDetails ? (
             <Box sx={{ mt: 2 }}>
-              <Typography>Name: {selectedProject.contractorDetails.contractorName}</Typography>
-              <Typography>Email: {selectedProject.contractorDetails.email}</Typography>
-              <Typography>Phone: {selectedProject.contractorDetails.phoneNumber}</Typography>
-              <Typography>Company: {selectedProject.contractorDetails.companyName}</Typography>
+              <Typography>Name: {contractorDetails.contractorName}</Typography>
+              <Typography>Email: {contractorDetails.email}</Typography>
+              <Typography>Phone: {contractorDetails.phoneNumber}</Typography>
+              <Typography>Company: {contractorDetails.companyName}</Typography>
             </Box>
           ) : (
             <Typography>No contractor details available.</Typography>
