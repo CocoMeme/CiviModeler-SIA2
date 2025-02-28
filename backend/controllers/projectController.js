@@ -127,41 +127,6 @@ export const getRecentProjects = async (req, res) => {
 };
 
 
-export const generate3DHouse = async (req, res) => {
-  try {
-    const { prompt } = req.body;
-
-    const response = await fetch(process.env.SLOYD_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        Prompt: prompt,
-        ClientId: process.env.SLOYD_CLIENT_ID,
-        ClientSecret: process.env.SLOYD_CLIENT_SECRET,
-        ModelOutputType: "gltf",
-        ResponseEncoding: "json"
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Sloyd API request failed with status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("Sloyd API response:", data);
-
-    res.status(200).json({
-      message: "3D model generated successfully!",
-      ModelData: data.ModelData 
-    });
-  } catch (error) {
-    console.error("Error generating 3D model:", error);
-    res.status(500).json({ message: "Failed to generate 3D model", error: error.message });
-  }
-};
-
 export const create3DModel = async (req, res) => {
   try {
     const { prompt, projectId } = req.body;

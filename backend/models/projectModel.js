@@ -32,7 +32,7 @@ const projectSchema = new mongoose.Schema({
     modelOutputType: { type: String },
     modelUrl: { type: String },
     thumbnailPreview: { type: String },
-  },
+  }, default: {}
 }, { timestamps: true });
 
 const projectModel = mongoose.models.project || mongoose.model("project", projectSchema);

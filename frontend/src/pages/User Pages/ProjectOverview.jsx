@@ -2,7 +2,10 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
-import ProjectContent from '../../components/Project Components/ProjectContent'; // Import the new component
+import ProjectContent from '../../components/Project Components/ProjectContent';
+import Collaborators from '../../components/Project Components/Collaborators';
+import ProjectReports from '../../components/Project Components/ProjectReports'; 
+import { toast } from 'react-toastify'; // Import toast
 
 export default function ProjectOverview() {
   const location = useLocation();
@@ -20,6 +23,8 @@ export default function ProjectOverview() {
   const [clientDetailsState, setClientDetailsState] = useState(clientDetails || {});
   const [projectDetailsState, setProjectDetailsState] = useState(rest || {});
   const [projectUpdated, setProjectUpdated] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     const fetchContractors = async () => {
@@ -113,6 +118,8 @@ export default function ProjectOverview() {
     }
   };
 
+  
+
   const materialData = materials
     ? Object.entries(materials).map(([material, details]) => ({
       name: material,
@@ -125,6 +132,28 @@ export default function ProjectOverview() {
       {/* Header */}
       <img className="rounded-lg mb-4 w-full" src="/project images/H5.png" alt="CiviModeler H5" />
 
+      {/* Tabs */}
+      <div className="flex mb-4">
+        <button
+          className={`px-4 py-2 ${activeTab === 'overview' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-l`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'collaborators' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+          onClick={() => setActiveTab('collaborators')}
+        >
+          Collaborators
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'reports' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-r`}
+          onClick={() => setActiveTab('reports')}
+        >
+          Reports
+        </button>
+      </div>
+
       {/* Loading Animation */}
       {loading && (
         <div className="flex justify-center items-center h-40">
@@ -133,7 +162,7 @@ export default function ProjectOverview() {
       )}
 
       {/* Main Layout */}
-      {!loading && (
+      {!loading && activeTab === 'overview' && (
         <ProjectContent
           clientDetailsState={clientDetailsState}
           projectDetailsState={projectDetailsState}
@@ -154,6 +183,22 @@ export default function ProjectOverview() {
           sloyd={sloyd}
           materialData={materialData}
         />
+      )}
+
+      {!loading && activeTab === 'collaborators' && (
+        <Collaborators />
+      )}
+
+      {!loading && activeTab === 'reports' && (
+        <ProjectReports />
+      )}
+
+      {/* Generating Animation */}
+      {generating && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-purple-700 rounded-full animate-spin"></div>
+          <p className="text-white mt-2">Generating 3D model...</p>
+        </div>
       )}
     </div>
   );

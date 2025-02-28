@@ -27,7 +27,6 @@ import Help from "./pages/User Pages/Help";
 import SampleProjects from "./pages/User Pages/SampleProjects";
 import Testimony from "./pages/Guest Pages/Testimony";
 import Projects from "./pages/Guest Pages/Projects";
-import HouseModelViewer from "./pages/User Pages/HouseModelViewer";
 import ProjectOverview from "./pages/User Pages/ProjectOverview";
 import ProjectViewer from "./pages/User Pages/Project Viewing Components/ProjectViewer";
 import ProjectLayout from "./pages/User Pages/Project Viewing Components/ProjectLayout";
@@ -59,7 +58,6 @@ const App = () => {
 
                 <Route path="/loading" element={<GeneratingPage />} />
                 <Route path="/model-generator" element={<ModelGenerator />} />
-                <Route path="/house-model-viewer" element={<HouseModelViewer />}/>
               </Routes>
               <Footer />
             </>
