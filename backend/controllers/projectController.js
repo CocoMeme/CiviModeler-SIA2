@@ -1,8 +1,14 @@
 import projectModel from '../models/projectModel.js';
 import userModel from '../models/userModel.js';
 import axios from 'axios';
-import cloudinary from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js'; // Ensure this import is correct
 import Project from '../models/projectModel.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Update an existing project
 export const updateProject = async (req, res) => {
@@ -160,34 +166,65 @@ export const create3DModel = async (req, res) => {
   try {
     const { prompt, projectId } = req.body;
 
-    // Make a POST request to the Sloyd API
-    const sloydResponse = await axios.post('https://api.sloyd.ai/create', {
-      prompt,
-      // Include any required credentials here
+    // Make a POST request to the Sloyd API with the required fields
+    const sloydResponse = await axios.post(process.env.SLOYD_API_URL, {
+      Prompt: prompt,
+      ClientId: process.env.SLOYD_CLIENT_ID,
+      ClientSecret: process.env.SLOYD_CLIENT_SECRET,
+      ModelOutputType: "glb",   // or "glb" if that's your desired output
+      ResponseEncoding: "json"
     });
 
-    const { interactionId, confidenceScore, responseEncoding, modelOutputType, modelData } = sloydResponse.data;
+    // Destructure the Sloyd API response
+    const {
+      InteractionId,
+      ConfidenceScore,
+      ResponseEncoding: SloydResponseEncoding,
+      ModelOutputType: SloydModelOutputType,
+      ModelData,
+      ThumbnailPreview
+    } = sloydResponse.data;
+
+    // Retrieve the project document from MongoDB to get the project name
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    // Ensure the temp directory exists
+    const tempDir = path.join(__dirname, '..', 'temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir);
+    }
+
+    // Save the model data to a temporary file using the project name
+    const tempFileName = `${project.projectName.replace(/\s+/g, '_')}.glb`; // Replace spaces with underscores
+    const tempFilePath = path.join(tempDir, tempFileName);
+    fs.writeFileSync(tempFilePath, Buffer.from(ModelData, 'base64'));
 
     // Upload the model file to Cloudinary
-    const uploadResponse = await cloudinary.uploader.upload(modelData, {
+    const uploadResponse = await cloudinary.uploader.upload(tempFilePath, {
       resource_type: 'raw',
     });
 
+    // Delete the temporary file
+    fs.unlinkSync(tempFilePath);
+
     // Update the project document in MongoDB
-    const project = await Project.findById(projectId);
     project.sloyd = {
-      interactionId,
-      confidenceScore,
-      responseEncoding,
-      modelOutputType,
-      modelUrl: uploadResponse.secure_url,
-      thumbnailPreview: uploadResponse.secure_url, // Adjust if needed
+      interactionId: InteractionId,
+      confidenceScore: ConfidenceScore,
+      responseEncoding: SloydResponseEncoding,
+      modelOutputType: SloydModelOutputType,
+      modelUrl: uploadResponse.secure_url,         // URL of the uploaded model file
+      thumbnailPreview: ThumbnailPreview || uploadResponse.secure_url, // fallback if thumbnail not provided
     };
+
     await project.save();
 
-    res.json(project);
+    res.json({ ModelData: project.sloyd });
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
+    console.error("Error creating 3D model:", error);
+    res.status(500).send("Server Error");
   }
 };

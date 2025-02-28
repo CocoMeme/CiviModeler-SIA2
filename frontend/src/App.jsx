@@ -30,6 +30,7 @@ import Projects from "./pages/Guest Pages/Projects";
 import HouseModelViewer from "./pages/User Pages/HouseModelViewer";
 import ProjectOverview from "./pages/User Pages/ProjectOverview";
 import ProjectViewer from "./pages/User Pages/Project Viewing Components/ProjectViewer";
+import ProjectLayout from "./pages/User Pages/Project Viewing Components/ProjectLayout";
 
 
 const App = () => {
@@ -74,9 +75,14 @@ const App = () => {
           <Route path="help" element={<Help />} />
 
           <Route path="project-overview" element={<ProjectOverview />} />
-          <Route path="project-viewer" element={<ProjectViewer />} />
+          
         </Route>
 
+        {/* Project Viewing Interface */}
+        <Route path="/project-viewer/*" element={<ProjectLayout />}>
+          <Route path="work-station" element={<ProjectViewer />} />
+
+        </Route>
         {/* Admin Interface */}
         <Route path="/admin/*" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
