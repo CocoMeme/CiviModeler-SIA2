@@ -236,10 +236,10 @@ export default function ProjectManagement() {
             <Box sx={{ mt: 2 }}>
               <Typography>Name: {contractorDetails.name}</Typography>
               <Typography>Email: {contractorDetails.licenseNumber}</Typography>
-              <Typography>Phone: {contractorDetails.businessAddress}</Typography>
-              <Typography>Company: {contractorDetails.contactNumber}</Typography>
-              <Typography>Company: {contractorDetails.experience}</Typography>
-              <Typography>Company: {contractorDetails.contractTerms}</Typography>
+              <Typography>Address: {contractorDetails.businessAddress}</Typography>
+              <Typography>Contact Number: {contractorDetails.contactNumber}</Typography>
+              <Typography>Experience: {contractorDetails.experience}</Typography>
+              <Typography>Terms: {contractorDetails.contractTerms}</Typography>
             </Box>
           ) : (
             <Typography>No contractor details available.</Typography>
