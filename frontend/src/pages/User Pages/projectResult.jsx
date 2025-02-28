@@ -87,7 +87,6 @@ export default function Result() {
     }
   };
 
-
   const materialData = result
     ? Object.entries(result.materials).map(([material, details]) => ({
       name: material,
@@ -163,8 +162,6 @@ export default function Result() {
             </div>
           )}
 
-
-
           {/* Client Details */}
           <div className="bg-white p-4 shadow-lg rounded-lg">
             <div className="flex justify-between items-center border-b pb-2">
@@ -206,7 +203,10 @@ export default function Result() {
                   key={contractor._id}
                   className={`p-2 border rounded w-full text-left transition-all duration-300 ${selectedContractor?._id === contractor._id ? 'bg-purple-700 text-white' : 'bg-white hover:bg-gray-100'
                     }`}
-                  onClick={() => setSelectedContractor(contractor)}
+                  onClick={() => {
+                    setSelectedContractor(contractor);
+                    setInfoDialog({ open: true, content: '' });
+                  }}
                 >
                   <h2 className='font-bold'>{contractor.name}</h2>
                   <p>
@@ -218,7 +218,7 @@ export default function Result() {
           </div>
 
           {/* Contractor Modal */}
-          {selectedContractor && (
+          {selectedContractor && infoDialog.open && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
               <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
                 <h2 className="text-lg font-semibold border-b pb-2">{selectedContractor.name}</h2>
@@ -233,7 +233,7 @@ export default function Result() {
                 <div className="text-right mt-4">
                   <button
                     className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
-                    onClick={() => setSelectedContractor(null)}
+                    onClick={() => setInfoDialog({ open: false, content: '' })}
                   >
                     Close
                   </button>
@@ -242,12 +242,10 @@ export default function Result() {
             </div>
           )}
 
-
         </div>
 
         {/* Right Side - Graph & Material Table */}
         <div className="lg:col-span-2 flex flex-col h-full">
-
 
           {/* Material Graph */}
           <div className="bg-white p-4 shadow-lg rounded-lg relative z-0">
@@ -264,7 +262,6 @@ export default function Result() {
               </ResponsiveContainer>
             </div>
           </div>
-
 
           {/* Material Table */}
           <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
