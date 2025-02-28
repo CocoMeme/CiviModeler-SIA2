@@ -42,6 +42,7 @@ const Navbar = () => {
         setUserData(null);
         setIsLoggedin(false);
         navigate('/');
+        toast.success("Logged out successfully");
       } else {
         toast.error('Logout failed');
       }
