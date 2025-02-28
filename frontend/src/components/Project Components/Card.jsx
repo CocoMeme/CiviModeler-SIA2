@@ -4,14 +4,9 @@ const defaultImage = '/project images/T3.png';
 const defaultImage2 = '/project images/T2.png';
 const defaultImage3 = '/project images/T3.png';
 import '../../../public/styles/ProjectCard.css';
-import '../../../public/styles/ProjectDetailsModal.css';
-import { TbEyeEdit, TbListDetails, TbCube3dSphere } from "react-icons/tb";
-import ProjectDetailsModal from './ProjectDetailsModal'; // Import the ProjectDetailsModal component
 
 const Card = ({ project }) => {
   const { thumbnail, projectName, author } = project;
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
-  const [modalView, setModalView] = useState('details'); // State to manage modal view
 
   const getUserInitials = () => {
     const name = author ? author.trim() : "Unknown";
@@ -21,15 +16,6 @@ const Card = ({ project }) => {
     } else {
       return name.length >= 2 ? (name[0] + name[1]).toUpperCase() : name[0].toUpperCase();
     }
-  };
-
-  const handleProjectClick = (view) => {
-    setModalView(view);
-    setIsModalOpen(true); // Show the modal when the button is clicked
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false); // Hide the modal
   };
 
   return (
@@ -50,22 +36,8 @@ const Card = ({ project }) => {
           </div>
         </div>
         <div className='card-rightside'>
-          {/* <button className="view-details-btn" onClick={() => handleProjectClick('details')}>
-            <TbEyeEdit />
-          </button> */}
-          <button className="view-materials-btn" onClick={() => handleProjectClick('materials')}>
-            <TbListDetails />
-          </button>
-          <button className="view-3d-btn" onClick={() => handleProjectClick('3d')}>
-            <TbCube3dSphere />
-          </button>
         </div>
       </div>
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <ProjectDetailsModal project={project} onClose={handleCloseModal} view={modalView} />
-        </div>
-      )}
     </div>
   );
 };
