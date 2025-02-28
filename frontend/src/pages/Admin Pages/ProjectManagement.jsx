@@ -27,6 +27,7 @@ export default function ProjectManagement() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [openClientModal, setOpenClientModal] = useState(false);
   const [openMaterialsModal, setOpenMaterialsModal] = useState(false);
+  const [openContractorModal, setOpenContractorModal] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -65,6 +66,13 @@ export default function ProjectManagement() {
 
   const handleCloseMaterialsModal = () => setOpenMaterialsModal(false);
 
+  const handleOpenContractorModal = (project) => {
+    setSelectedProject(project);
+    setOpenContractorModal(true);
+  };
+
+  const handleCloseContractorModal = () => setOpenContractorModal(false);
+
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredProjects);
     const workbook = XLSX.utils.book_new();
@@ -96,7 +104,7 @@ export default function ProjectManagement() {
           <Button variant="contained" color="success" size="small" onClick={() => handleOpenMaterialsModal(params.row)}>
             Materials
           </Button>
-          <Button variant="contained" color="secondary" size="small">
+          <Button variant="contained" color="secondary" size="small" onClick={() => handleOpenContractorModal(params.row)}>
             Contractor
           </Button>
           <Button variant="contained" color="warning" size="small">
@@ -186,6 +194,28 @@ export default function ProjectManagement() {
           )}
           <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Button variant="contained" color="primary" onClick={handleCloseMaterialsModal}>
+              Close
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Contractor Modal */}
+      <Modal open={openContractorModal} onClose={handleCloseContractorModal}>
+        <Box sx={{ ...modalStyle, width: '50%', maxWidth: 600, p: 4 }}>
+          <Typography variant="h6" className="mb-4 font-semibold text-center">Contractor Details</Typography>
+          {selectedProject && selectedProject.contractorDetails ? (
+            <Box sx={{ mt: 2 }}>
+              <Typography>Name: {selectedProject.contractorDetails.contractorName}</Typography>
+              <Typography>Email: {selectedProject.contractorDetails.email}</Typography>
+              <Typography>Phone: {selectedProject.contractorDetails.phoneNumber}</Typography>
+              <Typography>Company: {selectedProject.contractorDetails.companyName}</Typography>
+            </Box>
+          ) : (
+            <Typography>No contractor details available.</Typography>
+          )}
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Button variant="contained" color="primary" onClick={handleCloseContractorModal}>
               Close
             </Button>
           </Box>
