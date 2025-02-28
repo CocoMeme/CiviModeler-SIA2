@@ -88,10 +88,12 @@ export default function Result() {
   };
 
   const materialData = result
-    ? Object.entries(result.materials).map(([material, details]) => ({
-      name: material,
-      quantity: details.quantity
-    }))
+    ? Object.entries(result.materials)
+        .map(([material, details]) => ({
+          name: material,
+          quantity: details.quantity
+        }))
+        .sort((a, b) => b.quantity - a.quantity) // Sort in descending order
     : [];
 
   return (
