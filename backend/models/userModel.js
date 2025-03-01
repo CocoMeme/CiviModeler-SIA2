@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true, minlength: 6 },
     profilePic: { type: String, default: '' },
     isAdmin: { type: Boolean, default: false },
-<<<<<<< HEAD
 
     // Account Verification & Security
     verifyOtp: { type: String, default: '' },
@@ -68,18 +67,7 @@ userSchema.pre('save', function (next) {
     this.updatedAt = Date.now();
     next();
 });
-=======
-    verifyOtp: { type: String, default: ''},
-    verifyOtpExpireAt: { type: Number, default: 0},
-    isAccountVerified: { type: Boolean, default: 0},
-    resetOtp: { type: String, default: ''},
-    resetOtpExpireAt: { type: Number, default: 0},
-    isDeleted: {
-        type: Boolean,
-        default: false
-      }
-})
->>>>>>> a459163e450498bfee3cc8405cb672aad606c2f6
+
 
 const userModel = mongoose.models.user || mongoose.model("user", userSchema);
 export default userModel;
