@@ -11,6 +11,7 @@ export const AppContextProvider = (props) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [isLoggedin, setIsLoggedin] = useState(false);
     const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     const getAuthState = async () => {
         try {
@@ -26,11 +27,14 @@ export const AppContextProvider = (props) => {
             console.log('UserData after auth check:', userData);  
         } catch (error) {
             if (error.response && error.response.status === 401) {
+                // Handle 401 Unauthorized error gracefully
                 setIsLoggedin(false);
                 setUserData(null);
             } else {
                 toast.error(error.message || 'An error occurred');
             }
+        } finally {
+            setLoading(false); // Set loading to false after auth check
         }
     };
 
@@ -66,6 +70,7 @@ export const AppContextProvider = (props) => {
         getUserData,
         userData,
         setUserData,
+        loading, // Add loading to context value
     };
 
     return (

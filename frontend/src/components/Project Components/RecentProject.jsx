@@ -6,24 +6,26 @@ import { AppContext } from '../../context/AppContext.jsx';
 
 const RecentProject = () => {
   const [projects, setProjects] = useState([]);
-  const { backendUrl, userData } = useContext(AppContext);
+  const { backendUrl, userData, loading } = useContext(AppContext); // Add loading state
 
   useEffect(() => {
-    if (userData && userData._id) {
-      fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}`, { credentials: 'include' })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            setProjects(data.projects);
-          } else {
-            console.error('Error fetching user projects:', data.message);
-          }
-        })
-        .catch((error) => console.error('Error fetching user projects:', error));
-    } else {
-      console.error("User ID not found in userData:", userData);
+    if (!loading) { // Wait for loading to be false
+      if (userData && userData._id) {
+        fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}`, { credentials: 'include' })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              setProjects(data.projects);
+            } else {
+              console.error('Error fetching user projects:', data.message);
+            }
+          })
+          .catch((error) => console.error('Error fetching user projects:', error));
+      } else {
+        console.error("User ID not found in userData:", userData);
+      }
     }
-  }, [userData, backendUrl]);
+  }, [userData, backendUrl, loading]); // Add loading to dependency array
 
   const responsive = {
     superLargeDesktop: { breakpoint: { max: 4000, min: 1024 }, items: 4 },
@@ -31,6 +33,10 @@ const RecentProject = () => {
     tablet: { breakpoint: { max: 768, min: 464 }, items: 1 },
     mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
   };
+
+  if (loading) {
+    return <p>Loading...</p>; // Show loading state
+  }
 
   return (
     <div className='py-5'>
