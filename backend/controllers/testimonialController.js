@@ -15,9 +15,12 @@ export const getAllTestimonials = async (req, res) => {
 
 
 export const createTestimonial = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated." });
+  }
+
   const testimonial = new testimonialModel({
-    name: req.body.name,
-    position: req.body.position,
+    name: req.user.name, 
     quote: req.body.quote,
     rating: req.body.rating,
   });

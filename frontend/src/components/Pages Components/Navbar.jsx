@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { FaSignOutAlt, FaUserCheck } from 'react-icons/fa';
@@ -10,8 +10,10 @@ import { toast } from 'react-toastify';
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const { userData, backendUrl, setUserData, setIsLoggedin } = useContext(AppContext);
-
+  const { userData ={}, backendUrl, setUserData, setIsLoggedin } = useContext(AppContext);
+  useEffect(() => {
+    console.log("Navbar userData:", userData);
+  }, [userData]);
   const sendVerificationOtp = async () => {
     try {
       axios.defaults.withCredentials = true;
@@ -29,7 +31,6 @@ const Navbar = () => {
     }
   }
 
-
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -42,6 +43,7 @@ const Navbar = () => {
         setUserData(null);
         setIsLoggedin(false);
         navigate('/');
+        toast.success("Logged out successfully");
       } else {
         toast.error('Logout failed');
       }
@@ -51,7 +53,6 @@ const Navbar = () => {
     }
   };
 
-  // Add new function to get initials
   const getUserInitials = () => {
     const name = userData.name.trim();
     const words = name.split(" ");
@@ -91,7 +92,6 @@ const Navbar = () => {
         <div className="relative flex items-center md:space-x-3 space-x-2">
           {userData && userData.name ? (
             <div className="relative">
-              {/* Updated animated avatar container */}
               <div 
                 className="group flex items-center bg-white text-[#592a78] font-semibold rounded-full cursor-pointer overflow-hidden transition-all duration-300 px-1 py-1 hover:scale-105"
                 onClick={toggleDropdown}
@@ -108,22 +108,22 @@ const Navbar = () => {
                   <Link to="/profile" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
                     <FaCircleUser className="mr-4" /> Profile
                   </Link>
-                  {!userData.isAccountVerified ? (
-                    // If not verified: Check if OTP was recently sent (pending)
-                    userData.verifyOtpExpireAt > Date.now() ? (
-                      <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="OTP already sent, please wait">
-                        <FaUserCheck className="mr-4" /> OTP Sent
-                      </div>
-                    ) : (
-                      <Link onClick={sendVerificationOtp} className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
-                        <FaUserCheck className="mr-4" /> Verify Email
-                      </Link>
-                    )
-                  ) : (
-                    <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="Email already verified">
-                      <FaUserCheck className="mr-4" /> Verified
-                    </div>
-                  )}
+                  {userData?.isAccountVerified === false ? (
+  userData?.verifyOtpExpireAt > Date.now() ? (
+    <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="OTP already sent, please wait">
+      <FaUserCheck className="mr-4" /> OTP Sent
+    </div>
+  ) : (
+    <Link onClick={sendVerificationOtp} className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
+      <FaUserCheck className="mr-4" /> Verify Email
+    </Link>
+  )
+) : (
+  <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="Email already verified">
+    <FaUserCheck className="mr-4" /> Verified
+  </div>
+)}
+
                   <div
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
                     onClick={logout}

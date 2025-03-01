@@ -10,8 +10,6 @@ const Projects = () => {
             <p className="text-center mb-8">Here are some of the projects we've worked on.</p>
             <GuestProjects/>
         </div>
-        
-
     </div>
     </>
 

@@ -70,23 +70,6 @@ export default function ProjectDetail() {
       console.error('Error processing request:', error);
     }
   };
-
-
-  const handleGenerateModel = async () => {
-    try {
-      const response = await axios.post(`${backendUrl}/api/project/generate-3d`, {
-        prompt: formData.projectDescription  
-      });
-  
-      console.log("Backend response:", response.data);
-  
-      // Navigate to viewer page with the model data
-      navigate('/house-model-viewer', { state: { modelData: response.data.ModelData } });
-  
-    } catch (error) {
-      console.error("Error generating model:", error);
-    }
-  };
   
   
   return (
@@ -154,9 +137,6 @@ export default function ProjectDetail() {
             </Button>
             <button onClick={handleGetQuote} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">
               Get a Quote!
-            </button>
-            <button onClick={handleGenerateModel} className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition duration-300">
-              Generate 3D Model
             </button>
             {errorMessage && (
               <Typography variant="body2" color="error" sx={{ textAlign: 'center', mt: 2 }}>

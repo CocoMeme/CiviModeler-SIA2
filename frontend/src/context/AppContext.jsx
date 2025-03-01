@@ -14,12 +14,16 @@ export const AppContextProvider = (props) => {
 
     const getAuthState = async () => {
         try {
-            
-            const { data } = await axios.get(backendUrl + '/api/auth/is-auth');
+            const { data } = await axios.get(`${backendUrl}/api/auth/is-auth`);
             if (data.success) {
                 setIsLoggedin(true);
-                getUserData();
+                console.log('Auth successful, fetching user data...');
+                await getUserData();
+            } else {
+                setIsLoggedin(false);
+                setUserData(null);
             }
+            console.log('UserData after auth check:', userData);  
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 setIsLoggedin(false);
@@ -32,15 +36,24 @@ export const AppContextProvider = (props) => {
 
     const getUserData = async () => {
         try {
-            axios.defaults.withCredentials = true;
-            const { data } = await axios.get(backendUrl + '/api/user/data');
-            data.success 
-                ? setUserData(data.userData) 
-                : toast.error(data.message);
+            const { data } = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
+    
+            console.log("Raw API response:", data);
+    
+            if (data.success && data.user) { 
+                console.log('User data fetched successfully:', data.user);
+                setUserData(data.user); 
+                setIsLoggedin(true);
+            } else {
+                console.log("User data is missing from response.");
+                toast.error(data.message || "Failed to retrieve user data.");
+            }
         } catch (error) {
-            toast.error(error.message || 'An error occurred');
+            console.error("Error fetching user data:", error);
+            toast.error(error.response?.data?.message || "An error occurred");
         }
     };
+    
 
     useEffect(() => {
         getAuthState();
@@ -61,4 +74,3 @@ export const AppContextProvider = (props) => {
         </AppContext.Provider>
     );
 };
-

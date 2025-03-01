@@ -95,6 +95,12 @@ export default function UserManagement() {
       width: 150, 
       renderCell: (params) => (params.value ? 'Verified' : 'Not Verified')
     },
+    { 
+      field: 'isAdmin', 
+      headerName: 'Role', 
+      width: 150,
+      renderCell: (params) => (params.value ? 'Admin' : 'User')
+    },
     {
       field: 'actions',
       headerName: 'Actions',

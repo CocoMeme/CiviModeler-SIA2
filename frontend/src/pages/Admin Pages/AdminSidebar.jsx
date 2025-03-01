@@ -1,6 +1,31 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AppContext } from "../../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const AdminSidebar = () => {
+  const navigate = useNavigate();
+  const { backendUrl, setUserData, setIsLoggedin } = useContext(AppContext);
+
+  const logout = async () => {
+    try {
+      axios.defaults.withCredentials = true;
+      const { data } = await axios.post(backendUrl + '/api/auth/logout');
+      if (data.success) {
+        setUserData(null);
+        setIsLoggedin(false);
+        navigate('/');
+        toast.success("Logged out successfully");
+      } else {
+        toast.error("Logout failed");
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || 'An error occurred during logout';
+      toast.error(errorMsg);
+    }
+  };
+
   return (
     <div className="w-64 bg-gray-800 text-white p-5 flex flex-col justify-between">
       <div>
@@ -20,7 +45,7 @@ const AdminSidebar = () => {
           </li>
         </ul>
       </div>
-      <button className="bg-red-600 hover:bg-red-700 p-2 rounded text-center">
+      <button onClick={logout} className="bg-red-600 hover:bg-red-700 p-2 rounded text-center">
         Logout
       </button>
     </div>
