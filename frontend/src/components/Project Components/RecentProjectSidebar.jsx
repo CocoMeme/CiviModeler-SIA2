@@ -30,7 +30,6 @@ const RecentProjectSidebar = () => {
 
   const handleProjectClick = (project) => {
     navigate('/user/project-overview', { state: project });
-    window.location.reload(); // Refresh the page
   };
 
   return (

@@ -19,7 +19,7 @@ import ProjectResult from "./pages/User Pages/projectResult";
 import EmailVerify from "./components/Auth Components/EmailVerify";
 import ResetPassord from "./components/Auth Components/ResetPassword";
 import ModelGenerator from "./pages/User Pages/ModelGenerator";
-import ParentProfile from "./pages/User Pages/Profile Components/ParentProfile";
+import Profile from "./pages/User Pages/Profile Components/Profile";
 import UserLayout from "./pages/User Pages/UserLayout";
 import UserHome from "./pages/User Pages/UserHome";
 import UserProjects from "./pages/User Pages/UserProjects";
@@ -30,6 +30,8 @@ import Projects from "./pages/Guest Pages/Projects";
 import ProjectOverview from "./pages/User Pages/ProjectOverview";
 import ProjectViewer from "./pages/User Pages/Project Viewing Components/ProjectViewer";
 import ProjectLayout from "./pages/User Pages/Project Viewing Components/ProjectLayout";
+import ProfileLayout from "./pages/User Pages/Profile Components/ProfileLayout";
+import ProfileOverview from "./pages/User Pages/Profile Components/Overview";
 
 
 const App = () => {
@@ -50,7 +52,10 @@ const App = () => {
                 <Route path="/reset-password" element={<ResetPassord />} />
 
                 <Route path="/project-detail" element={<ProjectDetail />} />
-                <Route path="/profile" element={<ParentProfile/>} />
+
+                <Route path="/profile/*" element={<ProfileLayout/>}>
+                  <Route path="overview" element={<ProfileOverview />} />
+                </Route>
                 
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/testimony" element={<Testimony />} />

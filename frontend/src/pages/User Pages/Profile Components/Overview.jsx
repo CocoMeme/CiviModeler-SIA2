@@ -1,32 +1,12 @@
-import React from 'react'
+import React from "react";
 
-const Overview = () => {
+const ProfileOverview = () => {
   return (
-    <div className="overview-container">
-      {/* User Information */}
-      <header className="overview-header">
-        <h2>User Profile</h2>
-        <p>Name: John Doe</p>
-        <p>Email: john.doe@example.com</p>
-      </header>
-      
-      {/* Biography Section */}
-      <section className="overview-bio">
-        <h3>Biography</h3>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae semper dui.</p>
-      </section>
-      
-      {/* Recent Activity Section */}
-      <section className="overview-activity">
-        <h3>Recent Activity</h3>
-        <ul>
-          <li>Logged in from IP 192.168.1.1</li>
-          <li>Updated profile picture</li>
-          <li>Changed account settings</li>
-        </ul>
-      </section>
+    <div>
+      <h2 className="text-lg font-semibold">Profile Overview</h2>
+      <p>Welcome to your profile overview!</p>
     </div>
-  )
-}
+  );
+};
 
-export default Overview
+export default ProfileOverview;
