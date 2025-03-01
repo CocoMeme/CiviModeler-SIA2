@@ -3,14 +3,18 @@ import axios from "axios";
 
 const ParentProfile = () => {
   const [activeSection, setActiveSection] = useState("overview");
-  const [userData, setUserData] = useState({ name: "", email: ""});
+  const [userData, setUserData] = useState(null); // Initially null to indicate loading
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/data`, { withCredentials: true });
-        if (response.data.success) {
-          setUserData(response.data.userData);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/user/data`,
+          { withCredentials: true }
+        );
+
+        if (response.data.success && response.data.user) {
+          setUserData(response.data.user); // Ensure we use the correct property
         } else {
           console.error("Error fetching user data:", response.data.message);
         }
@@ -21,6 +25,15 @@ const ParentProfile = () => {
 
     fetchUserData();
   }, []);
+
+  // Handle loading state
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-600">
+        Loading user data...
+      </div>
+    );
+  }
 
   return (
     <div className="parent-profile-container flex flex-col items-center justify-center pt-20 px-6 min-h-screen bg-gray-100">
@@ -53,9 +66,8 @@ const ParentProfile = () => {
           {activeSection === "overview" && (
             <div>
               <h2 className="text-xl font-semibold text-purple-700">Profile Overview</h2>
-              <p className="text-lg text-gray-600 mt-2">Name: {userData.name}</p>
-              <p className="text-lg text-gray-600">Email: {userData.email}</p>
-
+              <p className="text-lg text-gray-600 mt-2">Name: {userData?.name || "N/A"}</p>
+              <p className="text-lg text-gray-600">Email: {userData?.email || "N/A"}</p>
             </div>
           )}
         </section>

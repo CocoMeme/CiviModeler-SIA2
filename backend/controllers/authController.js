@@ -197,28 +197,6 @@ export const isAuthenticated = async (req, res, next) => {
     }
 };
 
-// export const isAuthenticated = async (req, res) => {
-//     try {
-//         const token = req.cookies?.token; // Safe check for cookies
-
-//         if (!token) {
-//             return res.status(401).json({ success: false, message: "Unauthorized, no token found" });
-//         }
-
-//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-//         const user = await userModel.findById(decoded.id).select("-password");
-
-//         if (!user) {
-//             return res.status(401).json({ success: false, message: "User not found" });
-//         }
-
-//         res.json({ success: true, user });
-//     } catch (error) {
-//         res.status(401).json({ success: false, message: error.message || "Invalid token" });
-//     }
-// };
-
 
 // Send Password Reset OTP
 export const sendResetOtp = async (req, res) => {

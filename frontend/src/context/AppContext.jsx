@@ -12,30 +12,18 @@ export const AppContextProvider = (props) => {
     const [isLoggedin, setIsLoggedin] = useState(false);
     const [userData, setUserData] = useState(null);
 
-    // const getAuthState = async () => {
-    //     try {
-            
-    //         const { data } = await axios.get(backendUrl + '/api/auth/is-auth');
-    //         if (data.success) {
-    //             setIsLoggedin(true);
-    //             getUserData();
-    //         }
-    //     } catch (error) {
-    //         if (error.response && error.response.status === 401) {
-    //             setIsLoggedin(false);
-    //             setUserData(null);
-    //         } else {
-    //             toast.error(error.message || 'An error occurred');
-    //         }
-    //     }
-    // };
     const getAuthState = async () => {
         try {
-            const { data } = await axios.get(`${backendUrl}/api/auth/is-auth`); // Fixed route
+            const { data } = await axios.get(`${backendUrl}/api/auth/is-auth`);
             if (data.success) {
                 setIsLoggedin(true);
-                getUserData();
+                console.log('Auth successful, fetching user data...');
+                await getUserData();
+            } else {
+                setIsLoggedin(false);
+                setUserData(null);
             }
+            console.log('UserData after auth check:', userData);  
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 setIsLoggedin(false);
@@ -48,22 +36,24 @@ export const AppContextProvider = (props) => {
 
     const getUserData = async () => {
         try {
-            axios.defaults.withCredentials = true;  // Ensure cookies are included
+            const { data } = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
     
-            const { data } = await axios.get(backendUrl + '/api/user/data', {
-                withCredentials: true,  // Explicitly include cookies
-            });
+            console.log("Raw API response:", data);
     
-            if (data.success) {
-                setUserData(data.userData);
-                setIsLoggedin(true); // Set isLoggedin to true
+            if (data.success && data.user) { 
+                console.log('User data fetched successfully:', data.user);
+                setUserData(data.user); 
+                setIsLoggedin(true);
             } else {
-                toast.error(data.message);
+                console.log("User data is missing from response.");
+                toast.error(data.message || "Failed to retrieve user data.");
             }
         } catch (error) {
+            console.error("Error fetching user data:", error);
             toast.error(error.response?.data?.message || "An error occurred");
         }
     };
+    
 
     useEffect(() => {
         getAuthState();
