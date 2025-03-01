@@ -177,13 +177,47 @@ export const verifyEmail = async (req, res) => {
     }
 };
 
-export const isAuthenticated = async (req, res) => {
+export const isAuthenticated = async (req, res, next) => {
     try {
-        return res.json({ success: true});
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Unauthorized, no token found" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await userModel.findById(decoded.id).select("-password");
+
+        if (!user) {
+            return res.status(401).json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, user });
     } catch (error) {
-        res.json({ success: false, message: error.message });
+        res.status(401).json({ success: false, message: "Invalid token" });
     }
-}
+};
+
+// export const isAuthenticated = async (req, res) => {
+//     try {
+//         const token = req.cookies?.token; // Safe check for cookies
+
+//         if (!token) {
+//             return res.status(401).json({ success: false, message: "Unauthorized, no token found" });
+//         }
+
+//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+//         const user = await userModel.findById(decoded.id).select("-password");
+
+//         if (!user) {
+//             return res.status(401).json({ success: false, message: "User not found" });
+//         }
+
+//         res.json({ success: true, user });
+//     } catch (error) {
+//         res.status(401).json({ success: false, message: error.message || "Invalid token" });
+//     }
+// };
 
 
 // Send Password Reset OTP
@@ -242,7 +276,7 @@ export const resetPassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "User not found" });
         }
 
-        if(user.resetOpt === '' || user.resetOtp !== otp) {
+        if(user.resetOtp === '' || user.resetOtp !== otp) {
             return res.status(400).json({ success: false, message: "Invalid OTP" });
         }
 

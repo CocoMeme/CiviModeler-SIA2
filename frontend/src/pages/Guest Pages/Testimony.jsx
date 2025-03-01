@@ -1,10 +1,10 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Filter } from "bad-words";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { AppContext } from "../../context/AppContext";
 
 // Star rating component
 const StarRating = ({ rating, setRating }) => {
@@ -49,9 +49,8 @@ const PrevArrow = (props) => {
 };
 
 const Testimony = () => {
+  const { userData, backendUrl } = useContext(AppContext);
   const [testimonials, setTestimonials] = useState([]);
-  const [name, setName] = useState("");
-  const [position, setPosition] = useState("");
   const [quote, setQuote] = useState("");
   const [rating, setRating] = useState(0);
   const [error, setError] = useState(null);
@@ -61,12 +60,12 @@ const Testimony = () => {
       try {
         console.log("Fetching testimonials...");
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/testimonials/all`, 
+          `${backendUrl}/api/testimonials/all`,
           { withCredentials: true }
         );
-        
+
         console.log("API Response:", response.data);
-  
+
         // Check if the response data is an array
         if (Array.isArray(response.data)) {
           setTestimonials(response.data); // Set testimonials directly
@@ -77,27 +76,23 @@ const Testimony = () => {
         console.error("Error fetching testimonials:", error.message, error.response?.data);
       }
     };
-  
+
     fetchTestimonials();
-  }, []);
-  
+  }, [backendUrl]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const filter = new Filter();
-    const filteredName = filter.clean(name);
-    const filteredPosition = filter.clean(position);
     const filteredQuote = filter.clean(quote);
-
+  
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/testimonials/create`,
-        { name: filteredName, position: filteredPosition, quote: filteredQuote, rating },
+        `${backendUrl}/api/testimonials/create`,
+        { quote: filteredQuote, rating },
         { withCredentials: true }
       );
       console.log("Testimonial submitted:", response.data);
       setTestimonials([...testimonials, response.data]); // Add the new testimonial to the list
-      setName("");
-      setPosition("");
       setQuote("");
       setRating(0);
       setError(null);
@@ -171,7 +166,6 @@ const Testimony = () => {
               <h3 className="text-purple-700 font-extrabold text-2xl mt-6">
                 {testimonial.name}
               </h3>
-              <p className="text-gray-500 text-lg">{testimonial.position}</p>
             </div>
           </div>
         ))}
@@ -184,32 +178,6 @@ const Testimony = () => {
         </h2>
         <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white p-8 shadow-2xl rounded-2xl">
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="position">
-              Position
-            </label>
-            <input
-              type="text"
-              id="position"
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </div>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="quote">
               Quote

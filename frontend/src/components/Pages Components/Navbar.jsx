@@ -29,7 +29,6 @@ const Navbar = () => {
     }
   }
 
-
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -52,7 +51,6 @@ const Navbar = () => {
     }
   };
 
-  // Add new function to get initials
   const getUserInitials = () => {
     const name = userData.name.trim();
     const words = name.split(" ");
@@ -92,7 +90,6 @@ const Navbar = () => {
         <div className="relative flex items-center md:space-x-3 space-x-2">
           {userData && userData.name ? (
             <div className="relative">
-              {/* Updated animated avatar container */}
               <div 
                 className="group flex items-center bg-white text-[#592a78] font-semibold rounded-full cursor-pointer overflow-hidden transition-all duration-300 px-1 py-1 hover:scale-105"
                 onClick={toggleDropdown}
@@ -110,7 +107,6 @@ const Navbar = () => {
                     <FaCircleUser className="mr-4" /> Profile
                   </Link>
                   {!userData.isAccountVerified ? (
-                    // If not verified: Check if OTP was recently sent (pending)
                     userData.verifyOtpExpireAt > Date.now() ? (
                       <div className="flex items-center px-4 py-2 text-gray-400 cursor-not-allowed" title="OTP already sent, please wait">
                         <FaUserCheck className="mr-4" /> OTP Sent
@@ -153,3 +149,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

@@ -19,37 +19,36 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      return toast.error("Please fill in all fields.");
+        return toast.error("Please fill in all fields.");
     }
     setLoading(true);
     try {
-      axios.defaults.withCredentials = true;
-      const { data } = await axios.post(`${backendUrl}/api/auth/login`, formData);
-      if (data.success) {
-        setIsLoggedin(true);
-        getUserData();
-      if(data.isAdmin)
-      {
-        navigate('/admin/dashboard');
-        toast.success("Login successful!");
-      }else{
-        toast.success("Login successful!");
-        navigate('/');
-      }
-      } else {
-        toast.error(data.error || "Invalid credentials.");
-      }
+        axios.defaults.withCredentials = true;
+        const { data } = await axios.post(`${backendUrl}/api/auth/login`, formData);
+        if (data.success) {
+            setIsLoggedin(true);
+            await getUserData(); // Ensure getUserData is awaited
+            if (data.isAdmin) {
+                navigate('/admin/dashboard');
+                toast.success("Login successful!");
+            } else {
+                toast.success("Login successful!");
+                navigate('/');
+            }
+        } else {
+            toast.error(data.error || "Invalid credentials.");
+        }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        toast.error("Incorrect email or password.");
-      } else if (error.response && error.response.status === 404) {
-        toast.error("Email not found.");
-      } else {
-        toast.error("Invalid Credentials");
-      }
+        if (error.response && error.response.status === 401) {
+            toast.error("Incorrect email or password.");
+        } else if (error.response && error.response.status === 404) {
+            toast.error("Email not found.");
+        } else {
+            toast.error("Invalid Credentials");
+        }
     }
     setLoading(false);
-  };
+};
 
   const handleGoogleSignIn = () => {};
 
