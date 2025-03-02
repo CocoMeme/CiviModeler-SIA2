@@ -1,7 +1,17 @@
-import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const ProfileLayout = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Redirect to overview if on base profile route
+    useEffect(() => {
+        if (location.pathname === "/profile") {
+            navigate("/profile/overview");
+        }
+    }, [location.pathname, navigate]);
+
     return (
         <div className=" bg-gray-100 pt-4">
 

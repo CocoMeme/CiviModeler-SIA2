@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
             zipCode: { type: String, default: '' },
         },
         dateOfBirth: { type: Date, default: null },
-        gender: { type: String, enum: ['Male', 'Female', 'Other'], default: 'Other' },
+        gender: { type: String, enum: ['Male', 'Female', 'Unknown'], default: 'Unknown' },
     },
 
     // Subscription & Plan Details

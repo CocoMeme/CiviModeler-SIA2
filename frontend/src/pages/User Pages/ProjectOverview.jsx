@@ -12,6 +12,9 @@ export default function ProjectOverview() {
   const navigate = useNavigate();
   const { backendUrl, userData } = useContext(AppContext);
   const projectData = location.state;
+  if (!projectData) {
+    return <div>No project data available. Please select a project from the sidebar.</div>;
+  }
 
   const { clientDetails, materials, totalCost, sloyd, ...rest } = projectData || {};
 
@@ -25,6 +28,8 @@ export default function ProjectOverview() {
   const [projectUpdated, setProjectUpdated] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [projectLoading, setProjectLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => {
     const fetchContractors = async () => {
@@ -43,7 +48,15 @@ export default function ProjectOverview() {
     setTimeout(() => setLoading(false), loadingTime);
   }, [backendUrl, projectData._id]); // Add projectData._id to dependencies
 
+  useEffect(() => {
+    setProjectLoading(true);
+    setClientDetailsState(projectData.clientDetails || {});
+    setProjectDetailsState(rest || {});
+    setTimeout(() => setProjectLoading(false), 500);
+  }, [projectData]);
+
   const handleConfirm = async () => {
+    setSaveLoading(true);
     try {
       const updatedProject = {
         clientDetails: {
@@ -56,11 +69,15 @@ export default function ProjectOverview() {
       };
 
       const response = await axios.put(`${backendUrl}/api/project/${projectData._id}`, updatedProject);
-      console.log('Project updated successfully:', response.data);
+      // console.log('Project updated successfully:', response.data);
       setOpenDialog(false);
       setProjectUpdated(true); // Set the flag to true
+      toast.success('Project updated successfully!');
     } catch (error) {
       console.error('Error updating project:', error);
+      toast.error('Error updating project.');
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -132,65 +149,81 @@ export default function ProjectOverview() {
       {/* Header */}
       <img className="rounded-lg mb-4 w-full" src="/project images/H5.png" alt="CiviModeler H5" />
 
-      {/* Tabs */}
-      <div className="flex mb-4">
-        <button
-          className={`px-4 py-2 ${activeTab === 'overview' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-l`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
-        </button>
-        <button
-          className={`px-4 py-2 ${activeTab === 'collaborators' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
-          onClick={() => setActiveTab('collaborators')}
-        >
-          Collaborators
-        </button>
-        <button
-          className={`px-4 py-2 ${activeTab === 'reports' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-r`}
-          onClick={() => setActiveTab('reports')}
-        >
-          Reports
-        </button>
-      </div>
-
-      {/* Loading Animation */}
-      {loading && (
-        <div className="flex justify-center items-center h-40">
+      { projectLoading ? (
+        <div className="flex justify-center items-center mb-4">
           <div className="w-12 h-12 border-4 border-gray-300 border-t-purple-700 rounded-full animate-spin"></div>
         </div>
+      ) : (
+        <>
+          {/* Tabs */}
+          <div className="flex mb-4">
+            <button
+              className={`px-4 py-2 ${activeTab === 'overview' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-l`}
+              onClick={() => setActiveTab('overview')}
+            >
+              Overview
+            </button>
+            <button
+              className={`px-4 py-2 ${activeTab === 'collaborators' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+              onClick={() => setActiveTab('collaborators')}
+            >
+              Collaborators
+            </button>
+            <button
+              className={`px-4 py-2 ${activeTab === 'reports' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-r`}
+              onClick={() => setActiveTab('reports')}
+            >
+              Reports
+            </button>
+          </div>
+
+          {/* Overall Loading Animation */}
+          {loading && (
+            <div className="flex justify-center items-center h-40">
+              <div className="w-12 h-12 border-4 border-gray-300 border-t-purple-700 rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {/* Main Layout */}
+          {!loading && activeTab === 'overview' && (
+            <ProjectContent
+              clientDetailsState={clientDetailsState}
+              projectDetailsState={projectDetailsState}
+              contractors={contractors}
+              selectedContractor={selectedContractor}
+              setSelectedContractor={setSelectedContractor}
+              handleClientDetailsChange={handleClientDetailsChange}
+              handleProjectDetailsChange={handleProjectDetailsChange}
+              handleGoTo3D={handleGoTo3D}
+              handleGenerate3D={handleGenerate3D} // Pass the new function
+              handleConfirm={handleConfirm}
+              openDialog={openDialog}
+              setOpenDialog={setOpenDialog}
+              infoDialog={infoDialog}
+              setInfoDialog={setInfoDialog}
+              materials={materials}
+              totalCost={totalCost}
+              sloyd={sloyd}
+              materialData={materialData}
+            />
+          )}
+
+          {!loading && activeTab === 'collaborators' && (
+            <Collaborators />
+          )}
+
+          {!loading && activeTab === 'reports' && (
+            <ProjectReports />
+          )}
+        </>
       )}
 
-      {/* Main Layout */}
-      {!loading && activeTab === 'overview' && (
-        <ProjectContent
-          clientDetailsState={clientDetailsState}
-          projectDetailsState={projectDetailsState}
-          contractors={contractors}
-          selectedContractor={selectedContractor}
-          setSelectedContractor={setSelectedContractor}
-          handleClientDetailsChange={handleClientDetailsChange}
-          handleProjectDetailsChange={handleProjectDetailsChange}
-          handleGoTo3D={handleGoTo3D}
-          handleGenerate3D={handleGenerate3D} // Pass the new function
-          handleConfirm={handleConfirm}
-          openDialog={openDialog}
-          setOpenDialog={setOpenDialog}
-          infoDialog={infoDialog}
-          setInfoDialog={setInfoDialog}
-          materials={materials}
-          totalCost={totalCost}
-          sloyd={sloyd}
-          materialData={materialData}
-        />
-      )}
-
-      {!loading && activeTab === 'collaborators' && (
-        <Collaborators />
-      )}
-
-      {!loading && activeTab === 'reports' && (
-        <ProjectReports />
+      {/* NEW: Saving Updates Loading Animation */}
+      {saveLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-700 rounded-full animate-spin"></div>
+          <p className="text-white mt-2">Saving updates...</p>
+        </div>
       )}
 
       {/* Generating Animation */}

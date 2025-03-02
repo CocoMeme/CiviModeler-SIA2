@@ -7,36 +7,31 @@ const defaultImage3 = '/project images/T3.png';
 
 const RecentProjectSidebar = () => {
   const [userProjects, setUserProjects] = useState([]);
-  const { backendUrl, userData, loading } = useContext(AppContext); // Add loading state
+  const { backendUrl, userData } = useContext(AppContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) { // Wait for loading to be false
-      if (userData && userData._id) {
-        console.log("User ID found:", userData._id);
-        fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}`, { credentials: 'include' })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              setUserProjects(data.projects);
-            } else {
-              console.error('Error fetching user projects:', data.message);
-            }
-          })
-          .catch((error) => console.error('Error fetching user projects:', error));
-      } else {
-        console.error("User ID not found in userData:", userData);
-      }
+    if (userData && userData._id) {
+      console.log("User ID found:", userData._id);
+      fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}`, { credentials: 'include' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setUserProjects(data.projects);
+          } else {
+            console.error('Error fetching user projects:', data.message);
+          }
+        })
+        .catch((error) => console.error('Error fetching user projects:', error));
+    } else {
+      console.error("User ID not found in userData:", userData);
     }
-  }, [userData, backendUrl, loading]); // Add loading to dependency array
+  }, [userData, backendUrl]);
 
   const handleProjectClick = (project) => {
     navigate('/user/project-overview', { state: project });
+    window.location.reload(); // Refresh the page
   };
-
-  if (loading) {
-    return <p>Loading...</p>; // Show loading state
-  }
 
   return (
     <div className="recent-project-sidebar">
