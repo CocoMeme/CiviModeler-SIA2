@@ -26,10 +26,13 @@ export default function ProjectDetail() {
     designStyle: 'Modern' // Default design style
   });
   const [errorMessage, setErrorMessage] = React.useState('');
+  const [formErrors, setFormErrors] = React.useState('');
   const navigate = useNavigate();
   
   const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
+    if (validateForm()) {
+      setActiveStep((prevStep) => prevStep + 1);
+    }
   };
   
   const handleBack = () => {
@@ -47,6 +50,7 @@ export default function ProjectDetail() {
   };
 
   const handleGetQuote = async () => {
+    if (validateForm())
     try {
       // Ensure userData exists (i.e. the user is logged in)
       if (!userData) {
@@ -71,6 +75,23 @@ export default function ProjectDetail() {
     }
   };
   
+  const validateForm = () => {
+    let errors = {};
+    if (activeStep === 0) {
+      if (!formData.clientName) errors.clientName = 'Client name is required';
+      if (!formData.email) errors.email = 'Email is required';
+      if (!formData.phoneNumber) errors.phoneNumber = 'Phone number is required';
+      if (!formData.companyName) errors.companyName = 'Company name is required';
+    } else if (activeStep === 1) {
+      if (!formData.projectName) errors.projectName = 'Project name is required';
+      if (!formData.locationSize) errors.locationSize = 'Location size is required';
+      if (!formData.projectBudget) errors.projectBudget = 'Project budget is required';
+    } else if (activeStep === 2) {
+      if (!formData.projectDescription) errors.projectDescription = 'Project description is required';
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
   
   return (
     <Box sx={{ width: '100%', maxWidth: 600, margin: 'auto', padding: 4, fontFamily: 'Outfit, sans-serif', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}> 
@@ -85,19 +106,92 @@ export default function ProjectDetail() {
         {activeStep === 0 && (
           <Box>
             <Typography variant="h6" className="custom-typography">Client Details</Typography>
-            <TextField fullWidth label="Client Full Name" id="clientName" margin="normal" className="custom-textfield" value={formData.clientName} onChange={handleChange} />
-            <TextField fullWidth label="Email" id="email" type="email" margin="normal" className="custom-textfield" value={formData.email} onChange={handleChange} />
-            <TextField fullWidth label="Phone Number" id="phoneNumber" type="tel" margin="normal" className="custom-textfield" value={formData.phoneNumber} onChange={handleChange} />
-            <TextField fullWidth label="Company Name" id="companyName" margin="normal" className="custom-textfield" value={formData.companyName} onChange={handleChange} />
+            <TextField 
+              fullWidth 
+              label="Client Full Name" 
+              id="clientName" 
+              margin="normal" 
+              className="custom-textfield" 
+              value={formData.clientName} 
+              onChange={handleChange} 
+              error={!!formErrors.clientName}
+              helperText={formErrors.clientName}
+            />
+            <TextField 
+              fullWidth 
+              label="Email" 
+              id="email" 
+              type="email" 
+              margin="normal" 
+              className="custom-textfield" 
+              value={formData.email} 
+              onChange={handleChange} 
+              error={!!formErrors.email}
+              helperText={formErrors.email}
+            />
+            <TextField 
+              fullWidth 
+              label="Phone Number" 
+              id="phoneNumber" 
+              type="tel" 
+              margin="normal" 
+              className="custom-textfield" 
+              value={formData.phoneNumber} 
+              onChange={handleChange} 
+              error={!!formErrors.phoneNumber}
+              helperText={formErrors.phoneNumber}
+            />
+            <TextField 
+              fullWidth 
+              label="Company Name" 
+              id="companyName" 
+              margin="normal" 
+              className="custom-textfield" 
+              value={formData.companyName} 
+              onChange={handleChange} 
+              error={!!formErrors.companyName}
+              helperText={formErrors.companyName}
+            />
             <Button variant="contained" onClick={handleNext} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">Next</Button>
           </Box>
         )}
         {activeStep === 1 && (
           <Box>
             <Typography variant="h6" className="custom-typography">Project Details</Typography>
-            <TextField fullWidth label="Project Name" id="projectName" margin="normal" className="custom-textfield" value={formData.projectName} onChange={handleChange} />
-            <TextField fullWidth label="Location Size (sqft)" id="locationSize" margin="normal" className="custom-textfield" value={formData.locationSize} onChange={handleChange} />
-            <TextField fullWidth label="Project Budget (₱)" id="projectBudget" type="number" margin="normal" className="custom-textfield" value={formData.projectBudget} onChange={handleChange} />
+            <TextField 
+              fullWidth 
+              label="Project Name" 
+              id="projectName" 
+              margin="normal" 
+              className="custom-textfield" 
+              value={formData.projectName} 
+              onChange={handleChange} 
+              error={!!formErrors.projectName}
+              helperText={formErrors.projectName}
+            />
+            <TextField 
+              fullWidth 
+              label="Location Size (sqft)" 
+              id="locationSize" 
+              margin="normal" 
+              className="custom-textfield" 
+              value={formData.locationSize} 
+              onChange={handleChange} 
+              error={!!formErrors.locationSize}
+              helperText={formErrors.locationSize}
+            />
+            <TextField 
+              fullWidth 
+              label="Project Budget (₱)" 
+              id="projectBudget" 
+              type="number" 
+              margin="normal" 
+              className="custom-textfield" 
+              value={formData.projectBudget} 
+              onChange={handleChange} 
+              error={!!formErrors.projectBudget}
+              helperText={formErrors.projectBudget}
+            />
             <FormControl fullWidth margin="normal">
               <InputLabel id="designStyle-label">Design Style</InputLabel>
               <Select
@@ -120,7 +214,7 @@ export default function ProjectDetail() {
         )}
         {activeStep === 2 && (
           <Box>
-            <Typography variant="h6" className="custom-typography">Setting-up</Typography>
+             <Typography variant="h6" className="custom-typography">Setting-up</Typography>
             <TextField
               fullWidth
               label="Project Description"
@@ -131,6 +225,8 @@ export default function ProjectDetail() {
               className="custom-textfield"
               value={formData.projectDescription}
               onChange={handleChange}
+              error={!!formErrors.projectDescription}
+              helperText={formErrors.projectDescription}
             />
             <Button onClick={handleBack} className="px-6 py-3 bg-white text-blue-600 border border-blue-600 font-semibold rounded-md shadow-md hover:bg-blue-100 flex items-center gap-2 transition duration-300">
               <FaArrowLeft /> Back

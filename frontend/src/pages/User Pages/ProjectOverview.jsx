@@ -149,34 +149,6 @@ export default function ProjectOverview() {
       {/* Header */}
       <img className="rounded-lg mb-4 w-full" src="/project images/H5.png" alt="CiviModeler H5" />
 
-      { projectLoading ? (
-        <div className="flex justify-center items-center mb-4">
-          <div className="w-12 h-12 border-4 border-gray-300 border-t-purple-700 rounded-full animate-spin"></div>
-        </div>
-      ) : (
-        <>
-          {/* Tabs */}
-          <div className="flex mb-4">
-            <button
-              className={`px-4 py-2 ${activeTab === 'overview' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-l`}
-              onClick={() => setActiveTab('overview')}
-            >
-              Overview
-            </button>
-            <button
-              className={`px-4 py-2 ${activeTab === 'collaborators' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
-              onClick={() => setActiveTab('collaborators')}
-            >
-              Collaborators
-            </button>
-            <button
-              className={`px-4 py-2 ${activeTab === 'reports' ? 'bg-purple-700 text-white' : 'bg-gray-200'} rounded-r`}
-              onClick={() => setActiveTab('reports')}
-            >
-              Reports
-            </button>
-          </div>
-
           {/* Overall Loading Animation */}
           {loading && (
             <div className="flex justify-center items-center h-40">
