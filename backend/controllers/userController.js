@@ -21,7 +21,7 @@ export const getUserData = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        res.json({ success: true, userData: user });
+        res.json({ success: true, user });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -56,12 +56,12 @@ export const updateUser = async (req, res) => {
         profilePic = uploadResult.secure_url;
       }
   
-      // Update user fields dynamically
+      // // Update user fields dynamically
       const updateData = {};
-      if (name) updateData.name = name;
+      // if (name) updateData.name = name;
       if (profilePic) updateData.profilePic = profilePic;
-      if (phoneNumber) updateData["profile.phoneNumber"] = phoneNumber;
-      if (address) updateData["profile.address"] = JSON.parse(address);
+      // if (phoneNumber) updateData["profile.phoneNumber"] = phoneNumber;
+      // if (address) updateData["profile.address"] = JSON.parse(address);
   
       const user = await userModel.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
   

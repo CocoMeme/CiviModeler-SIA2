@@ -187,8 +187,6 @@ export default function ProjectOverview() {
           {!loading && activeTab === 'reports' && (
             <ProjectReports />
           )}
-        </>
-      )}
 
       {/* NEW: Saving Updates Loading Animation */}
       {saveLoading && (
