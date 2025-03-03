@@ -28,151 +28,151 @@ const ProjectContent = ({
 
   const handleGeneratePDF = () => {
     try {
-        const doc = new jsPDF('p', 'pt', 'a4');
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 40;
-        let currentY = margin;
-
-        // **Add Logo to Header**
-        const logoPath = '/images/CiviModeler - NBG.png'; // Your logo path
-        const logoWidth = 60;
-        const logoHeight = 60;
-        doc.addImage(logoPath, 'PNG', margin, currentY, logoWidth, logoHeight);
-
-        // **Header Title Beside Logo**
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(24);
-        doc.setTextColor(102, 51, 153); // Purple color
-        doc.text("CiviModeler Project Report", margin + logoWidth + 15, currentY + 40);
-
-        currentY += 70; // Move cursor down
-
-        // **Styled Header Line**
-        doc.setLineWidth(1);
-        doc.setDrawColor(102, 51, 153);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20; // Adjust spacing
-
-        // **Move Date Below Divider**
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'italic');
-        doc.setTextColor(0, 0, 0);
-        const date = new Date().toLocaleDateString();
-        doc.text(`Generated on: ${date}`, margin, currentY);
-
-        currentY += 30; // Move cursor down for project details
-
-        // **Project Details**
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(102, 51, 153);
-        doc.text("Project Details", margin, currentY);
-        currentY += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        const details = [
-            `Project Name: ${projectDetailsState.projectName || 'N/A'}`,
-            `Client Name: ${clientDetailsState.clientName || 'N/A'}`,
-            `Contractor: ${selectedContractor?.name || 'N/A'}`,
-            `Total Cost: ₱${(totalCost?.toFixed(2) || '0.00')}`
-        ];
-        details.forEach(text => {
-            doc.text(text, margin, currentY);
-            currentY += 18;
-        });
-
-        // **Section Divider**
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20;
-
-        // **Client Details**
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(102, 51, 153);
-        doc.text("Client Details", margin, currentY);
-        currentY += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        const clientDetails = [
-            `Email: ${clientDetailsState.email || 'N/A'}`,
-            `Phone: ${clientDetailsState.phoneNumber || 'N/A'}`,
-            `Company: ${clientDetailsState.companyName || 'N/A'}`
-        ];
-        clientDetails.forEach(text => {
-            doc.text(text, margin, currentY);
-            currentY += 18;
-        });
-
-        // **Section Divider**
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20;
-
-        // **Additional Project Details**
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(102, 51, 153);
-        doc.text("Additional Project Details", margin, currentY);
-        currentY += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        const projectDetails = [
-            `Location Size: ${projectDetailsState.size || 'N/A'}`,
-            `Budget: ₱${projectDetailsState.budget || 'N/A'}`,
-            `Design Style: ${projectDetailsState.style || 'N/A'}`,
-            `Description: ${projectDetailsState.projectDescription || 'N/A'}`
-        ];
-        projectDetails.forEach(text => {
-            doc.text(text, margin, currentY);
-            currentY += 18;
-        });
-
-        // **Section Divider**
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20;
-
-        // **Material Table**
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(102, 51, 153);
-        doc.text("Material Table", margin, currentY);
-        currentY += 15;
-
-        const materialRows = Object.entries(materials || {}).map(([_, details]) => [
-            details.material,
-            details.quantity.toString(),
-            `₱${details.unitPrice.toFixed(2)}`,
-            `₱${details.totalPrice.toFixed(2)}`
-        ]);
-
-        doc.autoTable({
-            startY: currentY,
-            head: [['Material', 'Quantity', 'Unit Price', 'Total Price']],
-            body: materialRows,
-            theme: 'striped',
-            headStyles: { fillColor: [102, 51, 153], textColor: [255, 255, 255] }, // Purple header
-            styles: { font: "helvetica", fontSize: 10, cellPadding: 5 },
-            alternateRowStyles: { fillColor: [245, 245, 245] },
-            margin: { left: margin, right: margin },
-            didDrawPage: (data) => {
-                // Footer
-                doc.setFontSize(10);
-                doc.setTextColor(102, 51, 153);
-                doc.text("This is an autogenerated report by CiviModeler", margin, pageHeight - 20);
-            }
-        });
-
-        // Save the document
-        doc.save('User_report.pdf');
+      const doc = new jsPDF('p', 'pt', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 40;
+      let currentY = margin;
+  
+      // **Add Logo to Header**
+      const logoPath = '/images/CiviModeler - NBG.png'; // Your logo path
+      const logoWidth = 60;
+      const logoHeight = 60;
+      doc.addImage(logoPath, 'PNG', margin, currentY, logoWidth, logoHeight);
+  
+      // **Header Title Beside Logo**
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(24);
+      doc.setTextColor(102, 51, 153); // Purple color
+      doc.text("CiviModeler Project Report", margin + logoWidth + 15, currentY + 40);
+  
+      currentY += 70; // Move cursor down
+  
+      // **Styled Header Line**
+      doc.setLineWidth(1);
+      doc.setDrawColor(102, 51, 153);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 20; // Adjust spacing
+  
+      // **Move Date Below Divider**
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(0, 0, 0);
+      const date = new Date().toLocaleDateString();
+      doc.text(`Generated on: ${date}`, margin, currentY);
+  
+      currentY += 30; // Move cursor down for project details
+  
+      // **Project Details**
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(102, 51, 153);
+      doc.text("Project Details", margin, currentY);
+      currentY += 15;
+  
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      const details = [
+        `Project Name: ${projectDetailsState.projectName || 'N/A'}`,
+        `Client Name: ${clientDetailsState.clientName || 'N/A'}`,
+        `Contractor: ${selectedContractor?.name || 'N/A'}`,
+        `Total Cost: ${(totalCost?.toFixed(2) || '0.00')}`
+      ];
+      details.forEach(text => {
+        doc.text(text, margin, currentY);
+        currentY += 18;
+      });
+  
+      // **Section Divider**
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 20;
+  
+      // **Client Details**
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(102, 51, 153);
+      doc.text("Client Details", margin, currentY);
+      currentY += 15;
+  
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+      const clientDetails = [
+        `Email: ${clientDetailsState.email || 'N/A'}`,
+        `Phone: ${clientDetailsState.phoneNumber || 'N/A'}`,
+        `Company: ${clientDetailsState.companyName || 'N/A'}`
+      ];
+      clientDetails.forEach(text => {
+        doc.text(text, margin, currentY);
+        currentY += 18;
+      });
+  
+      // **Section Divider**
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 20;
+  
+      // **Additional Project Details**
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(102, 51, 153);
+      doc.text("Additional Project Details", margin, currentY);
+      currentY += 15;
+  
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+      const projectDetails = [
+        `Location Size: ${projectDetailsState.size || 'N/A'}`,
+        `Budget: ${projectDetailsState.budget || 'N/A'}`,
+        `Design Style: ${projectDetailsState.style || 'N/A'}`,
+        `Description: ${projectDetailsState.projectDescription || 'N/A'}`
+      ];
+      projectDetails.forEach(text => {
+        doc.text(text, margin, currentY);
+        currentY += 18;
+      });
+  
+      // **Section Divider**
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 20;
+  
+      // **Material Table**
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(102, 51, 153);
+      doc.text("Material Table", margin, currentY);
+      currentY += 15;
+  
+      const materialRows = Object.entries(materials || {}).map(([_, details]) => [
+        details.material,
+        details.quantity.toString(),
+        `${details.unitPrice.toFixed(2)}`,
+        `${details.totalPrice.toFixed(2)}`
+      ]);
+  
+      doc.autoTable({
+        startY: currentY,
+        head: [['Material', 'Quantity', 'Unit Price', 'Total Price']],
+        body: materialRows,
+        theme: 'striped',
+        headStyles: { fillColor: [102, 51, 153], textColor: [255, 255, 255] }, // Purple header
+        styles: { font: "helvetica", fontSize: 10, cellPadding: 5 },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { left: margin, right: margin },
+        didDrawPage: (data) => {
+          // Footer
+          doc.setFontSize(10);
+          doc.setTextColor(102, 51, 153);
+          doc.text("This is an autogenerated report by CiviModeler", margin, pageHeight - 20);
+        }
+      });
+  
+      // Save the document
+      doc.save('User_report.pdf');
     } catch (error) {
-        console.error('Error generating PDF:', error);
-        alert(`Error generating PDF: ${error.message}`);
+      console.error('Error generating PDF:', error);
+      alert(`Error generating PDF: ${error.message}`);
     }
-};
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -301,7 +301,10 @@ const ProjectContent = ({
                 key={contractor._id}
                 className={`p-2 border rounded w-full text-left transition-all duration-300 ${selectedContractor?._id === contractor._id ? 'bg-purple-700 text-white' : 'bg-white hover:bg-gray-100'
                   }`}
-                onClick={() => setSelectedContractor(contractor)}
+                  onClick={() => {
+                    setSelectedContractor(contractor);
+                    setInfoDialog({ open: true, content: '' });
+                  }}
               >
                 <h2 className='font-bold'>{contractor.name}</h2>
                 <p>
@@ -313,7 +316,7 @@ const ProjectContent = ({
         </div>
 
         {/* Contractor Modal */}
-        {selectedContractor && (
+        {selectedContractor && infoDialog.open && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
               <h2 className="text-lg font-semibold border-b pb-2">{selectedContractor.name}</h2>
@@ -328,7 +331,7 @@ const ProjectContent = ({
               <div className="text-right mt-4">
                 <button
                   className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
-                  onClick={() => setSelectedContractor(null)}
+                  onClick={() => setInfoDialog({ open: false, content: '' })}
                 >
                   Close
                 </button>
@@ -374,14 +377,14 @@ const ProjectContent = ({
                     <td className="p-2">{details.material}</td>
                     <td className="p-2">{details.quantity}</td>
                     <td className="p-2">{details.unitPrice.toFixed(2)}</td>
-                    <td className="p-2">₱ {details.totalPrice.toFixed(2)}</td>
+                    <td className="p-2"> {details.totalPrice.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="bg-gray-200 font-bold">
                   <td colSpan={3} className="p-2 text-left">Total Estimated Cost</td>
-                  <td className="p-2">₱ {totalCost?.toFixed(2) || '0.00'}</td>
+                  <td className="p-2"> {totalCost?.toFixed(2) || '0.00'}</td>
                 </tr>
               </tfoot>
             </table>

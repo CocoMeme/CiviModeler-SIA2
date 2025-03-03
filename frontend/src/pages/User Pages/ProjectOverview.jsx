@@ -16,7 +16,7 @@ export default function ProjectOverview() {
     return <div>No project data available. Please select a project from the sidebar.</div>;
   }
 
-  const { clientDetails, materials, totalCost, sloyd, ...rest } = projectData || {};
+  const { clientDetails, materials, totalCost, sloyd, contractorId, ...rest } = projectData || {};
 
   const [openDialog, setOpenDialog] = useState(false);
   const [contractors, setContractors] = useState([]);
@@ -41,12 +41,24 @@ export default function ProjectOverview() {
       }
     };
 
+    const fetchSelectedContractor = async () => {
+      if (contractorId) {
+        try {
+          const response = await axios.get(`${backendUrl}/api/contractor/${contractorId}`);
+          setSelectedContractor(response.data);
+        } catch (error) {
+          console.error('Error fetching selected contractor:', error);
+        }
+      }
+    };
+
     fetchContractors();
+    fetchSelectedContractor();
 
     // Random loading time between 300ms to 1s
     const loadingTime = Math.random() * (1000 - 300) + 300;
     setTimeout(() => setLoading(false), loadingTime);
-  }, [backendUrl, projectData._id]); // Add projectData._id to dependencies
+  }, [backendUrl, projectData._id, contractorId]); // Add projectData._id and contractorId to dependencies
 
   useEffect(() => {
     setProjectLoading(true);
@@ -135,8 +147,6 @@ export default function ProjectOverview() {
     }
   };
 
-  
-
   const materialData = materials
     ? Object.entries(materials).map(([material, details]) => ({
       name: material,
@@ -149,44 +159,44 @@ export default function ProjectOverview() {
       {/* Header */}
       <img className="rounded-lg mb-4 w-full" src="/project images/H5.png" alt="CiviModeler H5" />
 
-          {/* Overall Loading Animation */}
-          {loading && (
-            <div className="flex justify-center items-center h-40">
-              <div className="w-12 h-12 border-4 border-gray-300 border-t-purple-700 rounded-full animate-spin"></div>
-            </div>
-          )}
+      {/* Overall Loading Animation */}
+      {loading && (
+        <div className="flex justify-center items-center h-40">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-purple-700 rounded-full animate-spin"></div>
+        </div>
+      )}
 
-          {/* Main Layout */}
-          {!loading && activeTab === 'overview' && (
-            <ProjectContent
-              clientDetailsState={clientDetailsState}
-              projectDetailsState={projectDetailsState}
-              contractors={contractors}
-              selectedContractor={selectedContractor}
-              setSelectedContractor={setSelectedContractor}
-              handleClientDetailsChange={handleClientDetailsChange}
-              handleProjectDetailsChange={handleProjectDetailsChange}
-              handleGoTo3D={handleGoTo3D}
-              handleGenerate3D={handleGenerate3D} // Pass the new function
-              handleConfirm={handleConfirm}
-              openDialog={openDialog}
-              setOpenDialog={setOpenDialog}
-              infoDialog={infoDialog}
-              setInfoDialog={setInfoDialog}
-              materials={materials}
-              totalCost={totalCost}
-              sloyd={sloyd}
-              materialData={materialData}
-            />
-          )}
+      {/* Main Layout */}
+      {!loading && activeTab === 'overview' && (
+        <ProjectContent
+          clientDetailsState={clientDetailsState}
+          projectDetailsState={projectDetailsState}
+          contractors={contractors}
+          selectedContractor={selectedContractor}
+          setSelectedContractor={setSelectedContractor}
+          handleClientDetailsChange={handleClientDetailsChange}
+          handleProjectDetailsChange={handleProjectDetailsChange}
+          handleGoTo3D={handleGoTo3D}
+          handleGenerate3D={handleGenerate3D} // Pass the new function
+          handleConfirm={handleConfirm}
+          openDialog={openDialog}
+          setOpenDialog={setOpenDialog}
+          infoDialog={infoDialog}
+          setInfoDialog={setInfoDialog}
+          materials={materials}
+          totalCost={totalCost}
+          sloyd={sloyd}
+          materialData={materialData}
+        />
+      )}
 
-          {!loading && activeTab === 'collaborators' && (
-            <Collaborators />
-          )}
+      {!loading && activeTab === 'collaborators' && (
+        <Collaborators />
+      )}
 
-          {!loading && activeTab === 'reports' && (
-            <ProjectReports />
-          )}
+      {!loading && activeTab === 'reports' && (
+        <ProjectReports />
+      )}
 
       {/* NEW: Saving Updates Loading Animation */}
       {saveLoading && (
