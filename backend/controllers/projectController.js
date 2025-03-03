@@ -110,7 +110,34 @@ export const getProjectReportsData = async (req, res) => {
       { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } }
     ]);
 
-    res.status(200).json(projects);
+    const contractorProjects = await projectModel.aggregate([
+      {
+        $group: {
+          _id: "$contractorId",
+          totalProjects: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: "contractors", // Ensure this matches your contractors collection name
+          localField: "_id",
+          foreignField: "_id",
+          as: "contractor"
+        }
+      },
+      {
+        $unwind: "$contractor"
+      },
+      {
+        $project: {
+          _id: 0,
+          contractorName: "$contractor.name",
+          totalProjects: 1
+        }
+      }
+    ]);
+
+    res.status(200).json({ projects, contractorProjects });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching reports data', error });
   }
