@@ -1,7 +1,8 @@
 import cloudinary from "cloudinary";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import userModel from "../models/userModel.js"; // Adjust path if needed
+import userModel from "../models/userModel.js";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
@@ -38,43 +39,59 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-    try {
-      const { id } = req.params;
-      let { name, phoneNumber, address } = req.body;
-      let profilePic = req.file?.path; // Multer uploads file, path contains Cloudinary URL
-  
-      // Validate MongoDB ObjectId
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ success: false, message: "Invalid user ID" });
-      }
-  
-      // Upload profile picture to Cloudinary if provided
-      if (req.file) {
-        const uploadResult = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: "user_profiles",
-        });
-        profilePic = uploadResult.secure_url;
-      }
-  
-      // // Update user fields dynamically
-      const updateData = {};
-      // if (name) updateData.name = name;
-      if (profilePic) updateData.profilePic = profilePic;
-      // if (phoneNumber) updateData["profile.phoneNumber"] = phoneNumber;
-      // if (address) updateData["profile.address"] = JSON.parse(address);
-  
-      const user = await userModel.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
-  
-      if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
-      }
-  
-      res.status(200).json({ success: true, message: "User updated successfully!", user });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+  try {
+    const { id } = req.params;
+    const { name, password, profile } = req.body; // Expect profile to be an object
+    let profilePic = req.file?.path; // Multer provides file info if uploaded
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
     }
-  };
-  
+
+    // Upload profile picture to Cloudinary if provided
+    if (req.file) {
+      const uploadResult = await cloudinary.v2.uploader.upload(req.file.path, {
+        folder: "user_profiles",
+      });
+      profilePic = uploadResult.secure_url;
+    }
+
+    // Build the update data object dynamically
+    const updateData = {};
+
+    if (name) updateData.name = name;
+    if (profilePic) updateData.profilePic = profilePic;
+    if (profile) {
+      let parsedProfile;
+      try {
+        parsedProfile = typeof profile === "string" ? JSON.parse(profile) : profile;
+      } catch (err) {
+        return res.status(400).json({ success: false, message: "Invalid profile format" });
+      }
+      updateData.profile = parsedProfile;
+    }
+
+    // Hash the password if provided
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      updateData.password = hashedPassword;
+    }
+
+    // Update the user document in MongoDB
+    const user = await userModel.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, message: "User updated successfully!", user });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // Add the deleteUser function
 export const deleteUser = async (req, res) => {
     try {

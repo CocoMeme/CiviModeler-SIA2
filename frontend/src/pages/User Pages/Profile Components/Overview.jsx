@@ -6,9 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 const ProfileOverview = () => {
   const { userData, setUserData, backendUrl } = useContext(AppContext);
-  const defaultProfile = userData?.profile || {};
-  const defaultAddress = defaultProfile.address || {};
-
   const [initialized, setInitialized] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -21,7 +18,6 @@ const ProfileOverview = () => {
     dateOfBirth: "",
     gender: "Other",
   });
-
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
 
@@ -59,36 +55,41 @@ const ProfileOverview = () => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
-      formDataToSend.append("phoneNumber", formData.phoneNumber);
-      formDataToSend.append("dateOfBirth", formData.dateOfBirth);
-      formDataToSend.append("gender", formData.gender);
-      formDataToSend.append(
-        "address",
-        JSON.stringify({
+
+      // Create a profile object with nested fields
+      const profileObj = {
+        phoneNumber: formData.phoneNumber,
+        address: {
           street: formData.street,
           city: formData.city,
           state: formData.state,
           country: formData.country,
           zipCode: formData.zipCode,
-        })
-      );
+        },
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+      };
+
+      // Append the profile object as a JSON string
+      formDataToSend.append("profile", JSON.stringify(profileObj));
 
       if (image) {
         formDataToSend.append("profilePic", image);
       }
 
+      // Remove the explicit "Content-Type" header so Axios sets the correct boundary automatically
       const response = await axios.put(
         `${backendUrl}/api/user/update/${userData._id}`,
-        formDataToSend,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        formDataToSend
       );
 
       setUserData(response.data.user);
-      // Reset initialization so the useEffect reinitializes the form fields using the updated record
+      // Reset initialization so the form reinitializes with updated data
       setInitialized(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error("Failed to update profile.");
+      console.error("Update error:", error);
     } finally {
       setLoading(false);
     }
@@ -148,36 +149,107 @@ const ProfileOverview = () => {
         <h2 className="text-lg font-semibold border-b pb-2">Personal Information</h2>
         
         <div className="mt-4 grid grid-cols-3 gap-2 items-center pl-10">
-          <label className="text-left pr-2 col-span-1"><strong>Name:</strong></label>
-          <input type="text" name="name" value={formData.name} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>Name:</strong>
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
 
-          <label className="text-left pr-2 col-span-1"><strong>Phone Number:</strong></label>
-          <input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>Phone Number:</strong>
+          </label>
+          <input
+            type="text"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
 
-          <label className="text-left pr-2 col-span-1"><strong>Date of Birth:</strong></label>
-          <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>Date of Birth:</strong>
+          </label>
+          <input
+            type="date"
+            name="dateOfBirth"
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
 
-          <label className="text-left pr-2 col-span-1"><strong>Gender:</strong></label>
-          <select name="gender" value={formData.gender} onChange={handleChange} className="col-span-2 w-full p-2 border rounded">
+          <label className="text-left pr-2 col-span-1">
+            <strong>Gender:</strong>
+          </label>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          >
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Other">Other</option>
           </select>
 
-          <label className="text-left pr-2 col-span-1"><strong>Street:</strong></label>
-          <input type="text" name="street" value={formData.street} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>Street:</strong>
+          </label>
+          <input
+            type="text"
+            name="street"
+            value={formData.street}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
 
-          <label className="text-left pr-2 col-span-1"><strong>City:</strong></label>
-          <input type="text" name="city" value={formData.city} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>City:</strong>
+          </label>
+          <input
+            type="text"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
 
-          <label className="text-left pr-2 col-span-1"><strong>State:</strong></label>
-          <input type="text" name="state" value={formData.state} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>State:</strong>
+          </label>
+          <input
+            type="text"
+            name="state"
+            value={formData.state}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
 
-          <label className="text-left pr-2 col-span-1"><strong>Country:</strong></label>
-          <input type="text" name="country" value={formData.country} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>Country:</strong>
+          </label>
+          <input
+            type="text"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
 
-          <label className="text-left pr-2 col-span-1"><strong>Zip Code:</strong></label>
-          <input type="text" name="zipCode" value={formData.zipCode} onChange={handleChange} className="col-span-2 w-full p-2 border rounded" />
+          <label className="text-left pr-2 col-span-1">
+            <strong>Zip Code:</strong>
+          </label>
+          <input
+            type="text"
+            name="zipCode"
+            value={formData.zipCode}
+            onChange={handleChange}
+            className="col-span-2 w-full p-2 border rounded"
+          />
         </div>
       </div>
     </div>
