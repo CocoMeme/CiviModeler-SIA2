@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
 import transporter from '../config/nodemailer.js';
@@ -109,8 +110,21 @@ export const logout = async (req, res) => {
 
 export const sendVerifyOtp = async (req, res) => {
     try {
-        const {userId} = req.body;
+        const { userId } = req.body;
+
+        // Log the userId for debugging
+        console.log("Received userId:", userId);
+
+        // Validate userId
+        if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user ID" });
+        }
+
         const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
 
         if (user.isAccountVerified) {
             return res.status(400).json({ success: false, message: "Account already verified" });
@@ -133,7 +147,6 @@ export const sendVerifyOtp = async (req, res) => {
         await transporter.sendMail(mailOptions);
 
         res.json({ success: true, message: "OTP sent successfully" });
-        
 
     } catch (error) {
         res.json({ success: false, message: error.message });
