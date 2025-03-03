@@ -88,17 +88,62 @@ const ReportsPage = () => {
   const handleDownloadPDF = () => {
     const reportElement = document.getElementById("report-container");
 
-    html2canvas(reportElement, { scale: 2 }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 190; // mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
-      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-      pdf.save("report.pdf");
-    });
-  };
+    setTimeout(() => {
+        html2canvas(reportElement, { scale: 3 }).then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            const pdf = new jsPDF("p", "mm", "a4");
+
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 10;
+            let currentY = margin;
+
+            // **Logo**
+            const logoPath = '/images/CiviModeler - NBG.png';
+            const logoWidth = 40;
+            const logoHeight = 40;
+            pdf.addImage(logoPath, 'PNG', margin, currentY, logoWidth, logoHeight);
+
+            // **Title Beside Logo**
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(20);
+            pdf.setTextColor(102, 51, 153);
+            pdf.text("CiviModeler Project Report", margin + logoWidth + 15, currentY + 20);
+
+            currentY += 50;
+
+            // **Header Line**
+            pdf.setLineWidth(0.8);
+            pdf.setDrawColor(102, 51, 153);
+            pdf.line(margin, currentY, pageWidth - margin, currentY);
+            currentY += 12;
+
+            // **Date Below Header**
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'italic');
+            pdf.setTextColor(0, 0, 0);
+            const date = new Date().toLocaleDateString();
+            pdf.text(`Generated on: ${date}`, margin, currentY);
+            currentY += 15;
+
+            // **Convert Report Content to Image**
+            const imgWidth = pageWidth - 2 * margin;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            if (currentY + imgHeight > pageHeight - margin) {
+                pdf.addPage();
+                currentY = margin;
+            }
+
+            pdf.addImage(imgData, "PNG", margin, currentY, imgWidth, imgHeight);
+            pdf.save("Admin_ChartReport.pdf");
+        });
+    }, 500);
+};
 
   return (
+
+    
     <div>
       <h2 className="text-xl font-bold text-white mb-6">Reports</h2>
 
@@ -108,6 +153,8 @@ const ReportsPage = () => {
       >
         Export as PDF
       </button>
+      
+      
 
       <div id="report-container" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
