@@ -134,22 +134,39 @@ export default function UserManagement() {
         </Button>
       </Box>
       <Box sx={{ height: 500, width: '100%', backgroundColor: '#1E1E1E', borderRadius: 2, padding: 2, color: 'white' }}>
-        <DataGrid 
-          rows={filteredUsers} 
-          columns={columns} 
-          getRowId={(row) => row._id} 
-          pageSize={10} 
-          rowsPerPageOptions={[10, 20, 50]} 
-          checkboxSelection 
-          sx={{
-            color: 'black',
-            borderColor: 'white',
-            '& .MuiDataGrid-cell': { color: 'white' },
-            '& .MuiDataGrid-columnHeaders': { backgroundColor: '#333', textAlign: 'center' },
-            '& .MuiDataGrid-columnHeaderTitle': { textAlign: 'center', width: '100%' },
-            '& .MuiDataGrid-row:nth-of-type(even)': { backgroundColor: '#252525' },
-          }}
-        />
+      <DataGrid 
+        rows={filteredUsers} 
+        columns={columns} 
+        getRowId={(row) => row._id} 
+        pageSize={10} 
+        rowsPerPageOptions={[10, 20, 50]} 
+        checkboxSelection 
+        sx={{
+          color: 'black',
+          borderColor: 'white',
+          '& .MuiDataGrid-cell': { color: 'white' }, 
+          '& .MuiDataGrid-columnHeaders': { 
+            backgroundColor: '#333', 
+            textAlign: 'center' 
+          },
+          '& .MuiDataGrid-columnHeaderTitle': { 
+            textAlign: 'center', 
+            width: '100%' 
+          },
+          '& .MuiDataGrid-row:nth-of-type(even)': { 
+            backgroundColor: '#252525' 
+          },
+          '& .MuiTablePagination-root, & .MuiTablePagination-caption': {
+            color: 'white', // Makes "Rows per page" and pagination text white
+          },
+          '& .MuiSvgIcon-root': {
+            color: 'white', // Makes pagination arrows white
+          },
+          '& .MuiToolbar-root': {
+            color: 'white', // Ensures toolbar text (pagination controls) is white
+          },
+        }} 
+      />
       </Box>
 
       {/* Delete Confirmation Modal */}

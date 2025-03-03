@@ -94,32 +94,37 @@ export default function ProjectManagement() {
   };
 
   const columns = [
-    { field: '_id', headerName: 'Project ID', width: 200 },
-    { field: 'projectName', headerName: 'Project Name', width: 250 },
+    { field: '_id', headerName: 'Project ID', flex: 1, minWidth: 180 },
+    { field: 'projectName', headerName: 'Project Name', flex: 1.5, minWidth: 220 },
     { 
       field: 'budget', 
       headerName: 'Budget', 
-      width: 150, 
+      flex: 1, 
+      minWidth: 150, 
       renderCell: (params) => `₱${params.value.toLocaleString()}`
     },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 400,
+      flex: 2,
+      minWidth: 420,
       sortable: false,
       renderCell: (params) => (
-        <Box display="flex" gap={1}>
-          <Button variant="contained" color="primary" size="small" onClick={() => handleOpenClientModal(params.row)}>
+        <Box display="flex" justifyContent="space-between" gap={1} width="100%">
+          <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleOpenClientModal(params.row)}>
             Client Details
           </Button>
-          <Button variant="contained" color="success" size="small" onClick={() => handleOpenMaterialsModal(params.row)}>
+          <Button variant="contained" size="small" sx={{ bgcolor: 'success.main' }} onClick={() => handleOpenMaterialsModal(params.row)}>
             Materials
           </Button>
-          <Button variant="contained" color="secondary" size="small" onClick={() => handleOpenContractorModal(params.row)}>
+          <Button variant="contained" size="small" sx={{ bgcolor: 'secondary.main' }} onClick={() => handleOpenContractorModal(params.row)}>
             Contractor
           </Button>
-          <Button variant="contained" color="warning" size="small">
+          <Button variant="contained" size="small" sx={{ bgcolor: 'warning.main' }}>
             View 3D
+          </Button>
+          <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }}>
+            Generate PDF
           </Button>
         </Box>
       ),
@@ -141,27 +146,34 @@ export default function ProjectManagement() {
         </Button>
       </Box>
       <DataGrid 
-        rows={filteredProjects} 
-        columns={columns} 
-        getRowId={(row) => row._id} 
-        pageSize={5} 
-        rowsPerPageOptions={[5, 10, 20]} 
-        checkboxSelection 
-        sx={{ 
-          color: 'black', 
-          borderColor: 'white', 
-          '& .MuiDataGrid-cell': { 
-            color: 'white', 
-            textAlign: 'center', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-          }, 
-          '& .MuiDataGrid-columnHeaders': { 
-            backgroundColor: '#333' 
-          } 
-        }} 
-      />
+  rows={filteredProjects} 
+  columns={columns} 
+  getRowId={(row) => row._id} 
+  pageSize={5} 
+  rowsPerPageOptions={[5, 10, 20]} 
+  checkboxSelection 
+  sx={{ 
+    color: 'black', 
+    borderColor: 'white', 
+    '& .MuiDataGrid-cell': { 
+      color: 'white', 
+      textAlign: 'center', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+    }, 
+    '& .MuiDataGrid-columnHeaders': { 
+      backgroundColor: '#333' 
+    },
+    '& .MuiTablePagination-root, & .MuiTablePagination-caption': {
+      color: 'white', // Makes "Rows per page" and pagination text white
+    },
+    '& .MuiSvgIcon-root': {
+      color: 'white', // Makes pagination arrows white
+    },
+  }} 
+/>
+
 
       {/* Client Details Modal */}
       <Modal open={openClientModal} onClose={handleCloseClientModal}>
