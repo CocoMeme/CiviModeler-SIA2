@@ -153,11 +153,11 @@ const Testimony = () => {
               className="bg-white p-8 shadow-2xl rounded-2xl text-center border-t-4 border-purple-500 
                          transition-transform transform hover:scale-105 hover:shadow-3xl hover:border-purple-700"
             >
-              <img
+              {/* <img
                 src={testimonial.image}
                 alt={testimonial.name}
                 className="w-24 h-24 mx-auto rounded-full border-4 border-purple-500 mb-6 transition-transform transform hover:scale-110"
-              />
+              /> */}
               <p className="text-gray-600 italic text-lg">❝ {testimonial.quote} ❞</p>
 
               {/* Star Rating */}
