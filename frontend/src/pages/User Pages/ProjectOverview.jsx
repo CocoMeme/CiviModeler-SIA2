@@ -123,7 +123,12 @@ export default function ProjectOverview() {
   };
 
   const handleGoTo3D = () => {
-    navigate('/project-viewer/work-station', { state: { modelUrl: sloyd?.modelUrl } });
+    navigate('/project-viewer/work-station', { 
+      state: { 
+        modelUrl: sloyd?.modelUrl,
+        projectId: projectData._id // Add projectId to the state
+      } 
+    });
   };
 
   const handleGenerate3D = async () => {
@@ -136,8 +141,13 @@ export default function ProjectOverview() {
 
       // Ensure the response contains the expected data
       if (response.data && response.data.ModelData && response.data.ModelData.modelUrl) {
-        // Navigate to viewer page with the model data
-        navigate('/project-viewer/work-station', { state: { modelUrl: response.data.ModelData.modelUrl } });
+        // Navigate to viewer page with the model data and projectId
+        navigate('/project-viewer/work-station', { 
+          state: { 
+            modelUrl: response.data.ModelData.modelUrl,
+            projectId: projectData._id 
+          } 
+        });
       } else {
         console.error("Unexpected response structure:", response.data);
       }
