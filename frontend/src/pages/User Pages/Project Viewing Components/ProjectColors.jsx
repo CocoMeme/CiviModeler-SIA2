@@ -51,7 +51,8 @@ const ProjectColors = ({
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm">
-                          {parts.length > 1 ? `Group ${parts.indexOf(part) + 1}` : 'Color'}
+                          {part.name}
+                          {parts.length > 1 ? ` (${part.meshUuid.slice(0, 4)})` : ''}
                         </span>
                         <div
                           className="w-6 h-6 rounded border border-gray-600"
@@ -69,10 +70,8 @@ const ProjectColors = ({
             <div className="space-y-4 mt-6">
               <div>
                 <h4 className="text-sm font-medium mb-2">
-                  Selected: {selectedPart.name}
-                  {Object.keys(groupedParts[selectedPart.name]).length > 1 &&
-                    ` (Group ${groupedParts[selectedPart.name].indexOf(selectedPart) + 1})`
-                  }
+                  Selected Part Color: {selectedPart.name}
+                  {selectedPart.meshUuid && ` (${selectedPart.meshUuid.slice(0, 4)})`}
                 </h4>
                 <input
                   type="color"
@@ -84,7 +83,7 @@ const ProjectColors = ({
 
               {/* Preset Colors */}
               <div>
-                <h4 className="text-sm font-medium mb-2">Preset Colors</h4>
+                <h4 className="text-sm font-medium mb-2">Quick Colors</h4>
                 <div className="grid grid-cols-4 gap-2">
                   {presetColors.map((color) => (
                     <button
