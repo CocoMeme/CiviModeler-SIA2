@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Line } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { format } from "date-fns"; // Date formatting
 import jsPDF from "jspdf";
@@ -11,21 +11,16 @@ Chart.register(...registerables);
 const ReportsPage = () => {
   const [lineData, setLineData] = useState(null);
   const [projectData, setProjectData] = useState(null);
+  const [contractorData, setContractorData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchReportsData = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/project/reports-data`, { withCredentials: true });
-        const data = response.data;
+        const { projects, contractorProjects } = response.data;
 
-        console.log("API Response:", JSON.stringify(data, null, 2)); // Debugging
-
-        if (!Array.isArray(data) || data.length === 0) {
-          throw new Error("No data received from the API");
-        }
-
-        const labels = data.map(item => {
+        const labels = projects.map(item => {
           const day = item._id?.day;
           const month = item._id?.month;
           const year = item._id?.year;
@@ -36,9 +31,9 @@ const ReportsPage = () => {
           return "Unknown";
         });
 
-        const totalProjects = data.map(item => item.totalProjects ?? 0);
-        const totalBudget = data.map(item => item.totalBudget ?? 0);
-        const totalCost = data.map(item => item.totalCost ?? 0);
+        const totalProjects = projects.map(item => item.totalProjects ?? 0);
+        const totalBudget = projects.map(item => item.totalBudget ?? 0);
+        const totalCost = projects.map(item => item.totalCost ?? 0);
 
         setLineData({
           labels,
@@ -64,18 +59,22 @@ const ReportsPage = () => {
           ],
         });
 
-        setProjectData({
-          labels,
+        const contractorLabels = contractorProjects.map(item => item.contractorName);
+        const contractorProjectsData = contractorProjects.map(item => item.totalProjects);
+
+        setContractorData({
+          labels: contractorLabels,
           datasets: [
             {
-              label: "Total Projects",
-              data: totalProjects,
-              borderColor: "#ff6384",
-              backgroundColor: "rgba(255, 99, 132, 0.2)",
-              fill: true,
+              label: "Projects per Contractor",
+              data: contractorProjectsData,
+              backgroundColor: "rgba(75, 192, 192, 0.2)",
+              borderColor: "rgba(75, 192, 192, 1)",
+              borderWidth: 1,
             },
           ],
         });
+
       } catch (error) {
         console.error("Error fetching reports data:", error);
         setError(error.message);
@@ -142,8 +141,6 @@ const ReportsPage = () => {
 };
 
   return (
-
-    
     <div>
       <h2 className="text-xl font-bold text-white mb-6">Reports</h2>
 
@@ -153,8 +150,6 @@ const ReportsPage = () => {
       >
         Export as PDF
       </button>
-      
-      
 
       <div id="report-container" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
@@ -164,6 +159,10 @@ const ReportsPage = () => {
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
           {projectData && <Line data={projectData} />}
+        </div>
+        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
+          {contractorData && <Bar data={contractorData} />}
         </div>
       </div>
     </div>
