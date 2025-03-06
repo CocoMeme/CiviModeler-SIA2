@@ -46,7 +46,7 @@ const MaterialPropertyControl = ({ label, value, onChange, presets, property }) 
 };
 
 const ProjectMaterialModify = ({ 
-  selectedPart,
+  selectedParts, // Changed from selectedPart to selectedParts
   onTransformChange,
   onMaterialChange,
   onResetTransforms
@@ -69,12 +69,13 @@ const ProjectMaterialModify = ({
 
   // Update state when selected part changes
   useEffect(() => {
-    if (selectedPart) {
+    if (selectedParts.size > 0) {
+      const firstPart = selectedParts.values().next().value;
       setMaterial({
-        color: selectedPart.currentColor || '#ffffff',
-        metalness: selectedPart.currentMaterial?.metalness || 0.5,
-        roughness: selectedPart.currentMaterial?.roughness || 0.5,
-        opacity: selectedPart.currentMaterial?.opacity || 1.0
+        color: firstPart.currentColor || '#ffffff',
+        metalness: firstPart.currentMaterial?.metalness || 0.5,
+        roughness: firstPart.currentMaterial?.roughness || 0.5,
+        opacity: firstPart.currentMaterial?.opacity || 1.0
       });
     } else {
       // Reset to defaults if no part is selected
@@ -90,7 +91,7 @@ const ProjectMaterialModify = ({
         opacity: 1.0
       });
     }
-  }, [selectedPart]);
+  }, [selectedParts]);
 
   const validateTransform = (type, value) => {
     switch (type) {
@@ -183,7 +184,7 @@ const ProjectMaterialModify = ({
     }
   };
 
-  if (!selectedPart) {
+  if (selectedParts.size === 0) {
     return (
       <div className="text-center py-8 text-gray-400">
         Select a part from the Colors tab to modify its properties
@@ -199,10 +200,10 @@ const ProjectMaterialModify = ({
         </div>
       )}
 
-      {/* Selected Part Info */}
+      {/* Selected Parts Info */}
       <div className="bg-gray-700 rounded-lg p-4">
-        <h3 className="text-lg font-semibold mb-2">Selected Part</h3>
-        <p className="text-gray-300">{selectedPart.name}</p>
+        <h3 className="text-lg font-semibold mb-2">Selected Parts</h3>
+        <p className="text-gray-300">{selectedParts.size} part{selectedParts.size > 1 ? 's' : ''} selected</p>
       </div>
 
       {/* Material Properties with enhanced sliders */}

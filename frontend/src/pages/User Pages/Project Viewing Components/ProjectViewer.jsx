@@ -15,7 +15,7 @@ const ProjectViewer = () => {
   const { modelUrl, projectId } = location.state || {};
   const [model, setModel] = useState(null);
   const [modelParts, setModelParts] = useState([]);
-  const [selectedPart, setSelectedPart] = useState(null);
+  const [selectedParts, setSelectedParts] = useState(new Set()); // Add this state for multiple selection
   const [projectDetails, setProjectDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,6 +23,7 @@ const ProjectViewer = () => {
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
   const previewTimeout = useRef(null);
   const [hiddenParts, setHiddenParts] = useState(new Set());
+  const [previousMaterials, setPreviousMaterials] = useState(new Map());
 
   // Fetch project details
   useEffect(() => {
@@ -197,16 +198,21 @@ const ProjectViewer = () => {
   };
 
   const handleTransformChange = (type, axis, value) => {
-    if (!model || !selectedPart) return;
+    if (!model || selectedParts.size === 0) return;
     
-    selectedPart.meshes.forEach(({ uuid }) => {
-      model.traverse((obj) => {
-        if (obj.isMesh && obj.uuid === uuid) {
-          if (type === 'position') obj.position[axis] = value;
-          if (type === 'rotation') obj.rotation[axis] = THREE.MathUtils.degToRad(value);
-          if (type === 'scale') obj.scale[axis] = value;
-        }
-      });
+    selectedParts.forEach(partUuid => {
+      const part = modelParts.find(p => p.meshUuid === partUuid);
+      if (part) {
+        part.meshes.forEach(({ uuid }) => {
+          model.traverse((obj) => {
+            if (obj.isMesh && obj.uuid === uuid) {
+              if (type === 'position') obj.position[axis] = value;
+              if (type === 'rotation') obj.rotation[axis] = THREE.MathUtils.degToRad(value);
+              if (type === 'scale') obj.scale[axis] = value;
+            }
+          });
+        });
+      }
     });
   };
 
@@ -222,16 +228,50 @@ const ProjectViewer = () => {
     if (currentHistoryIndex < 0) return;
 
     const lastChange = materialHistory[currentHistoryIndex];
-    const part = modelParts.find(p => p.meshUuid === lastChange.partId);
     
-    if (part) {
-      Object.entries(lastChange.changes.previous).forEach(([property, value]) => {
-        handleMaterialChange(property, value, false);
+    if (lastChange.type === 'delete') {
+      // Restore deleted parts
+      setModelParts(prev => [...prev, ...lastChange.partsData.parts]);
+      
+      // Restore mesh states
+      lastChange.partsData.meshStates.forEach((state, uuid) => {
+        model.traverse((obj) => {
+          if (obj.isMesh && obj.uuid === uuid) {
+            obj.visible = state.visible;
+            obj.position.copy(state.position);
+            obj.rotation.copy(state.rotation);
+            obj.scale.copy(state.scale);
+            obj.material = state.material.clone();
+          }
+        });
       });
+
+      // Restore selection
+      setSelectedParts(new Set(lastChange.selectedParts));
+    } else if (lastChange.type === 'reset-transforms') {
+      // Restore previous transform states
+      lastChange.previousStates.forEach((state, uuid) => {
+        model.traverse((obj) => {
+          if (obj.isMesh && obj.uuid === uuid) {
+            obj.position.copy(state.position);
+            obj.rotation.copy(state.rotation);
+            obj.scale.copy(state.scale);
+          }
+        });
+      });
+      setSelectedParts(new Set(lastChange.selectedParts));
+    } else {
+      // Handle regular material changes
+      const part = modelParts.find(p => p.meshUuid === lastChange.partId);
+      if (part) {
+        Object.entries(lastChange.changes.previous).forEach(([property, value]) => {
+          handleMaterialChange(property, value, false);
+        });
+      }
     }
     
     setCurrentHistoryIndex(prev => prev - 1);
-  }, [currentHistoryIndex, materialHistory, modelParts]);
+  }, [currentHistoryIndex, materialHistory, modelParts, model]);
 
   const redoMaterialChange = useCallback(() => {
     if (currentHistoryIndex >= materialHistory.length - 1) return;
@@ -249,37 +289,42 @@ const ProjectViewer = () => {
   }, [currentHistoryIndex, materialHistory, modelParts]);
 
   const handleMaterialChange = (property, value, addHistory = true) => {
-    if (!model || !selectedPart) return;
+    if (!model || selectedParts.size === 0) return;
 
     const previousValues = {};
-    selectedPart.meshes.forEach(({ uuid, materialIndex }) => {
-      model.traverse((obj) => {
-        if (obj.isMesh && obj.uuid === uuid) {
-          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-          const targetMaterial = materialIndex !== null && materials[materialIndex] 
-            ? materials[materialIndex] 
-            : obj.material;
+    selectedParts.forEach(partUuid => {
+      const part = modelParts.find(p => p.meshUuid === partUuid);
+      if (part) {
+        part.meshes.forEach(({ uuid, materialIndex }) => {
+          model.traverse((obj) => {
+            if (obj.isMesh && obj.uuid === uuid) {
+              const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+              const targetMaterial = materialIndex !== null && materials[materialIndex] 
+                ? materials[materialIndex] 
+                : obj.material;
 
-          // Store previous value before change
-          previousValues[property] = targetMaterial[property]?.clone?.() || targetMaterial[property];
+              // Store previous value before change
+              previousValues[property] = targetMaterial[property]?.clone?.() || targetMaterial[property];
 
-          if (property === 'color') {
-            targetMaterial.color = new THREE.Color(value);
-          } else {
-            targetMaterial[property] = value;
-            if (property === 'opacity') {
-              targetMaterial.transparent = value < 1;
+              if (property === 'color') {
+                targetMaterial.color = new THREE.Color(value);
+              } else {
+                targetMaterial[property] = value;
+                if (property === 'opacity') {
+                  targetMaterial.transparent = value < 1;
+                }
+              }
+              targetMaterial.needsUpdate = true;
             }
-          }
-          targetMaterial.needsUpdate = true;
-        }
-      });
+          });
+        });
+      }
     });
 
     // Update the currentMaterial state in modelParts
     setModelParts(parts => 
       parts.map(p => 
-        p.meshUuid === selectedPart.meshUuid
+        selectedParts.has(p.meshUuid)
           ? { 
               ...p, 
               currentMaterial: { 
@@ -293,36 +338,71 @@ const ProjectViewer = () => {
 
     // Add to history if needed
     if (addHistory) {
-      addToHistory(selectedPart, {
-        previous: { [property]: previousValues[property] },
-        current: { [property]: value }
+      selectedParts.forEach(partUuid => {
+        const part = modelParts.find(p => p.meshUuid === partUuid);
+        if (part) {
+          addToHistory(part, {
+            previous: { [property]: previousValues[property] },
+            current: { [property]: value }
+          });
+        }
       });
     }
   };
 
-  const resetTransforms = () => {
-    if (!model || !selectedPart) return;
+  // Function to delete selected parts
+  const deleteSelectedParts = () => {
+    if (selectedParts.size === 0) return;
 
-    selectedPart.meshes.forEach(({ uuid }) => {
-      model.traverse((obj) => {
-        if (obj.isMesh && obj.uuid === uuid) {
-          obj.position.set(0, 0, 0);
-          obj.rotation.set(0, 0, 0);
-          obj.scale.set(1, 1, 1);
-        }
-      });
+    // Store the current state for undo
+    const deletedPartsData = {
+      parts: modelParts.filter(part => selectedParts.has(part.meshUuid)),
+      meshStates: new Map()
+    };
+
+    // Remove selected parts from the scene
+    selectedParts.forEach(partUuid => {
+      const part = modelParts.find(p => p.meshUuid === partUuid);
+      if (part) {
+        part.meshes.forEach(({ uuid }) => {
+          model.traverse((obj) => {
+            if (obj.isMesh && obj.uuid === uuid) {
+              // Store mesh state for undo
+              deletedPartsData.meshStates.set(uuid, {
+                visible: obj.visible,
+                position: obj.position.clone(),
+                rotation: obj.rotation.clone(),
+                scale: obj.scale.clone(),
+                material: obj.material.clone()
+              });
+              
+              // Hide the mesh instead of removing it (for undo capability)
+              obj.visible = false;
+            }
+          });
+        });
+      }
     });
 
-    // Reset material properties
-    handleMaterialChange('color', selectedPart.originalColor);
-    handleMaterialChange('metalness', selectedPart.originalMaterial.metalness);
-    handleMaterialChange('roughness', selectedPart.originalMaterial.roughness);
-    handleMaterialChange('opacity', selectedPart.originalMaterial.opacity);
+    // Add to history
+    setMaterialHistory(prev => {
+      const newHistory = prev.slice(0, currentHistoryIndex + 1);
+      return [...newHistory, { 
+        type: 'delete',
+        partsData: deletedPartsData,
+        selectedParts: new Set(selectedParts)
+      }];
+    });
+    setCurrentHistoryIndex(prev => prev + 1);
+
+    // Update model parts state
+    setModelParts(prev => prev.filter(part => !selectedParts.has(part.meshUuid)));
+    setSelectedParts(new Set()); // Clear selection
   };
 
   // Handle keyboard shortcuts
   const handleKeyDown = useCallback((e) => {
-    if (!selectedPart || !model) return;
+    if (selectedParts.size === 0 || !model) return;
 
     const STEP = {
       position: e.shiftKey ? 1 : 0.1,
@@ -332,7 +412,7 @@ const ProjectViewer = () => {
 
     const updateTransform = (type, axis, delta) => {
       model.traverse((obj) => {
-        if (obj.isMesh && selectedPart.meshes.some(mesh => mesh.uuid === obj.uuid)) {
+        if (obj.isMesh && selectedParts.has(obj.uuid)) {
           if (type === 'position') obj.position[axis] += delta;
           if (type === 'rotation') obj.rotation[axis] += THREE.MathUtils.degToRad(delta);
           if (type === 'scale') obj.scale[axis] = Math.max(0.1, obj.scale[axis] + delta);
@@ -378,7 +458,14 @@ const ProjectViewer = () => {
       }
       e.preventDefault();
     }
-  }, [selectedPart, model, undoMaterialChange, redoMaterialChange]);
+
+    // Add delete shortcut
+    if (e.code === 'Delete' || e.code === 'Backspace') {
+      e.preventDefault();
+      deleteSelectedParts();
+      return;
+    }
+  }, [selectedParts, model, undoMaterialChange, redoMaterialChange, deleteSelectedParts]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -408,6 +495,177 @@ const ProjectViewer = () => {
         }
       });
     });
+  };
+
+  // Update the highlightPart function with better state management
+  const highlightPart = (part, isSelected) => {
+    if (!model || !part) return;
+
+    part.meshes.forEach(({ uuid, materialIndex }) => {
+      model.traverse((obj) => {
+        if (obj.isMesh && obj.uuid === uuid) {
+          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+          const targetMaterial = materialIndex !== null && materials[materialIndex] 
+            ? materials[materialIndex] 
+            : obj.material;
+
+          const materialKey = uuid + (materialIndex || '');
+
+          if (isSelected) {
+            // Store original material state if not already stored
+            if (!previousMaterials.has(materialKey)) {
+              setPreviousMaterials(prev => {
+                const newMap = new Map(prev);
+                newMap.set(materialKey, {
+                  emissive: targetMaterial.emissive.clone(),
+                  emissiveIntensity: targetMaterial.emissiveIntensity
+                });
+                return newMap;
+              });
+            }
+
+            // Apply highlighting effect
+            targetMaterial.emissive.setHex(0x3366ff);
+            targetMaterial.emissiveIntensity = 0.8;
+          } else {
+            // Restore to original state
+            const prevState = previousMaterials.get(materialKey);
+            if (prevState) {
+              targetMaterial.emissive.copy(prevState.emissive);
+              targetMaterial.emissiveIntensity = prevState.emissiveIntensity;
+            } else {
+              // Reset to default if no previous state
+              targetMaterial.emissive.setHex(0x000000);
+              targetMaterial.emissiveIntensity = 0;
+            }
+
+            // Remove from previousMaterials when unhighlighting
+            setPreviousMaterials(prev => {
+              const newMap = new Map(prev);
+              newMap.delete(materialKey);
+              return newMap;
+            });
+          }
+          targetMaterial.needsUpdate = true;
+        }
+      });
+    });
+  };
+
+  // Update handleClick function to properly manage highlighting
+  const handleClick = (event) => {
+    if (!model) return;
+
+    event.stopPropagation();
+
+    if (event.intersections.length > 0) {
+      const clickedMesh = event.intersections[0].object;
+      const clickedPart = modelParts.find(part =>
+        part.meshes.some(mesh => mesh.uuid === clickedMesh.uuid)
+      );
+
+      if (clickedPart) {
+        setSelectedParts(prev => {
+          const next = new Set();
+          
+          if (event.ctrlKey || event.metaKey) {
+            // Multi-select mode
+            if (prev.has(clickedPart.meshUuid)) {
+              // If clicking an already selected part, unselect it
+              prev.forEach(uuid => {
+                if (uuid !== clickedPart.meshUuid) {
+                  next.add(uuid);
+                }
+              });
+              // Unhighlight the clicked part
+              highlightPart(clickedPart, false);
+            } else {
+              // Add the new part to selection
+              prev.forEach(uuid => next.add(uuid));
+              next.add(clickedPart.meshUuid);
+              // Highlight the new part
+              highlightPart(clickedPart, true);
+            }
+          } else {
+            // Single selection mode
+            // First unhighlight all currently selected parts
+            prev.forEach(uuid => {
+              const part = modelParts.find(p => p.meshUuid === uuid);
+              if (part) {
+                highlightPart(part, false);
+              }
+            });
+
+            // Select and highlight only the clicked part
+            next.add(clickedPart.meshUuid);
+            highlightPart(clickedPart, true);
+          }
+          
+          return next;
+        });
+      }
+    } else {
+      // If clicking empty space, clear all selections and highlights
+      handlePointerMissed(event);
+    }
+  };
+
+  // Update handlePointerMissed for better cleanup
+  const handlePointerMissed = (event) => {
+    if (event.ctrlKey || event.metaKey) return;
+    
+    // Remove highlights from all selected parts
+    selectedParts.forEach(partUuid => {
+      const part = modelParts.find(p => p.meshUuid === partUuid);
+      if (part) {
+        highlightPart(part, false);
+      }
+    });
+    
+    // Clear all selections and material states
+    setPreviousMaterials(new Map());
+    setSelectedParts(new Set());
+  };
+
+  // Add resetTransforms function
+  const resetTransforms = () => {
+    if (!model || selectedParts.size === 0) return;
+
+    // Store the current state for undo
+    const previousStates = new Map();
+    selectedParts.forEach(partUuid => {
+      const part = modelParts.find(p => p.meshUuid === partUuid);
+      if (part) {
+        part.meshes.forEach(({ uuid }) => {
+          model.traverse((obj) => {
+            if (obj.isMesh && obj.uuid === uuid) {
+              // Store current state for undo
+              previousStates.set(uuid, {
+                position: obj.position.clone(),
+                rotation: obj.rotation.clone(),
+                scale: obj.scale.clone()
+              });
+
+              // Reset transforms
+              obj.position.set(0, 0, 0);
+              obj.rotation.set(0, 0, 0);
+              obj.scale.set(1, 1, 1);
+            }
+          });
+        });
+      }
+    });
+
+    // Add to history
+    setMaterialHistory(prev => {
+      const newHistory = prev.slice(0, currentHistoryIndex + 1);
+      return [...newHistory, {
+        type: 'reset-transforms',
+        previousStates,
+        selectedParts: new Set(selectedParts)
+      }];
+    });
+    setCurrentHistoryIndex(prev => prev + 1);
   };
 
   return (
@@ -458,6 +716,7 @@ Scale (Hold Ctrl):
 - Y: Scale Y axis
 - Z: Scale Z axis
 - Hold Shift to decrease
+- Delete/Backspace: Delete selected parts
             `)}
             style={{
               background: "#333",
@@ -488,7 +747,16 @@ Scale (Hold Ctrl):
           {/* Custom GridHelper */}
           <CustomGrid />
 
-          {model ? <primitive object={model} /> : <PlaceholderModel />}
+          {/* Add pointer events to model */}
+          {model ? (
+            <primitive 
+              object={model} 
+              onClick={handleClick}
+              onPointerMissed={handlePointerMissed}
+            />
+          ) : (
+            <PlaceholderModel />
+          )}
         </Canvas>
       </div>
       
@@ -497,13 +765,14 @@ Scale (Hold Ctrl):
         loading={loading}
         error={error}
         modelParts={modelParts}
-        selectedPart={selectedPart}
-        setSelectedPart={setSelectedPart}
+        selectedParts={selectedParts} // Update to pass selectedParts instead of selectedPart
+        setSelectedParts={setSelectedParts} // Update to pass setSelectedParts
         updatePartColor={updatePartColor}
         resetAllColors={resetAllColors}
         onTransformChange={handleTransformChange}
         onMaterialChange={handleMaterialChange}
         onResetTransforms={resetTransforms}
+        onDeleteParts={deleteSelectedParts} // Add delete function
         canUndo={currentHistoryIndex >= 0}
         canRedo={currentHistoryIndex < materialHistory.length - 1}
         onUndo={undoMaterialChange}
