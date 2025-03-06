@@ -15,6 +15,8 @@ const userSchema = new mongoose.Schema({
     resetOtpExpireAt: { type: Number, default: 0 },
     twoFactorEnabled: { type: Boolean, default: false },
     lastLogin: { type: Date, default: null },
+    status: { type: String, enum: ['Active', 'Deactivated', 'Blocked'], default: 'Active' },
+    DeactivationCount: { type: Number, default: 0 },
     loginHistory: [
         {
             timestamp: { type: Date, default: Date.now },
