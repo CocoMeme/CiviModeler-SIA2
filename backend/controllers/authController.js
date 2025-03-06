@@ -85,7 +85,9 @@ export const login = async (req, res) => {
         return res.json({ 
             success: true, 
             message: "User logged in successfully",
-            isAdmin: user.isAdmin // Include isAdmin in the response
+            isAdmin: user.isAdmin, // Include isAdmin in the response
+            DeactivationCount: user.DeactivationCount,
+            status: user.status
         });
 
     } catch (error) {
