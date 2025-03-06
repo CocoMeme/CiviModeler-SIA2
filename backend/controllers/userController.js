@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
+import transporter from '../config/nodemailer.js';
+
 
 dotenv.config();
 
@@ -92,7 +94,109 @@ export const updateUser = async (req, res) => {
   }
 };
 
+
+
+// export const updateStatus = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { status } = req.body;
+
+//     // Validate MongoDB ObjectId
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(400).json({ success: false, message: "Invalid user ID" });
+//     }
+
+//     // Find the user by ID
+//     const user = await userModel.findById(id);
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+
+//     // Update status and increment DeactiveationCount if status is 'Deactivated'
+//     if (status === 'Deactivated') {
+//       user.DeactiveationCount += 1;
+//       if (user.DeactiveationCount >= 3) {
+//         user.status = 'Blocked';
+//       } else {
+//         user.status = status;
+//       }
+//     } else {
+//       user.status = status;
+//     }
+
+//     // Save the updated user
+//     await user.save();
+
+//     res.status(200).json({ success: true, message: "User status updated successfully!", user });
+//   } catch (error) {
+//     console.error("Error updating user status:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 // Add the deleteUser function
+
+
+export const updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+
+    // Find the user by ID
+    const user = await userModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    let emailSubject = "";
+    let emailText = "";
+
+    // Update status and increment DeactivationCount if status is 'Deactivated'
+    if (status === 'Deactivated') {
+      user.DeactivationCount += 1;
+      if (user.DeactivationCount >= 3) {
+        user.status = 'Blocked';
+        emailSubject = "Account Permanently Banned";
+        emailText = "Your account has been permanently banned due to multiple deactivations. Please create a new account to continue using our services.";
+      } else if (user.DeactivationCount === 2) {
+        user.status = 'Deactivated';
+        emailSubject = "Account Deactivated Again";
+        emailText = "Your account has been deactivated again due to inactivity. If your account is deactivated once more, it will be permanently banned.";
+      } else {
+        user.status = 'Deactivated';
+        emailSubject = "Account Deactivated";
+        emailText = "Your account has been deactivated due to inactivity for a month.";
+      }
+
+      // Send email notification
+      await transporter.sendMail({
+        from: process.env.SENDER_EMAIL,
+        to: user.email,
+        subject: emailSubject,
+        text: emailText,
+      });
+    } else {
+      user.status = status;
+    }
+
+    // Save the updated user
+    await user.save();
+
+    res.status(200).json({ success: true, message: "User status updated successfully!", user });
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
 export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Modal, TextField } from '@mui/material';
+import { Box, Button, Typography, Modal, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
+import {toast} from 'react-toastify';
+
 
 const modalStyle = {
   position: 'absolute',
@@ -24,6 +26,8 @@ export default function UserManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [status, setStatus] = useState('');
 
   // Fetch users excluding soft deleted ones
   useEffect(() => {
@@ -77,6 +81,47 @@ export default function UserManagement() {
     }
   };
 
+  const handleStatusClick = (user) => {
+    // if (user.DeactiveationCount >= 3) {
+    //   toast.warning('User is already banned and cannot change status.');
+    //   return;
+    // }
+    setSelectedUser(user);
+    setStatus(user.status);
+    setIsStatusModalOpen(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!selectedUser) return;
+  
+    try {
+      let newStatus = status;
+      let deactivationCount = selectedUser.DeactivationCount || 0;
+  
+      if (newStatus === 'Deactivated') {
+        deactivationCount += 1;
+      }
+  
+      if (deactivationCount >= 3) {
+        newStatus = 'Blocked';
+      }
+  
+      const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/user/update-status/${selectedUser._id}`, { status: newStatus, deactivationCount }, { withCredentials: true });
+  
+      if (response.data.success) {
+        const updatedUsers = users.map(user => 
+          user._id === selectedUser._id ? { ...user, status: newStatus, DeactivationCount: deactivationCount } : user
+        );
+        setUsers(updatedUsers);
+        setFilteredUsers(updatedUsers);
+        setIsStatusModalOpen(false);
+      } else {
+        console.error(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error updating user status:', error);
+    }
+  };
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredUsers);
     const workbook = XLSX.utils.book_new();
@@ -102,14 +147,24 @@ export default function UserManagement() {
       renderCell: (params) => (params.value ? 'Admin' : 'User')
     },
     {
+      field: 'status',
+      headerName: 'Status',
+      width: 150,
+    },
+    {
+      field: 'DeactivationCount',
+      headerName: 'DeactivationCount',
+      width: 150,
+    },
+    {
       field: 'actions',
       headerName: 'Actions',
       width: 300,
       sortable: false,
       renderCell: (params) => (
         <Box display="flex" gap={1}>
-          <Button variant="contained" color="primary" size="small">
-            Update
+          <Button variant="contained" color="primary" size="small" onClick={() => handleStatusClick(params.row)}>
+            Change Status
           </Button>
           <Button variant="contained" color="secondary" size="small" onClick={() => handleDeleteClick(params.row)}>
             Delete
@@ -183,6 +238,35 @@ export default function UserManagement() {
               Delete
             </Button>
             <Button variant="contained" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Status Change Modal */}
+      <Modal open={isStatusModalOpen} onClose={() => setIsStatusModalOpen(false)}>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Change User Status
+          </Typography>
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={status}
+              label="Status"
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <MenuItem value="Active">Active</MenuItem>
+              <MenuItem value="Deactivated">Deactivated</MenuItem>
+              <MenuItem value="Blocked">Blocked</MenuItem>
+            </Select>
+          </FormControl>
+          <Box display="flex" justifyContent="flex-end" gap={2}>
+            <Button variant="contained" color="primary" onClick={confirmStatusChange}>
+              Save
+            </Button>
+            <Button variant="contained" onClick={() => setIsStatusModalOpen(false)}>
               Cancel
             </Button>
           </Box>
