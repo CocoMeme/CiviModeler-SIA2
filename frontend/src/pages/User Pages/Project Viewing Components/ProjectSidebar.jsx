@@ -9,30 +9,61 @@ const ProjectSidebar = ({
   loading,
   error,
   modelParts = [],
-  selectedPart,
-  setSelectedPart,
+  selectedParts = new Set(), // Add default value
+  setSelectedParts,
   updatePartColor,
   resetAllColors,
   onTransformChange,
   onMaterialChange,
   onResetTransforms,
+  onDeleteParts,
   canUndo,
   canRedo,
   onUndo,
   onRedo,
   onTogglePartVisibility
 }) => {
-  const [activeTab, setActiveTab] = useState('details'); // Change default tab to parts
+  const [activeTab, setActiveTab] = useState('parts'); // Change default tab to parts
 
   const tabs = [
-    { id: 'details', label: 'Details' },
     { id: 'parts', label: 'Parts' },
     { id: 'materials', label: 'Materials' },
-    { id: 'colors', label: 'Colors' }
+    { id: 'colors', label: 'Colors' },
+    { id: 'details', label: 'Details' }
   ];
 
   return (
     <div className="w-96 bg-gray-800 text-white p-6 overflow-y-auto">
+      {/* Selection Info */}
+      {selectedParts.size > 0 && (
+        <div className="mb-4 p-3 bg-blue-500 bg-opacity-20 border border-blue-500 rounded">
+          <div className="flex justify-between items-center">
+            <span>{selectedParts.size} part{selectedParts.size > 1 ? 's' : ''} selected</span>
+            <button
+              onClick={() => setSelectedParts(new Set())}
+              className="text-sm text-blue-300 hover:text-blue-200"
+            >
+              Clear Selection
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Button - Show when parts are selected */}
+      {selectedParts.size > 0 && (
+        <div className="mb-4">
+          <button
+            onClick={onDeleteParts}
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Delete Selected {selectedParts.size > 1 ? 'Parts' : 'Part'}</span>
+          </button>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex mb-6 border-b border-gray-700">
         {tabs.map(tab => (
@@ -58,7 +89,7 @@ const ProjectSidebar = ({
       )}
 
       {/* Undo/Redo Controls - Show in materials and parts tabs */}
-      {(activeTab === 'materials' || activeTab === 'parts') && selectedPart && (
+      {(activeTab === 'materials' || activeTab === 'parts') && (
         <div className="flex justify-end mb-4 space-x-2">
           <button
             onClick={onUndo}
@@ -94,15 +125,30 @@ const ProjectSidebar = ({
         {activeTab === 'parts' && (
           <ProjectPartsList
             modelParts={modelParts}
-            selectedPart={selectedPart}
-            onSelectPart={setSelectedPart}
+            selectedParts={selectedParts}
+            onSelectPart={(part, event) => {
+              setSelectedParts(prev => {
+                const next = new Set(prev);
+                if (event?.ctrlKey || event?.metaKey) {
+                  if (next.has(part.meshUuid)) {
+                    next.delete(part.meshUuid);
+                  } else {
+                    next.add(part.meshUuid);
+                  }
+                } else {
+                  next.clear();
+                  next.add(part.meshUuid);
+                }
+                return next;
+              });
+            }}
             onToggleVisibility={onTogglePartVisibility}
           />
         )}
         
-        {activeTab === 'materials' && selectedPart && (
+        {activeTab === 'materials' && selectedParts.size > 0 && (
           <ProjectMaterialModify
-            selectedPart={selectedPart}
+            selectedParts={selectedParts}
             onTransformChange={onTransformChange}
             onMaterialChange={onMaterialChange}
             onResetTransforms={onResetTransforms}
@@ -112,8 +158,8 @@ const ProjectSidebar = ({
         {activeTab === 'colors' && (
           <ProjectColors
             modelParts={modelParts}
-            selectedPart={selectedPart}
-            setSelectedPart={setSelectedPart}
+            selectedParts={selectedParts}
+            setSelectedParts={setSelectedParts}
             updatePartColor={updatePartColor}
             resetAllColors={resetAllColors}
           />
@@ -127,9 +173,9 @@ const ProjectSidebar = ({
         )}
 
         {/* No Selection Message */}
-        {activeTab === 'materials' && !selectedPart && (
+        {activeTab === 'materials' && selectedParts.size === 0 && (
           <div className="text-center py-8 text-gray-400">
-            <p>Select a part to modify its materials</p>
+            <p>Select one or more parts to modify materials</p>
           </div>
         )}
       </div>
