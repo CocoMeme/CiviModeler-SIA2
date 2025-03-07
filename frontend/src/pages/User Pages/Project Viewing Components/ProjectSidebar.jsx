@@ -3,6 +3,7 @@ import ProjectInfos from './ProjectInfos';
 import ProjectColors from './ProjectColors';
 import ProjectMaterialModify from './ProjectMaterialModify';
 import ProjectPartsList from './ProjectPartsList';
+import ProjectVersions from './ProjectVersions';
 
 const ProjectSidebar = ({
   projectDetails,
@@ -21,7 +22,10 @@ const ProjectSidebar = ({
   canRedo,
   onUndo,
   onRedo,
-  onTogglePartVisibility
+  onTogglePartVisibility,
+  modelVersions = [],
+  currentVersion,
+  onVersionSelect
 }) => {
   const [activeTab, setActiveTab] = useState('parts'); // Change default tab to parts
 
@@ -29,6 +33,7 @@ const ProjectSidebar = ({
     { id: 'parts', label: 'Parts' },
     { id: 'materials', label: 'Materials' },
     { id: 'colors', label: 'Colors' },
+    { id: 'versions', label: 'Versions' },
     { id: 'details', label: 'Details' }
   ];
 
@@ -162,6 +167,14 @@ const ProjectSidebar = ({
             setSelectedParts={setSelectedParts}
             updatePartColor={updatePartColor}
             resetAllColors={resetAllColors}
+          />
+        )}
+        
+        {activeTab === 'versions' && (
+          <ProjectVersions
+            versions={modelVersions}
+            currentVersion={currentVersion}
+            onVersionSelect={onVersionSelect}
           />
         )}
         

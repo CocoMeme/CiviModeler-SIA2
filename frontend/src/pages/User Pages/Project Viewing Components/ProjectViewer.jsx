@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import axios from 'axios';
 import { AppContext } from '../../../context/AppContext';
 import ProjectSidebar from './ProjectSidebar';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
 
 const ProjectViewer = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const ProjectViewer = () => {
   const previewTimeout = useRef(null);
   const [hiddenParts, setHiddenParts] = useState(new Set());
   const [previousMaterials, setPreviousMaterials] = useState(new Map());
+  const [modelVersions, setModelVersions] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Fetch project details
   useEffect(() => {
@@ -158,6 +161,68 @@ const ProjectViewer = () => {
       }
     );
   }, [modelUrl]);
+
+  // Add fetch versions effect
+  useEffect(() => {
+    const fetchVersions = async () => {
+      if (!projectId) return;
+
+      try {
+        const response = await axios.get(`${backendUrl}/api/project/${projectId}/versions`);
+        if (response.data) {
+          setModelVersions(response.data.allVersions || []);
+        }
+      } catch (error) {
+        console.error('Error fetching model versions:', error);
+        setError(error.response?.data?.message || 'Error fetching model versions');
+      }
+    };
+
+    fetchVersions();
+  }, [projectId, backendUrl]);
+
+  // Add version selection handler
+  const handleVersionSelect = async (version) => {
+    try {
+      setLoading(true);
+      setModel(null); // Clear current model
+      
+      // Load the selected version's model
+      const loader = new GLTFLoader();
+      await new Promise((resolve, reject) => {
+        loader.load(
+          version.modelUrl,
+          (gltf) => {
+            const scene = gltf.scene;
+            // Apply existing material processing logic
+            scene.traverse((obj) => {
+              if (obj.isMesh) {
+                obj.castShadow = true;
+                obj.receiveShadow = true;
+                // ... rest of material processing
+              }
+            });
+            setModel(scene);
+            resolve();
+          },
+          undefined,
+          reject
+        );
+      });
+
+      // Update project details with the selected version
+      setProjectDetails(prev => ({
+        ...prev,
+        sloyd: version,
+        currentVersion: version.version
+      }));
+    } catch (error) {
+      console.error('Error loading model version:', error);
+      setError('Error loading model version');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updatePartColor = (partUuid, newColor) => {
     if (!model) return;
@@ -668,11 +733,63 @@ const ProjectViewer = () => {
     setCurrentHistoryIndex(prev => prev + 1);
   };
 
+  // Add save function
+  const handleSaveModel = async () => {
+    if (!model) return;
+    
+    setIsSaving(true);
+    try {
+      // Export the current model state to GLB
+      const exporter = new GLTFExporter();
+      const glbData = await new Promise((resolve, reject) => {
+        exporter.parse(model, 
+          (gltf) => resolve(gltf),
+          (error) => reject(error),
+          { binary: true } // Export as GLB
+        );
+      });
+
+      // Create form data with the model
+      const formData = new FormData();
+      const blob = new Blob([glbData], { type: 'model/gltf-binary' });
+      const file = new File([blob], 'model.glb', { type: 'model/gltf-binary' });
+      formData.append('model', file);
+      formData.append('projectId', projectId);
+      formData.append('description', 'Updated model with customizations');
+
+      // Save the model
+      const response = await axios.post(
+        `${backendUrl}/api/project/save-model`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.data) {
+        // Update the versions list with the new version
+        setModelVersions(prev => [...prev, response.data.newVersion]);
+        setProjectDetails(prev => ({
+          ...prev,
+          sloyd: response.data.newVersion,
+          currentVersion: response.data.newVersion.version
+        }));
+      }
+    } catch (error) {
+      console.error('Error saving model:', error);
+      setError('Failed to save model changes');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div style={{ width: "100vw", height: "100vh", position: "absolute", top: 0, left: 0, display: 'flex' }}>
       <div style={{ flex: 1, position: 'relative' }}>
-        {/* Back Button */}
-        <div style={{ position: "absolute", top: "10px", left: "10px", zIndex: 10 }}>
+        {/* Back Button and Save Button */}
+        <div style={{ position: "absolute", top: "10px", left: "10px", zIndex: 10, display: 'flex', gap: '10px' }}>
           <button
             onClick={() => navigate(-1)}
             style={{
@@ -686,6 +803,34 @@ const ProjectViewer = () => {
             }}
           >
             ← Back
+          </button>
+          <button
+            onClick={handleSaveModel}
+            disabled={isSaving}
+            style={{
+              background: isSaving ? "#666" : "#22c55e",
+              color: "#fff",
+              padding: "10px 15px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: isSaving ? "not-allowed" : "pointer",
+              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px"
+            }}
+          >
+            {isSaving ? (
+              <>
+                <span className="animate-spin">↻</span>
+                Saving...
+              </>
+            ) : (
+              <>
+                <span>💾</span>
+                Save Changes
+              </>
+            )}
           </button>
         </div>
 
@@ -778,6 +923,9 @@ Scale (Hold Ctrl):
         onUndo={undoMaterialChange}
         onRedo={redoMaterialChange}
         onTogglePartVisibility={handleTogglePartVisibility}
+        modelVersions={modelVersions}
+        currentVersion={projectDetails?.currentVersion}
+        onVersionSelect={handleVersionSelect}
       />
     </div>
   );

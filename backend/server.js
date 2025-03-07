@@ -8,6 +8,7 @@ import userRouter from './routes/userRoute.js';
 import projectRouter from './routes/projectRoute.js';
 import contratorRouter from './routes/contractorRoute.js';
 import testimonialRouter from './routes/testimonialRoute.js';
+import fileUpload from 'express-fileupload';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -18,6 +19,13 @@ app.use(cookieParser());
 app.use(cors({
   origin: 'http://localhost:5173', // specify your client URL
   credentials: true
+}));
+
+// Add file upload middleware
+app.use(fileUpload({
+  useTempFiles: true,
+  tempFileDir: './temp/',
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
 }));
 
 // API Endpoints

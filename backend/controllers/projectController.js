@@ -156,14 +156,14 @@ export const getRecentProjects = async (req, res) => {
 
 export const create3DModel = async (req, res) => {
   try {
-    const { prompt, projectId } = req.body;
+    const { prompt, projectId, description } = req.body;
 
     // Make a POST request to the Sloyd API with the required fields
     const sloydResponse = await axios.post(process.env.SLOYD_API_URL, {
       Prompt: prompt,
       ClientId: process.env.SLOYD_CLIENT_ID,
       ClientSecret: process.env.SLOYD_CLIENT_SECRET,
-      ModelOutputType: "glb",   // or "glb" if that's your desired output
+      ModelOutputType: "glb",
       ResponseEncoding: "json"
     });
 
@@ -177,7 +177,7 @@ export const create3DModel = async (req, res) => {
       ThumbnailPreview
     } = sloydResponse.data;
 
-    // Retrieve the project document from MongoDB to get the project name
+    // Retrieve the project document from MongoDB
     const project = await Project.findById(projectId);
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
@@ -189,8 +189,9 @@ export const create3DModel = async (req, res) => {
       fs.mkdirSync(tempDir);
     }
 
-    // Save the model data to a temporary file using the project name
-    const tempFileName = `${project.projectName.replace(/\s+/g, '_')}.glb`; // Replace spaces with underscores
+    // Save the model data to a temporary file using the project name and version
+    const nextVersion = (project.currentVersion || 0) + 1;
+    const tempFileName = `${project.projectName.replace(/\s+/g, '_')}_v${nextVersion}.glb`;
     const tempFilePath = path.join(tempDir, tempFileName);
     fs.writeFileSync(tempFilePath, Buffer.from(ModelData, 'base64'));
 
@@ -202,21 +203,112 @@ export const create3DModel = async (req, res) => {
     // Delete the temporary file
     fs.unlinkSync(tempFilePath);
 
-    // Update the project document in MongoDB
-    project.sloyd = {
+    // Create the new version data
+    const newVersion = {
       interactionId: InteractionId,
       confidenceScore: ConfidenceScore,
       responseEncoding: SloydResponseEncoding,
       modelOutputType: SloydModelOutputType,
-      modelUrl: uploadResponse.secure_url,         // URL of the uploaded model file
-      thumbnailPreview: ThumbnailPreview || uploadResponse.secure_url, // fallback if thumbnail not provided
+      modelUrl: uploadResponse.secure_url,
+      thumbnailPreview: ThumbnailPreview || uploadResponse.secure_url,
+      version: nextVersion,
+      description: description || `Version ${nextVersion}`,
+      createdAt: new Date()
     };
+
+    // Update current sloyd data and add to versions array
+    project.sloyd = { ...newVersion };
+    if (!project.modelVersions) {
+      project.modelVersions = [];
+    }
+    project.modelVersions.push(newVersion);
+    project.currentVersion = nextVersion;
 
     await project.save();
 
-    res.json({ ModelData: project.sloyd });
+    res.json({ 
+      currentVersion: project.sloyd,
+      allVersions: project.modelVersions,
+      versionNumber: nextVersion
+    });
   } catch (error) {
     console.error("Error creating 3D model:", error);
     res.status(500).send("Server Error");
+  }
+};
+
+// Add a new controller to get all versions of a model
+export const getModelVersions = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+    
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    res.json({
+      currentVersion: project.sloyd,
+      allVersions: project.modelVersions,
+      currentVersionNumber: project.currentVersion
+    });
+  } catch (error) {
+    console.error("Error fetching model versions:", error);
+    res.status(500).send("Server Error");
+  }
+};
+
+export const saveModel = async (req, res) => {
+  try {
+    const { projectId, description } = req.body;
+    const modelFile = req.files?.model;
+
+    if (!modelFile) {
+      return res.status(400).json({ error: "No model file provided" });
+    }
+
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    // Upload the model file to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(modelFile.tempFilePath, {
+      resource_type: 'raw',
+      folder: 'model_versions',
+    });
+
+    // Create the new version data
+    const nextVersion = (project.currentVersion || 0) + 1;
+    const newVersion = {
+      interactionId: `manual_update_${Date.now()}`,
+      confidenceScore: 1.0,
+      responseEncoding: "binary",
+      modelOutputType: "glb",
+      modelUrl: uploadResponse.secure_url,
+      thumbnailPreview: project.sloyd.thumbnailPreview, // Keep the current thumbnail
+      version: nextVersion,
+      description: description || `Manual update - Version ${nextVersion}`,
+      createdAt: new Date()
+    };
+
+    // Update current sloyd data and add to versions array
+    project.sloyd = { ...newVersion };
+    if (!project.modelVersions) {
+      project.modelVersions = [];
+    }
+    project.modelVersions.push(newVersion);
+    project.currentVersion = nextVersion;
+
+    await project.save();
+
+    res.json({
+      success: true,
+      newVersion,
+      message: "Model updated successfully"
+    });
+  } catch (error) {
+    console.error("Error saving model:", error);
+    res.status(500).json({ error: "Failed to save model" });
   }
 };
