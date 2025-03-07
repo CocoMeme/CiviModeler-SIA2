@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Pie } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { format } from "date-fns"; // Date formatting
 import jsPDF from "jspdf";
@@ -13,6 +13,7 @@ const ReportsPage = () => {
   const [projectData, setProjectData] = useState(null);
   const [contractorData, setContractorData] = useState(null);
   const [ratingsData, setRatingsData] = useState(null);
+  const [genderData, setGenderData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -107,8 +108,31 @@ const ReportsPage = () => {
       }
     };
 
+    const fetchGenderData = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/gender-data`, { withCredentials: true });
+        const data = response.data.data;
+
+        setGenderData({
+          labels: Object.keys(data),
+          datasets: [
+            {
+              label: "Gender Distribution",
+              data: Object.values(data),
+              backgroundColor: ["#36A2EB", "#FF6384", "#FFCE56"],
+              hoverBackgroundColor: ["#36A2EB", "#FF6384", "#FFCE56"],
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("Error fetching gender data:", error);
+        setError(error.message);
+      }
+    };
+
     fetchReportsData();
     fetchRatingsData();
+    fetchGenderData();
   }, []);
 
   const handleDownloadPDF = () => {
@@ -194,6 +218,10 @@ const ReportsPage = () => {
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
           {ratingsData && <Bar data={ratingsData} />}
+        </div>
+        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
+          {genderData && <Pie data={genderData} />}
         </div>
       </div>
     </div>

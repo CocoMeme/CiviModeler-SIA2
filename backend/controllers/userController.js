@@ -194,9 +194,6 @@ export const updateStatus = async (req, res) => {
   }
 };
 
-
-
-
 export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -211,4 +208,21 @@ export const deleteUser = async (req, res) => {
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
+};
+
+export const getGenderData = async (req, res) => {
+  try {
+    const genderData = await userModel.aggregate([
+      { $group: { _id: "$profile.gender", count: { $sum: 1 } } }
+    ]);
+
+    const formattedData = genderData.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    res.json({ success: true, data: formattedData });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
