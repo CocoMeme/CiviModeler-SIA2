@@ -26,6 +26,11 @@ const Login = () => {
         axios.defaults.withCredentials = true;
         const { data } = await axios.post(`${backendUrl}/api/auth/login`, formData);
         if (data.success) {
+          if (data.status === 'Deactivated' || data.status === 'Blocked') {
+            axios.defaults.withCredentials = true;
+            const { data } = await axios.post(backendUrl + '/api/auth/logout');
+            return toast.error("Your account has been deactivated or blocked. Please contact support.");
+          }
             setIsLoggedin(true);
             await getUserData(); // Ensure getUserData is awaited
             if (data.isAdmin) {
