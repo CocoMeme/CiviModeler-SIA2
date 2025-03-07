@@ -8,17 +8,32 @@ import axios from 'axios';
 import { AppContext } from '../../../context/AppContext';
 import ProjectSidebar from './ProjectSidebar';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
+import { FiArrowLeft, FiSave, FiHelpCircle } from 'react-icons/fi';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+
+// Loading animation component
+const LoadingAnimation = () => {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+      <div className="bg-gray-800 rounded-lg p-8 shadow-xl flex flex-col items-center space-y-4">
+        <AiOutlineLoading3Quarters className="w-16 h-16 text-blue-500 animate-spin" />
+        <p className="text-white text-lg">Loading 3D Model...</p>
+      </div>
+    </div>
+  );
+};
 
 const ProjectViewer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { backendUrl } = useContext(AppContext);
-  const { modelUrl, projectId } = location.state || {};
+  const { projectId } = location.state || {}; // We'll fetch the model URL based on the project ID
   const [model, setModel] = useState(null);
   const [modelParts, setModelParts] = useState([]);
-  const [selectedParts, setSelectedParts] = useState(new Set()); // Add this state for multiple selection
+  const [selectedParts, setSelectedParts] = useState(new Set());
   const [projectDetails, setProjectDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [modelLoading, setModelLoading] = useState(true); // Separate state for model loading
   const [error, setError] = useState(null);
   const [materialHistory, setMaterialHistory] = useState([]);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
@@ -27,10 +42,11 @@ const ProjectViewer = () => {
   const [previousMaterials, setPreviousMaterials] = useState(new Map());
   const [modelVersions, setModelVersions] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [currentVersion, setCurrentVersion] = useState(null);
 
-  // Fetch project details
+  // Fetch project details and versions simultaneously
   useEffect(() => {
-    const fetchProjectDetails = async () => {
+    const fetchProjectData = async () => {
       if (!projectId) {
         setError('No project ID provided');
         setLoading(false);
@@ -38,171 +54,148 @@ const ProjectViewer = () => {
       }
 
       try {
-        const response = await axios.get(`${backendUrl}/api/project/${projectId}`);
-        if (response.data) {
-          setProjectDetails(response.data);
+        setLoading(true);
+        
+        // Fetch project details and versions in parallel
+        const [projectResponse, versionsResponse] = await Promise.all([
+          axios.get(`${backendUrl}/api/project/${projectId}`),
+          axios.get(`${backendUrl}/api/project/${projectId}/versions`)
+        ]);
+
+        if (projectResponse.data) {
+          setProjectDetails(projectResponse.data);
         } else {
           setError('No project details found');
         }
+
+        if (versionsResponse.data) {
+          const versions = versionsResponse.data.allVersions || [];
+          setModelVersions(versions);
+          
+          // Find the latest version
+          if (versions.length > 0) {
+            const latestVersion = versions.reduce((latest, version) => 
+              version.version > latest.version ? version : latest, versions[0]);
+            setCurrentVersion(latestVersion);
+            
+            // Load the latest version model
+            await loadModelVersion(latestVersion);
+          }
+        }
       } catch (error) {
-        console.error('Error fetching project details:', error);
-        setError(error.response?.data?.message || 'Error fetching project details');
+        console.error('Error fetching project data:', error);
+        setError(error.response?.data?.message || 'Error fetching project data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProjectDetails();
+    fetchProjectData();
   }, [projectId, backendUrl]);
 
-  useEffect(() => {
-    if (!modelUrl) {
-      console.error('No model URL provided.');
-      return;
-    }
+  // Function to load a model version
+  const loadModelVersion = async (version) => {
+    if (!version || !version.modelUrl) return;
 
-    const loader = new GLTFLoader();
-    loader.load(
-      modelUrl,
-      (gltf) => {
-        const scene = gltf.scene;
-        const materialGroups = new Map();
-
-        // First pass: collect all materials and their properties
-        scene.traverse((obj) => {
-          if (obj.isMesh) {
-            obj.castShadow = true;
-            obj.receiveShadow = true;
-            
-            if (!obj.material) {
-              obj.material = new THREE.MeshStandardMaterial();
-            }
-
-            const processMaterial = (material, index = null) => {
-              if (!material) return;
-
-              // Extract base name (remove numbers from end)
-              const baseName = obj.name.replace(/[_-]?\d+$/, '');
-              const colorHex = material.color ? '#' + material.color.getHexString() : '#ffffff';
-              
-              // Create a unique key for this material group
-              const groupKey = `${baseName}_${obj.uuid}_${index !== null ? index : ''}`;
-              
-              if (!materialGroups.has(groupKey)) {
-                // Create a new material instance for this part
-                const newMaterial = material.clone();
-                
-                materialGroups.set(groupKey, {
-                  name: baseName,
-                  color: colorHex,
-                  originalColor: colorHex,
-                  metalness: newMaterial.metalness || 0.5,
-                  roughness: newMaterial.roughness || 0.5,
-                  opacity: newMaterial.opacity || 1.0,
-                  meshes: [],
-                  materialIndices: new Set(),
-                  material: newMaterial // Store the unique material instance
-                });
-
-                // Apply the new material to the mesh
-                if (Array.isArray(obj.material)) {
-                  if (index !== null) {
-                    obj.material[index] = newMaterial;
-                  }
-                } else {
-                  obj.material = newMaterial;
-                }
-              }
-
-              const group = materialGroups.get(groupKey);
-              group.meshes.push({
-                uuid: obj.uuid,
-                materialIndex: index
-              });
-              if (index !== null) {
-                group.materialIndices.add(index);
-              }
-            };
-
-            if (Array.isArray(obj.material)) {
-              obj.material.forEach((mat, index) => processMaterial(mat, index));
-            } else {
-              processMaterial(obj.material);
-            }
-          }
-        });
-
-        // Convert material groups to parts array
-        const parts = Array.from(materialGroups.entries()).map(([key, group]) => ({
-          name: group.name,
-          meshUuid: key,
-          currentColor: group.color,
-          originalColor: group.originalColor,
-          currentMaterial: {
-            metalness: group.metalness,
-            roughness: group.roughness,
-            opacity: group.opacity
-          },
-          originalMaterial: {
-            metalness: group.metalness,
-            roughness: group.roughness,
-            opacity: group.opacity
-          },
-          meshes: group.meshes,
-          materialIndices: Array.from(group.materialIndices)
-        }));
-
-        setModel(scene);
-        setModelParts(parts);
-      },
-      undefined,
-      (error) => {
-        console.error("🚨 Error loading model:", error);
-      }
-    );
-  }, [modelUrl]);
-
-  // Add fetch versions effect
-  useEffect(() => {
-    const fetchVersions = async () => {
-      if (!projectId) return;
-
-      try {
-        const response = await axios.get(`${backendUrl}/api/project/${projectId}/versions`);
-        if (response.data) {
-          setModelVersions(response.data.allVersions || []);
-        }
-      } catch (error) {
-        console.error('Error fetching model versions:', error);
-        setError(error.response?.data?.message || 'Error fetching model versions');
-      }
-    };
-
-    fetchVersions();
-  }, [projectId, backendUrl]);
-
-  // Add version selection handler
-  const handleVersionSelect = async (version) => {
     try {
-      setLoading(true);
-      setModel(null); // Clear current model
+      setModelLoading(true);
+      setModel(null);
+      setModelParts([]);
       
-      // Load the selected version's model
       const loader = new GLTFLoader();
       await new Promise((resolve, reject) => {
         loader.load(
           version.modelUrl,
           (gltf) => {
             const scene = gltf.scene;
-            // Apply existing material processing logic
+            const materialGroups = new Map();
+
+            // First pass: collect all materials and their properties
             scene.traverse((obj) => {
               if (obj.isMesh) {
                 obj.castShadow = true;
                 obj.receiveShadow = true;
-                // ... rest of material processing
+                
+                if (!obj.material) {
+                  obj.material = new THREE.MeshStandardMaterial();
+                }
+
+                const processMaterial = (material, index = null) => {
+                  if (!material) return;
+
+                  // Extract base name (remove numbers from end)
+                  const baseName = obj.name.replace(/[_-]?\d+$/, '');
+                  const colorHex = material.color ? '#' + material.color.getHexString() : '#ffffff';
+                  
+                  // Create a unique key for this material group
+                  const groupKey = `${baseName}_${obj.uuid}_${index !== null ? index : ''}`;
+                  
+                  if (!materialGroups.has(groupKey)) {
+                    // Create a new material instance for this part
+                    const newMaterial = material.clone();
+                    
+                    materialGroups.set(groupKey, {
+                      name: baseName,
+                      color: colorHex,
+                      originalColor: colorHex,
+                      metalness: newMaterial.metalness || 0.5,
+                      roughness: newMaterial.roughness || 0.5,
+                      opacity: newMaterial.opacity || 1.0,
+                      meshes: [],
+                      materialIndices: new Set(),
+                      material: newMaterial // Store the unique material instance
+                    });
+
+                    // Apply the new material to the mesh
+                    if (Array.isArray(obj.material)) {
+                      if (index !== null) {
+                        obj.material[index] = newMaterial;
+                      }
+                    } else {
+                      obj.material = newMaterial;
+                    }
+                  }
+
+                  const group = materialGroups.get(groupKey);
+                  group.meshes.push({
+                    uuid: obj.uuid,
+                    materialIndex: index
+                  });
+                  if (index !== null) {
+                    group.materialIndices.add(index);
+                  }
+                };
+
+                if (Array.isArray(obj.material)) {
+                  obj.material.forEach((mat, index) => processMaterial(mat, index));
+                } else {
+                  processMaterial(obj.material);
+                }
               }
             });
+
+            // Convert material groups to parts array
+            const parts = Array.from(materialGroups.entries()).map(([key, group]) => ({
+              name: group.name,
+              meshUuid: key,
+              currentColor: group.color,
+              originalColor: group.originalColor,
+              currentMaterial: {
+                metalness: group.metalness,
+                roughness: group.roughness,
+                opacity: group.opacity
+              },
+              originalMaterial: {
+                metalness: group.metalness,
+                roughness: group.roughness,
+                opacity: group.opacity
+              },
+              meshes: group.meshes,
+              materialIndices: Array.from(group.materialIndices)
+            }));
+
             setModel(scene);
+            setModelParts(parts);
             resolve();
           },
           undefined,
@@ -210,18 +203,24 @@ const ProjectViewer = () => {
         );
       });
 
-      // Update project details with the selected version
+      // Update current version in project details
       setProjectDetails(prev => ({
         ...prev,
         sloyd: version,
         currentVersion: version.version
       }));
     } catch (error) {
-      console.error('Error loading model version:', error);
-      setError('Error loading model version');
+      console.error("🚨 Error loading model:", error);
+      setError(`Error loading model: ${error.message}`);
     } finally {
-      setLoading(false);
+      setModelLoading(false);
     }
+  };
+
+  // Version selection handler
+  const handleVersionSelect = async (version) => {
+    setCurrentVersion(version);
+    await loadModelVersion(version);
   };
 
   const updatePartColor = (partUuid, newColor) => {
@@ -769,17 +768,22 @@ const ProjectViewer = () => {
       );
 
       if (response.data) {
+        const newVersion = response.data.newVersion;
         // Update the versions list with the new version
-        setModelVersions(prev => [...prev, response.data.newVersion]);
+        setModelVersions(prev => [...prev, newVersion]);
+        setCurrentVersion(newVersion);
         setProjectDetails(prev => ({
           ...prev,
-          sloyd: response.data.newVersion,
-          currentVersion: response.data.newVersion.version
+          sloyd: newVersion,
+          currentVersion: newVersion.version
         }));
+        // Show success message
+        alert('Model saved successfully!');
       }
     } catch (error) {
       console.error('Error saving model:', error);
       setError('Failed to save model changes');
+      alert('Failed to save model changes. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -787,7 +791,11 @@ const ProjectViewer = () => {
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "absolute", top: 0, left: 0, display: 'flex' }}>
-      <div style={{ flex: 1, position: 'relative' }}>
+      {/* Show loading animation while model is loading */}
+      {(loading || modelLoading) && <LoadingAnimation />}
+      
+      {/* 3D viewer area - takes 5/6 of the width */}
+      <div className="w-5/6" style={{ position: 'relative' }}>
         {/* Back Button and Save Button */}
         <div style={{ position: "absolute", top: "10px", left: "10px", zIndex: 10, display: 'flex', gap: '10px' }}>
           <button
@@ -801,38 +809,60 @@ const ProjectViewer = () => {
               cursor: "pointer",
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
             }}
+            className="flex items-center gap-2"
           >
-            ← Back
+            <FiArrowLeft size={18} />
+            <span>Back</span>
           </button>
           <button
             onClick={handleSaveModel}
-            disabled={isSaving}
+            disabled={isSaving || modelLoading}
             style={{
-              background: isSaving ? "#666" : "#22c55e",
+              background: isSaving || modelLoading ? "#666" : "#22c55e",
               color: "#fff",
               padding: "10px 15px",
               border: "none",
               borderRadius: "5px",
-              cursor: isSaving ? "not-allowed" : "pointer",
+              cursor: isSaving || modelLoading ? "not-allowed" : "pointer",
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
               display: "flex",
               alignItems: "center",
               gap: "8px"
             }}
+            className="flex items-center gap-2"
           >
             {isSaving ? (
               <>
-                <span className="animate-spin">↻</span>
-                Saving...
+                <AiOutlineLoading3Quarters className="animate-spin" size={18} />
+                <span>Saving...</span>
               </>
             ) : (
               <>
-                <span>💾</span>
-                Save Changes
+                <FiSave size={18} />
+                <span>Save Changes</span>
               </>
             )}
           </button>
         </div>
+
+        {/* Version info indicator */}
+        {currentVersion && (
+          <div style={{ 
+            position: "absolute", 
+            top: "10px", 
+            left: "50%", 
+            transform: "translateX(-50%)",
+            zIndex: 10, 
+            background: "rgba(0, 0, 0, 0.6)",
+            color: "#fff",
+            padding: "5px 10px",
+            borderRadius: "5px",
+            fontSize: "14px"
+          }}>
+            Version {currentVersion.version} 
+            {currentVersion.description && ` - ${currentVersion.description}`}
+          </div>
+        )}
 
         {/* Keyboard Shortcuts Help */}
         <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
@@ -872,8 +902,10 @@ Scale (Hold Ctrl):
               cursor: "pointer",
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
             }}
+            className="flex items-center gap-2"
           >
-            Keyboard Shortcuts (?)
+            <FiHelpCircle size={18} />
+            <span>Keyboard Shortcuts</span>
           </button>
         </div>
 
@@ -905,28 +937,31 @@ Scale (Hold Ctrl):
         </Canvas>
       </div>
       
-      <ProjectSidebar 
-        projectDetails={projectDetails} 
-        loading={loading}
-        error={error}
-        modelParts={modelParts}
-        selectedParts={selectedParts} // Update to pass selectedParts instead of selectedPart
-        setSelectedParts={setSelectedParts} // Update to pass setSelectedParts
-        updatePartColor={updatePartColor}
-        resetAllColors={resetAllColors}
-        onTransformChange={handleTransformChange}
-        onMaterialChange={handleMaterialChange}
-        onResetTransforms={resetTransforms}
-        onDeleteParts={deleteSelectedParts} // Add delete function
-        canUndo={currentHistoryIndex >= 0}
-        canRedo={currentHistoryIndex < materialHistory.length - 1}
-        onUndo={undoMaterialChange}
-        onRedo={redoMaterialChange}
-        onTogglePartVisibility={handleTogglePartVisibility}
-        modelVersions={modelVersions}
-        currentVersion={projectDetails?.currentVersion}
-        onVersionSelect={handleVersionSelect}
-      />
+      {/* Sidebar - takes 1/6 of the width */}
+      <div className="w-1/6">
+        <ProjectSidebar 
+          projectDetails={projectDetails} 
+          loading={loading}
+          error={error}
+          modelParts={modelParts}
+          selectedParts={selectedParts}
+          setSelectedParts={setSelectedParts}
+          updatePartColor={updatePartColor}
+          resetAllColors={resetAllColors}
+          onTransformChange={handleTransformChange}
+          onMaterialChange={handleMaterialChange}
+          onResetTransforms={resetTransforms}
+          onDeleteParts={deleteSelectedParts}
+          canUndo={currentHistoryIndex >= 0}
+          canRedo={currentHistoryIndex < materialHistory.length - 1}
+          onUndo={undoMaterialChange}
+          onRedo={redoMaterialChange}
+          onTogglePartVisibility={handleTogglePartVisibility}
+          modelVersions={modelVersions}
+          currentVersion={currentVersion?.version}
+          onVersionSelect={handleVersionSelect}
+        />
+      </div>
     </div>
   );
 };
