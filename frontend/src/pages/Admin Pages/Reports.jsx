@@ -14,6 +14,8 @@ const ReportsPage = () => {
   const [contractorData, setContractorData] = useState(null);
   const [ratingsData, setRatingsData] = useState(null);
   const [genderData, setGenderData] = useState(null);
+  const [materialData, setMaterialData] = useState(null);
+  const [accountStatusData, setAccountStatusData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -130,10 +132,61 @@ const ReportsPage = () => {
       }
     };
 
+    const fetchMaterialData = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/project/material-data`, { withCredentials: true });
+        const materials = response.data;
+    
+        const labels = materials.map(item => item._id);
+        const quantities = materials.map(item => item.totalQuantity);
+    
+        setMaterialData({
+          labels,
+          datasets: [
+            {
+              label: "Material Quantity",
+              data: quantities,
+              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              borderColor: "rgba(255, 99, 132, 1)",
+              borderWidth: 1,
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("Error fetching material data:", error);
+        setError(error.message);
+      }
+    };
+
+    const fetchAccountStatusData = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/account-status-data`, { withCredentials: true });
+        const data = response.data.data;
+
+        setAccountStatusData({
+          labels: Object.keys(data),
+          datasets: [
+            {
+              label: "Account Status",
+              data: Object.values(data),
+              backgroundColor: ["#4CAF50", "#FFC107", "#F44336"],
+              hoverBackgroundColor: ["#4CAF50", "#FFC107", "#F44336"],
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("Error fetching account status data:", error);
+        setError(error.message);
+      }
+    };
+
     fetchReportsData();
     fetchRatingsData();
     fetchGenderData();
+    fetchMaterialData();
+    fetchAccountStatusData();
   }, []);
+
 
   const handleDownloadPDF = () => {
     const reportElement = document.getElementById("report-container");
@@ -222,6 +275,14 @@ const ReportsPage = () => {
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
           {genderData && <Pie data={genderData} />}
+        </div>
+        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Material Quantity Breakdown</h3>
+          {materialData && <Bar data={materialData} />}
+        </div>
+        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Account Status Distribution</h3>
+          {accountStatusData && <Pie data={accountStatusData} />}
         </div>
       </div>
     </div>

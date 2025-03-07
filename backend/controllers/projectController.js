@@ -220,3 +220,25 @@ export const create3DModel = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+export const getMaterialData = async (req, res) => {
+  try {
+    console.log("Fetching material data...");
+    const materialData = await projectModel.aggregate([
+      { $unwind: "$materials" },
+      {
+        $group: {
+          _id: "$materials.material",
+          totalQuantity: { $sum: "$materials.quantity" }
+        }
+      },
+      { $sort: { totalQuantity: -1 } }
+    ]);
+
+    console.log("Material data fetched:", materialData);
+    res.status(200).json(materialData);
+  } catch (error) {
+    console.error('Error fetching material data:', error);
+    res.status(500).json({ message: 'Error fetching material data', error });
+  }
+};

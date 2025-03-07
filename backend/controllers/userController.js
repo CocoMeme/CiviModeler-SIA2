@@ -226,3 +226,20 @@ export const getGenderData = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const getAccountStatusData = async (req, res) => {
+  try {
+    const statusData = await userModel.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
+
+    const formattedData = statusData.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    res.json({ success: true, data: formattedData });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
