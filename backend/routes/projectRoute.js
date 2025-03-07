@@ -1,5 +1,5 @@
 import express from 'express';
-import { createProject, getAllProject, getDashboardData, getUserProjects, getProjectReportsData, getRecentProjects, create3DModel, getProjectData, updateProject } from '../controllers/projectController.js';
+import { createProject, getAllProject, getDashboardData, getUserProjects, getProjectReportsData, getRecentProjects, create3DModel, getProjectData, updateProject, getMaterialData, saveModel, getModelVersions } from '../controllers/projectController.js';
 import userAuth from '../middleware/userAuth.js';
 
 const router = express.Router();
