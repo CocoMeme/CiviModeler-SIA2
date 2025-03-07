@@ -12,6 +12,7 @@ const ReportsPage = () => {
   const [lineData, setLineData] = useState(null);
   const [projectData, setProjectData] = useState(null);
   const [contractorData, setContractorData] = useState(null);
+  const [ratingsData, setRatingsData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -80,8 +81,34 @@ const ReportsPage = () => {
         setError(error.message);
       }
     };
+    const fetchRatingsData = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/testimonials/ratings`, { withCredentials: true });
+        const ratings = response.data;
+
+        const labels = ratings.map(item => `${item._id} Star`);
+        const counts = ratings.map(item => item.count);
+
+        setRatingsData({
+          labels,
+          datasets: [
+            {
+              label: "Number of Ratings",
+              data: counts,
+              backgroundColor: "rgba(153, 102, 255, 0.2)",
+              borderColor: "rgba(153, 102, 255, 1)",
+              borderWidth: 1,
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("Error fetching ratings data:", error);
+        setError(error.message);
+      }
+    };
 
     fetchReportsData();
+    fetchRatingsData();
   }, []);
 
   const handleDownloadPDF = () => {
@@ -163,6 +190,10 @@ const ReportsPage = () => {
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
           {contractorData && <Bar data={contractorData} />}
+        </div>
+        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
+          {ratingsData && <Bar data={ratingsData} />}
         </div>
       </div>
     </div>

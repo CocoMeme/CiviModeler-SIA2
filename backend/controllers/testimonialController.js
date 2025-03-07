@@ -32,3 +32,20 @@ export const createTestimonial = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+export const getRatingsData = async (req, res) => {
+  try {
+    const ratings = await testimonialModel.aggregate([
+      {
+        $group: {
+          _id: "$rating",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+    res.json(ratings);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

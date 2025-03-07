@@ -24,7 +24,6 @@ export const AppContextProvider = (props) => {
                 setIsLoggedin(false);
                 setUserData(null);
             }
-            console.log('UserData after auth check:', userData);  
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 // Handle 401 Unauthorized error gracefully
