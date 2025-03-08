@@ -8,32 +8,22 @@ import axios from 'axios';
 import { AppContext } from '../../../context/AppContext';
 import ProjectSidebar from './ProjectSidebar';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
-import { FiArrowLeft, FiSave, FiHelpCircle } from 'react-icons/fi';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-
-// Loading animation component
-const LoadingAnimation = () => {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-      <div className="bg-gray-800 rounded-lg p-8 shadow-xl flex flex-col items-center space-y-4">
-        <AiOutlineLoading3Quarters className="w-16 h-16 text-blue-500 animate-spin" />
-        <p className="text-white text-lg">Loading 3D Model...</p>
-      </div>
-    </div>
-  );
-};
+import ProjectShortcuts from './ProjectShortcuts';
+import ProjectToolbar from './ProjectToolbar';
+import ProjectLoadingAnimation from './ProjectLoadingAnimation';
+import { CustomGrid, PlaceholderModel, VersionInfo } from './Project3DSceneHelpers';
 
 const ProjectViewer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { backendUrl } = useContext(AppContext);
-  const { projectId } = location.state || {}; // We'll fetch the model URL based on the project ID
+  const { projectId } = location.state || {};
   const [model, setModel] = useState(null);
   const [modelParts, setModelParts] = useState([]);
   const [selectedParts, setSelectedParts] = useState(new Set());
   const [projectDetails, setProjectDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [modelLoading, setModelLoading] = useState(true); // Separate state for model loading
+  const [modelLoading, setModelLoading] = useState(true);
   const [error, setError] = useState(null);
   const [materialHistory, setMaterialHistory] = useState([]);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
@@ -55,7 +45,7 @@ const ProjectViewer = () => {
 
       try {
         setLoading(true);
-        
+
         // Fetch project details and versions in parallel
         const [projectResponse, versionsResponse] = await Promise.all([
           axios.get(`${backendUrl}/api/project/${projectId}`),
@@ -71,13 +61,13 @@ const ProjectViewer = () => {
         if (versionsResponse.data) {
           const versions = versionsResponse.data.allVersions || [];
           setModelVersions(versions);
-          
+
           // Find the latest version
           if (versions.length > 0) {
-            const latestVersion = versions.reduce((latest, version) => 
+            const latestVersion = versions.reduce((latest, version) =>
               version.version > latest.version ? version : latest, versions[0]);
             setCurrentVersion(latestVersion);
-            
+
             // Load the latest version model
             await loadModelVersion(latestVersion);
           }
@@ -101,7 +91,7 @@ const ProjectViewer = () => {
       setModelLoading(true);
       setModel(null);
       setModelParts([]);
-      
+
       const loader = new GLTFLoader();
       await new Promise((resolve, reject) => {
         loader.load(
@@ -115,7 +105,7 @@ const ProjectViewer = () => {
               if (obj.isMesh) {
                 obj.castShadow = true;
                 obj.receiveShadow = true;
-                
+
                 if (!obj.material) {
                   obj.material = new THREE.MeshStandardMaterial();
                 }
@@ -126,14 +116,14 @@ const ProjectViewer = () => {
                   // Extract base name (remove numbers from end)
                   const baseName = obj.name.replace(/[_-]?\d+$/, '');
                   const colorHex = material.color ? '#' + material.color.getHexString() : '#ffffff';
-                  
+
                   // Create a unique key for this material group
                   const groupKey = `${baseName}_${obj.uuid}_${index !== null ? index : ''}`;
-                  
+
                   if (!materialGroups.has(groupKey)) {
                     // Create a new material instance for this part
                     const newMaterial = material.clone();
-                    
+
                     materialGroups.set(groupKey, {
                       name: baseName,
                       color: colorHex,
@@ -245,9 +235,9 @@ const ProjectViewer = () => {
     });
 
     // Update the state for this specific part
-    setModelParts(parts => 
-      parts.map(p => 
-        p.meshUuid === partUuid 
+    setModelParts(parts =>
+      parts.map(p =>
+        p.meshUuid === partUuid
           ? { ...p, currentColor: newColor }
           : p
       )
@@ -263,7 +253,7 @@ const ProjectViewer = () => {
 
   const handleTransformChange = (type, axis, value) => {
     if (!model || selectedParts.size === 0) return;
-    
+
     selectedParts.forEach(partUuid => {
       const part = modelParts.find(p => p.meshUuid === partUuid);
       if (part) {
@@ -292,11 +282,11 @@ const ProjectViewer = () => {
     if (currentHistoryIndex < 0) return;
 
     const lastChange = materialHistory[currentHistoryIndex];
-    
+
     if (lastChange.type === 'delete') {
       // Restore deleted parts
       setModelParts(prev => [...prev, ...lastChange.partsData.parts]);
-      
+
       // Restore mesh states
       lastChange.partsData.meshStates.forEach((state, uuid) => {
         model.traverse((obj) => {
@@ -333,7 +323,7 @@ const ProjectViewer = () => {
         });
       }
     }
-    
+
     setCurrentHistoryIndex(prev => prev - 1);
   }, [currentHistoryIndex, materialHistory, modelParts, model]);
 
@@ -342,13 +332,13 @@ const ProjectViewer = () => {
 
     const nextChange = materialHistory[currentHistoryIndex + 1];
     const part = modelParts.find(p => p.meshUuid === nextChange.partId);
-    
+
     if (part) {
       Object.entries(nextChange.changes.current).forEach(([property, value]) => {
         handleMaterialChange(property, value, false);
       });
     }
-    
+
     setCurrentHistoryIndex(prev => prev + 1);
   }, [currentHistoryIndex, materialHistory, modelParts]);
 
@@ -363,8 +353,8 @@ const ProjectViewer = () => {
           model.traverse((obj) => {
             if (obj.isMesh && obj.uuid === uuid) {
               const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-              const targetMaterial = materialIndex !== null && materials[materialIndex] 
-                ? materials[materialIndex] 
+              const targetMaterial = materialIndex !== null && materials[materialIndex]
+                ? materials[materialIndex]
                 : obj.material;
 
               // Store previous value before change
@@ -386,16 +376,16 @@ const ProjectViewer = () => {
     });
 
     // Update the currentMaterial state in modelParts
-    setModelParts(parts => 
-      parts.map(p => 
+    setModelParts(parts =>
+      parts.map(p =>
         selectedParts.has(p.meshUuid)
-          ? { 
-              ...p, 
-              currentMaterial: { 
-                ...p.currentMaterial, 
-                [property]: value 
-              }
+          ? {
+            ...p,
+            currentMaterial: {
+              ...p.currentMaterial,
+              [property]: value
             }
+          }
           : p
       )
     );
@@ -439,7 +429,7 @@ const ProjectViewer = () => {
                 scale: obj.scale.clone(),
                 material: obj.material.clone()
               });
-              
+
               // Hide the mesh instead of removing it (for undo capability)
               obj.visible = false;
             }
@@ -451,7 +441,7 @@ const ProjectViewer = () => {
     // Add to history
     setMaterialHistory(prev => {
       const newHistory = prev.slice(0, currentHistoryIndex + 1);
-      return [...newHistory, { 
+      return [...newHistory, {
         type: 'delete',
         partsData: deletedPartsData,
         selectedParts: new Set(selectedParts)
@@ -569,8 +559,8 @@ const ProjectViewer = () => {
       model.traverse((obj) => {
         if (obj.isMesh && obj.uuid === uuid) {
           const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-          const targetMaterial = materialIndex !== null && materials[materialIndex] 
-            ? materials[materialIndex] 
+          const targetMaterial = materialIndex !== null && materials[materialIndex]
+            ? materials[materialIndex]
             : obj.material;
 
           const materialKey = uuid + (materialIndex || '');
@@ -631,7 +621,7 @@ const ProjectViewer = () => {
       if (clickedPart) {
         setSelectedParts(prev => {
           const next = new Set();
-          
+
           if (event.ctrlKey || event.metaKey) {
             // Multi-select mode
             if (prev.has(clickedPart.meshUuid)) {
@@ -664,7 +654,7 @@ const ProjectViewer = () => {
             next.add(clickedPart.meshUuid);
             highlightPart(clickedPart, true);
           }
-          
+
           return next;
         });
       }
@@ -677,7 +667,7 @@ const ProjectViewer = () => {
   // Update handlePointerMissed for better cleanup
   const handlePointerMissed = (event) => {
     if (event.ctrlKey || event.metaKey) return;
-    
+
     // Remove highlights from all selected parts
     selectedParts.forEach(partUuid => {
       const part = modelParts.find(p => p.meshUuid === partUuid);
@@ -685,7 +675,7 @@ const ProjectViewer = () => {
         highlightPart(part, false);
       }
     });
-    
+
     // Clear all selections and material states
     setPreviousMaterials(new Map());
     setSelectedParts(new Set());
@@ -735,13 +725,13 @@ const ProjectViewer = () => {
   // Add save function
   const handleSaveModel = async () => {
     if (!model) return;
-    
+
     setIsSaving(true);
     try {
       // Export the current model state to GLB
       const exporter = new GLTFExporter();
       const glbData = await new Promise((resolve, reject) => {
-        exporter.parse(model, 
+        exporter.parse(model,
           (gltf) => resolve(gltf),
           (error) => reject(error),
           { binary: true } // Export as GLB
@@ -792,122 +782,22 @@ const ProjectViewer = () => {
   return (
     <div style={{ width: "100vw", height: "100vh", position: "absolute", top: 0, left: 0, display: 'flex' }}>
       {/* Show loading animation while model is loading */}
-      {(loading || modelLoading) && <LoadingAnimation />}
-      
-      {/* 3D viewer area - takes 5/6 of the width */}
-      <div className="w-5/6" style={{ position: 'relative' }}>
+      {(loading || modelLoading) && <ProjectLoadingAnimation />}
+
+      {/* 3D viewer area*/}
+      <div className="w-4/5" style={{ position: 'relative' }}>
         {/* Back Button and Save Button */}
-        <div style={{ position: "absolute", top: "10px", left: "10px", zIndex: 10, display: 'flex', gap: '10px' }}>
-          <button
-            onClick={() => navigate(-1)}
-            style={{
-              background: "#333",
-              color: "#fff",
-              padding: "10px 15px",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
-            }}
-            className="flex items-center gap-2"
-          >
-            <FiArrowLeft size={18} />
-            <span>Back</span>
-          </button>
-          <button
-            onClick={handleSaveModel}
-            disabled={isSaving || modelLoading}
-            style={{
-              background: isSaving || modelLoading ? "#666" : "#22c55e",
-              color: "#fff",
-              padding: "10px 15px",
-              border: "none",
-              borderRadius: "5px",
-              cursor: isSaving || modelLoading ? "not-allowed" : "pointer",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px"
-            }}
-            className="flex items-center gap-2"
-          >
-            {isSaving ? (
-              <>
-                <AiOutlineLoading3Quarters className="animate-spin" size={18} />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <FiSave size={18} />
-                <span>Save Changes</span>
-              </>
-            )}
-          </button>
-        </div>
+        <ProjectToolbar 
+          isSaving={isSaving} 
+          modelLoading={modelLoading} 
+          onSave={handleSaveModel} 
+        />
 
         {/* Version info indicator */}
-        {currentVersion && (
-          <div style={{ 
-            position: "absolute", 
-            top: "10px", 
-            left: "50%", 
-            transform: "translateX(-50%)",
-            zIndex: 10, 
-            background: "rgba(0, 0, 0, 0.6)",
-            color: "#fff",
-            padding: "5px 10px",
-            borderRadius: "5px",
-            fontSize: "14px"
-          }}>
-            Version {currentVersion.version} 
-            {currentVersion.description && ` - ${currentVersion.description}`}
-          </div>
-        )}
+        <VersionInfo currentVersion={currentVersion} />
 
         {/* Keyboard Shortcuts Help */}
-        <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
-          <button
-            onClick={() => alert(`
-Keyboard Shortcuts:
-
-Material Controls:
-- Ctrl + Z: Undo material change
-- Ctrl + Shift + Z: Redo material change
-
-Transform Controls:
-Position:
-- Arrow Keys: Move in X/Y plane
-- [ and ]: Move in Z axis
-- Hold Shift for larger steps
-
-Rotation (Hold Alt):
-- Q/E: Rotate around X axis
-- A/D: Rotate around Y axis
-- W/S: Rotate around Z axis
-- Hold Shift for larger angles
-
-Scale (Hold Ctrl):
-- X: Scale X axis
-- Y: Scale Y axis
-- Z: Scale Z axis
-- Hold Shift to decrease
-- Delete/Backspace: Delete selected parts
-            `)}
-            style={{
-              background: "#333",
-              color: "#fff",
-              padding: "10px 15px",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
-            }}
-            className="flex items-center gap-2"
-          >
-            <FiHelpCircle size={18} />
-            <span>Keyboard Shortcuts</span>
-          </button>
-        </div>
+        <ProjectShortcuts />
 
         {/* 3D Viewer */}
         <Canvas
@@ -920,14 +810,12 @@ Scale (Hold Ctrl):
           <ambientLight intensity={2} />
           <directionalLight position={[5, 10, 5]} intensity={2} />
           <OrbitControls enableDamping={true} />
-          
-          {/* Custom GridHelper */}
+
           <CustomGrid />
 
-          {/* Add pointer events to model */}
           {model ? (
-            <primitive 
-              object={model} 
+            <primitive
+              object={model}
               onClick={handleClick}
               onPointerMissed={handlePointerMissed}
             />
@@ -936,11 +824,11 @@ Scale (Hold Ctrl):
           )}
         </Canvas>
       </div>
-      
-      {/* Sidebar - takes 1/6 of the width */}
-      <div className="w-1/6">
-        <ProjectSidebar 
-          projectDetails={projectDetails} 
+
+      {/* Sidebar */}
+      <div className="w-1/5">
+        <ProjectSidebar
+          projectDetails={projectDetails}
           loading={loading}
           error={error}
           modelParts={modelParts}
@@ -965,27 +853,5 @@ Scale (Hold Ctrl):
     </div>
   );
 };
-
-// Custom grid with glowing blue lines
-const CustomGrid = () => {
-  const gridRef = React.useRef();
-
-  useEffect(() => {
-    if (gridRef.current) {
-      gridRef.current.material.opacity = 0.7; // Make grid slightly transparent
-      gridRef.current.material.transparent = true;
-    }
-  }, []);
-
-  return <gridHelper ref={gridRef} args={[50, 50, "#1e90ff", "#1e90ff"]} />;
-};
-
-// A placeholder cube while loading or if there's an issue
-const PlaceholderModel = () => (
-  <mesh>
-    <boxGeometry args={[1, 1, 1]} />
-    <meshStandardMaterial color="orange" />
-  </mesh>
-);
 
 export default ProjectViewer;
