@@ -6,7 +6,6 @@ import { FaChartBar, FaCalendarAlt, FaTasks, FaChartPie, FaExternalLinkAlt } fro
 const ProjectInsights = () => {
   const [insights, setInsights] = useState({
     totalProjects: 0,
-    completedProjects: 0,
     inProgressProjects: 0,
     recentActivity: 0,
     categories: {}
@@ -27,9 +26,14 @@ const ProjectInsights = () => {
         if (data.success && data.projects) {
           const projects = data.projects;
           
-          // Calculate project statistics
-          const completed = projects.filter(p => p.status === 'completed').length;
-          const inProgress = projects.filter(p => p.status === 'in-progress').length;
+          // Calculate in-progress projects - check if sloyd.modelUrl doesn't exist or is null
+          const inProgress = projects.filter(project => {
+            if (!project.sloyd || !project.sloyd.modelUrl) {
+              console.log('No model URL:', project.projectName);
+              return true;
+            }
+            return false;
+          }).length;
           
           // Count projects by category
           const categoryCount = projects.reduce((acc, project) => {
@@ -47,7 +51,6 @@ const ProjectInsights = () => {
           
           setInsights({
             totalProjects: projects.length,
-            completedProjects: completed,
             inProgressProjects: inProgress,
             recentActivity: recentCount,
             categories: categoryCount
@@ -95,21 +98,13 @@ const ProjectInsights = () => {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-blue-50 rounded-lg p-4 flex flex-col">
               <div className="flex items-center mb-2">
                 <FaChartBar className="text-blue-600 mr-2" />
                 <span className="text-sm text-gray-600">Total Projects</span>
               </div>
               <span className="text-2xl font-bold text-blue-700">{insights.totalProjects}</span>
-            </div>
-            
-            <div className="bg-green-50 rounded-lg p-4 flex flex-col">
-              <div className="flex items-center mb-2">
-                <FaTasks className="text-green-600 mr-2" />
-                <span className="text-sm text-gray-600">Completed</span>
-              </div>
-              <span className="text-2xl font-bold text-green-700">{insights.completedProjects}</span>
             </div>
             
             <div className="bg-amber-50 rounded-lg p-4 flex flex-col">

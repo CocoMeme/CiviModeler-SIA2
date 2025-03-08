@@ -10,13 +10,13 @@ const LatestChanges = () => {
     if (!loading && userData && userData._id) {
       // This would ideally fetch from an API endpoint that tracks user activity
       // For now we'll simulate with the most recently updated projects
-      fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}?sort=-updatedAt&limit=5`, { 
+      fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}?sort=-updatedAt&limit=3`, { 
         credentials: 'include' 
       })
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            setUpdates(data.projects);
+            setUpdates(data.projects.slice(0, 3));
           }
         })
         .catch((error) => console.error('Error fetching updates:', error));
