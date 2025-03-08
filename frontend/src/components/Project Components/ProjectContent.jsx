@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import jsPDF from 'jspdf';
-import { applyPlugin } from 'jspdf-autotable'
+import { applyPlugin } from 'jspdf-autotable';
+import ModalCreate3D from './ModalCreate3D';
 applyPlugin(jsPDF)
 
 
@@ -25,6 +26,7 @@ const ProjectContent = ({
   sloyd,
   materialData
 }) => {
+  const [showCreate3DModal, setShowCreate3DModal] = useState(!sloyd?.modelUrl);
 
   const handleGeneratePDF = () => {
     try {
@@ -377,6 +379,12 @@ const ProjectContent = ({
 
       {/* Right Side - Graph & Material Table */}
       <div className="lg:col-span-2 flex flex-col h-full">
+        {/* 3D Model Creation Modal */}
+        <ModalCreate3D 
+          isOpen={showCreate3DModal}
+          onClose={() => setShowCreate3DModal(false)}
+        />
+
         {/* Sloyd Details */}
         <div className=" bg-white p-4 shadow-lg rounded-lg">
           <div className="flex justify-between items-center border-b pb-2">
