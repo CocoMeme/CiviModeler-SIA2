@@ -30,6 +30,9 @@ export default function ProjectOverview() {
   const [activeTab, setActiveTab] = useState('overview');
   const [projectLoading, setProjectLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [currentMaterials, setCurrentMaterials] = useState(materials || {});
+  const [currentTotalCost, setCurrentTotalCost] = useState(totalCost || 0);
+  const [currentSloyd, setCurrentSloyd] = useState(sloyd || {});
 
   useEffect(() => {
     const fetchContractors = async () => {
@@ -54,7 +57,7 @@ export default function ProjectOverview() {
 
     fetchContractors();
     fetchSelectedContractor();
-
+    
     // Random loading time between 300ms to 1s
     const loadingTime = Math.random() * (1000 - 300) + 300;
     setTimeout(() => setLoading(false), loadingTime);
@@ -64,6 +67,9 @@ export default function ProjectOverview() {
     setProjectLoading(true);
     setClientDetailsState(projectData.clientDetails || {});
     setProjectDetailsState(rest || {});
+    setCurrentMaterials(materials || {});
+    setCurrentTotalCost(totalCost || 0);
+    setCurrentSloyd(sloyd || {});
     setTimeout(() => setProjectLoading(false), 500);
   }, [projectData]);
 
@@ -78,10 +84,10 @@ export default function ProjectOverview() {
           companyName: clientDetailsState.companyName,
         },
         ...projectDetailsState,
+        contractorId: selectedContractor?._id
       };
-
+      
       const response = await axios.put(`${backendUrl}/api/project/${projectData._id}`, updatedProject);
-      // console.log('Project updated successfully:', response.data);
       setOpenDialog(false);
       setProjectUpdated(true); // Set the flag to true
       toast.success('Project updated successfully!');
@@ -100,9 +106,28 @@ export default function ProjectOverview() {
         try {
           const response = await axios.get(`${backendUrl}/api/project/${projectData._id}`);
           const updatedProjectData = response.data;
-          setClientDetailsState(updatedProjectData.clientDetails || {});
-          setProjectDetailsState(updatedProjectData || {});
+          
+          // Properly extract and update the different parts of the project data
+          const { clientDetails, materials, totalCost, sloyd, contractorId, ...restDetails } = updatedProjectData;
+          
+          setClientDetailsState(clientDetails || {});
+          setProjectDetailsState(restDetails || {});
+          setCurrentMaterials(materials || {});
+          setCurrentTotalCost(totalCost || 0);
+          setCurrentSloyd(sloyd || {});
+          
+          // Update the contractor if it changed
+          if (contractorId && contractorId !== selectedContractor?._id) {
+            try {
+              const contractorResponse = await axios.get(`${backendUrl}/api/contractor/${contractorId}`);
+              setSelectedContractor(contractorResponse.data);
+            } catch (error) {
+              console.error('Error fetching updated contractor:', error);
+            }
+          }
+          
           setProjectUpdated(false); // Reset the flag
+          toast.info('Project data refreshed with latest changes.');
         } catch (error) {
           console.error('Error fetching updated project data:', error);
         }
@@ -110,7 +135,7 @@ export default function ProjectOverview() {
 
       fetchUpdatedProject();
     }
-  }, [projectUpdated, backendUrl, projectData._id]);
+  }, [projectUpdated, backendUrl, projectData._id, selectedContractor]);
 
   const handleClientDetailsChange = (e) => {
     const { name, value } = e.target;
@@ -125,7 +150,7 @@ export default function ProjectOverview() {
   const handleGoTo3D = () => {
     navigate('/project-viewer/work-station', { 
       state: { 
-        modelUrl: sloyd?.modelUrl,
+        modelUrl: currentSloyd?.modelUrl,
         projectId: projectData._id // Add projectId to the state
       } 
     });
@@ -133,32 +158,37 @@ export default function ProjectOverview() {
 
   const handleGenerate3D = async () => {
     try {
-      const prompt = `The size of model is ${projectData.size} sqft. ${projectData.projectDescription}`;
+      setGenerating(true);
+      const prompt = `The size of model is ${projectDetailsState.size} sqft. ${projectDetailsState.projectDescription}`;
       const response = await axios.post(`${backendUrl}/api/project/generate-project`, {
         prompt,
         projectId: projectData._id
       });
 
-      // Ensure the response contains the expected data
-      if (response.data && response.data.ModelData && response.data.ModelData.modelUrl) {
-        // Navigate to viewer page with the model data and projectId
+      // Set project updated to refresh the data
+      setProjectUpdated(true);
+      setGenerating(false);
+      
+      // Show success message
+      toast.success('3D model generated successfully!');
+      
+      // Navigate to viewer with the latest model
+      setTimeout(() => {
         navigate('/project-viewer/work-station', { 
           state: { 
-            modelUrl: response.data.ModelData.modelUrl,
             projectId: projectData._id 
           } 
         });
-      } else {
-        console.error("Unexpected response structure:", response.data);
-      }
-
+      }, 1000);
     } catch (error) {
       console.error("Error generating 3D model:", error);
+      setGenerating(false);
+      toast.error('Error generating 3D model.');
     }
   };
 
-  const materialData = materials
-    ? Object.entries(materials).map(([material, details]) => ({
+  const materialData = currentMaterials
+    ? Object.entries(currentMaterials).map(([material, details]) => ({
       name: material,
       quantity: details.quantity
     }))
@@ -193,9 +223,9 @@ export default function ProjectOverview() {
           setOpenDialog={setOpenDialog}
           infoDialog={infoDialog}
           setInfoDialog={setInfoDialog}
-          materials={materials}
-          totalCost={totalCost}
-          sloyd={sloyd}
+          materials={currentMaterials}
+          totalCost={currentTotalCost}
+          sloyd={currentSloyd}
           materialData={materialData}
         />
       )}

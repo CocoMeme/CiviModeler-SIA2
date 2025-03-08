@@ -151,12 +151,12 @@ const ProjectContent = ({
             `that encapsulates both modern comfort and timeless aesthetics.\n\n` +
 
             `With a total budget of ${(projectDetailsState.budget || 'N/A')}, the ${projectDetailsState.projectName || 'house'} spans ${projectDetailsState.size || 'N/A'} ` +
-            `square meters, maximizing the use of space while ensuring a functional and aesthetically appealing structure. The home’s ${projectDetailsState.projectDescription || 'design details'} ` +
+            `square meters, maximizing the use of space while ensuring a functional and aesthetically appealing structure. The home's ${projectDetailsState.projectDescription || 'design details'} ` +
             `further highlight the attention to detail and craftsmanship involved in bringing this vision to life.\n\n` +
 
             `The project's financial plan, totaling $${totalCost?.toFixed(2) || '0.00'}, ensures that high-quality materials and labor contribute to its successful execution. ` +
             `By combining careful architectural planning, quality craftsmanship, and a well-defined budget, the ${projectDetailsState.projectName || 'project'} is set to be a blend ` +
-            `of elegance and functionality, reflecting the client’s vision in a remarkable way.`;
+            `of elegance and functionality, reflecting the client's vision in a remarkable way.`;
 
         const textLines = doc.splitTextToSize(synthesisText, pageWidth - 2 * margin);
         doc.text(textLines, margin, currentY);
@@ -168,8 +168,8 @@ const ProjectContent = ({
         doc.text("Material Table", margin, currentY);
         currentY += 15;
 
-        const materialRows = Object.entries(materials || {}).map(([_, details]) => [
-            details.material,
+        const materialRows = Object.entries(materials || {}).map(([material, details]) => [
+            material,
             details.quantity.toString(),
             `${details.unitPrice.toFixed(2)}`,
             `${details.totalPrice.toFixed(2)}`
@@ -213,7 +213,7 @@ const ProjectContent = ({
           </div>
           <div className="mt-4">
             <p className="text-gray-600 text-sm">
-              Clicking "Confirm" will save all project details, including client, contractor, and material data, and create a new record in the database.
+              Clicking "Update" will save all project details, including client, contractor, and material data to the database.
             </p>
           </div>
           <div className="mt-4 flex flex-col gap-2">
@@ -249,9 +249,9 @@ const ProjectContent = ({
         {openDialog && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded shadow-lg max-w-md w-full relative">
-              <h2 className="text-lg font-semibold border-b pb-2">Confirm Project Save</h2>
+              <h2 className="text-lg font-semibold border-b pb-2">Confirm Project Update</h2>
               <p className="mt-4 text-gray-600">
-                Are you sure you want to save this project? This action will create a **permanent record** in the database with all provided information.
+                Are you sure you want to update this project? This will replace the existing data in the database with your current changes.
               </p>
               <div className="flex justify-end mt-6 gap-2">
                 <button
@@ -264,7 +264,7 @@ const ProjectContent = ({
                   className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
                   onClick={handleConfirm}
                 >
-                  Yes, Save Project
+                  Yes, Update Project
                 </button>
               </div>
             </div>
