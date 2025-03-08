@@ -189,60 +189,50 @@ const ReportsPage = () => {
 
 
   const handleDownloadPDF = () => {
-    const reportElement = document.getElementById("report-container");
-
+    const reportElements = document.querySelectorAll(".chart-container"); // Select each chart separately
+  
     setTimeout(() => {
-        html2canvas(reportElement, { scale: 3 }).then((canvas) => {
-            const imgData = canvas.toDataURL("image/png");
-            const pdf = new jsPDF("p", "mm", "a4");
-
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 10;
-            let currentY = margin;
-
-            // **Logo**
-            const logoPath = '/images/CiviModeler - NBG.png';
-            const logoWidth = 40;
-            const logoHeight = 40;
-            pdf.addImage(logoPath, 'PNG', margin, currentY, logoWidth, logoHeight);
-
-            // **Title Beside Logo**
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(20);
-            pdf.setTextColor(102, 51, 153);
-            pdf.text("CiviModeler Project Report", margin + logoWidth + 15, currentY + 20);
-
-            currentY += 50;
-
-            // **Header Line**
-            pdf.setLineWidth(0.8);
-            pdf.setDrawColor(102, 51, 153);
-            pdf.line(margin, currentY, pageWidth - margin, currentY);
-            currentY += 12;
-
-            // **Date Below Header**
-            pdf.setFontSize(12);
-            pdf.setFont('helvetica', 'italic');
-            pdf.setTextColor(0, 0, 0);
-            const date = new Date().toLocaleDateString();
-            pdf.text(`Generated on: ${date}`, margin, currentY);
-            currentY += 15;
-
-            // **Convert Report Content to Image**
-            const imgWidth = pageWidth - 2 * margin;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            if (currentY + imgHeight > pageHeight - margin) {
-                pdf.addPage();
-                currentY = margin;
-            }
-
-            pdf.addImage(imgData, "PNG", margin, currentY, imgWidth, imgHeight);
+      const pdf = new jsPDF("portrait", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth - 20; // Keep margins
+      let yPosition = 40; // Start position for content below header
+  
+      // Function to add a header on each page
+      const addHeader = () => {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(20);
+        pdf.setTextColor(102, 51, 153);
+        pdf.text("CiviModeler Project Report", 10, 20);
+        pdf.setDrawColor(102, 51, 153);
+        pdf.line(10, 25, pageWidth - 10, 25); // Underline
+      };
+  
+      addHeader(); // Add header to the first page
+  
+      reportElements.forEach((element, index) => {
+        html2canvas(element, { scale: 3 }).then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
+  
+          if (yPosition + imgHeight > pageHeight - 20) {
+            pdf.addPage();
+            addHeader(); // Add header to the new page
+            yPosition = 40;
+          }
+  
+          pdf.addImage(imgData, "PNG", 10, yPosition, imgWidth, imgHeight);
+          yPosition += imgHeight + 10; // Space between charts
+  
+          if (index === reportElements.length - 1) {
             pdf.save("Admin_ChartReport.pdf");
+          }
         });
+      });
     }, 500);
-};
+  };
+  
+  
 
   return (
     <div>
@@ -256,35 +246,35 @@ const ReportsPage = () => {
       </button>
 
       <div id="report-container" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
-          {lineData && <Line data={lineData} />}
-        </div>
-        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
-          {projectData && <Line data={projectData} />}
-        </div>
-        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
-          {contractorData && <Bar data={contractorData} />}
-        </div>
-        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
-          {ratingsData && <Bar data={ratingsData} />}
-        </div>
-        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
-          {genderData && <Pie data={genderData} />}
-        </div>
-        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Material Quantity Breakdown</h3>
-          {materialData && <Bar data={materialData} />}
-        </div>
-        <div className="bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Account Status Distribution</h3>
-          {accountStatusData && <Pie data={accountStatusData} />}
-        </div>
-      </div>
+  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
+    {lineData && <Line data={lineData} />}
+  </div>
+  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
+    {projectData && <Line data={projectData} />}
+  </div>
+  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
+    {contractorData && <Bar data={contractorData} />}
+  </div>
+  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
+    {ratingsData && <Bar data={ratingsData} />}
+  </div>
+  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
+    {genderData && <Pie data={genderData} />}
+  </div>
+  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Material Quantity Breakdown</h3>
+    {materialData && <Bar data={materialData} />}
+  </div>
+  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+    <h3 className="text-lg font-semibold mb-2 text-white">Account Status Distribution</h3>
+    {accountStatusData && <Pie data={accountStatusData} />}
+  </div>
+</div>
     </div>
   );
 };
