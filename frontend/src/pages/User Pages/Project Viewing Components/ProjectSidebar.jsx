@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import ProjectInfos from './ProjectInfos';
 import ProjectColors from './ProjectColors';
 import ProjectMaterialModify from './ProjectMaterialModify';
-import ProjectPartsList from './ProjectPartsList';
 import ProjectVersions from './ProjectVersions';
-import { FiX, FiTrash2 } from 'react-icons/fi';
-import { BiCube, BiWrench, BiPalette, BiListUl, BiInfoCircle } from 'react-icons/bi';
+import { FiX, FiTrash2, FiEye, FiEyeOff } from 'react-icons/fi';
+import { BiWrench, BiPalette, BiListUl, BiInfoCircle } from 'react-icons/bi';
 import { TbArrowBackUp, TbArrowForwardUp } from 'react-icons/tb';
+import { GrMoney } from 'react-icons/gr';
 
 const ProjectSidebar = ({
   projectDetails,
@@ -30,12 +30,13 @@ const ProjectSidebar = ({
   currentVersion,
   onVersionSelect,
   isMobile = false,
-  onCloseSidebar = null
+  onCloseSidebar = null,
+  updatedMaterials = null,
+  showDifferences
 }) => {
-  const [activeTab, setActiveTab] = useState('parts');
+  const [activeTab, setActiveTab] = useState('materials');
 
   const tabs = [
-    { id: 'parts', label: 'Parts', icon: <BiCube size={20} /> },
     { id: 'materials', label: 'Materials', icon: <BiWrench size={20} /> },
     { id: 'colors', label: 'Colors', icon: <BiPalette size={20} /> },
     { id: 'versions', label: 'Versions', icon: <BiListUl size={20} /> },
@@ -90,6 +91,18 @@ const ProjectSidebar = ({
             </div>
           </div>
         )}
+
+        {/* Material Changes Alert - Show when materials have changed */}
+        {updatedMaterials && (
+          <div className="mb-4 p-3 bg-green-500 bg-opacity-20 border border-green-500 rounded">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <GrMoney className="mr-2 text-green-300" size={18} />
+                <span className="text-green-300">Material estimates have changed</span>
+              </div>
+            </div>
+          </div>
+        )}
   
         {/* Delete Button - Show when parts are selected */}
         {selectedParts.size > 0 && (
@@ -105,9 +118,9 @@ const ProjectSidebar = ({
         )}
       </div>
 
-      {/* Improved Tab Navigation - Grid layout instead of flex to fit all tabs */}
+      {/* Improved Tab Navigation - Grid layout for remaining tabs */}
       <div className="px-4">
-        <div className="grid grid-cols-5 gap-1 mb-4 border-b border-gray-700">
+        <div className="grid grid-cols-4 gap-1 mb-4 border-b border-gray-700">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -132,8 +145,8 @@ const ProjectSidebar = ({
           </div>
         )}
         
-        {/* Undo/Redo Controls - Show in materials and parts tabs */}
-        {(activeTab === 'materials' || activeTab === 'parts') && (
+        {/* Undo/Redo Controls */}
+        {activeTab === 'materials' && (
           <div className="flex justify-end mb-4 space-x-2">
             <button
               onClick={onUndo}
@@ -164,30 +177,6 @@ const ProjectSidebar = ({
       {/* Tab Content - With fixed height and proper scrolling */}
       <div className="flex-1 px-4 pb-4 overflow-hidden">
         <div className="h-full overflow-y-auto scrollbar-hide">
-          {activeTab === 'parts' && (
-            <ProjectPartsList
-              modelParts={modelParts}
-              selectedParts={selectedParts}
-              onSelectPart={(part, event) => {
-                setSelectedParts(prev => {
-                  const next = new Set(prev);
-                  if (event?.ctrlKey || event?.metaKey) {
-                    if (next.has(part.meshUuid)) {
-                      next.delete(part.meshUuid);
-                    } else {
-                      next.add(part.meshUuid);
-                    }
-                  } else {
-                    next.clear();
-                    next.add(part.meshUuid);
-                  }
-                  return next;
-                });
-              }}
-              onToggleVisibility={onTogglePartVisibility}
-            />
-          )}
-          
           {activeTab === 'materials' && selectedParts.size > 0 && (
             <ProjectMaterialModify
               selectedParts={selectedParts}
@@ -219,6 +208,7 @@ const ProjectSidebar = ({
             <ProjectInfos
               projectDetails={projectDetails}
               loading={loading}
+              updatedMaterials={updatedMaterials}
             />
           )}
 

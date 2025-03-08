@@ -3,8 +3,13 @@ import { FiArrowLeft, FiSave } from 'react-icons/fi';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 
-const ProjectToolbar = ({ isSaving, modelLoading, onSave }) => {
+const ProjectToolbar = ({ isSaving, modelLoading, onSave, onSaveSuccess }) => {
   const navigate = useNavigate();
+
+  const handleSave = async () => {
+    await onSave();
+    onSaveSuccess();
+  };
 
   return (
     <div style={{ 
@@ -33,7 +38,7 @@ const ProjectToolbar = ({ isSaving, modelLoading, onSave }) => {
       </button>
       
       <button
-        onClick={onSave}
+        onClick={handleSave}
         disabled={isSaving || modelLoading}
         style={{
           background: isSaving || modelLoading ? "#666" : "#22c55e",

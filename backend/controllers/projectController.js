@@ -283,6 +283,7 @@ export const getModelVersions = async (req, res) => {
 export const saveModel = async (req, res) => {
   try {
     const { projectId, description } = req.body;
+    const updatedMaterialsJson = req.body.updatedMaterials;
     const modelFile = req.files?.model;
 
     if (!modelFile) {
@@ -308,7 +309,7 @@ export const saveModel = async (req, res) => {
       responseEncoding: "binary",
       modelOutputType: "glb",
       modelUrl: uploadResponse.secure_url,
-      thumbnailPreview: project.sloyd.thumbnailPreview, // Keep the current thumbnail
+      thumbnailPreview: project.sloyd.thumbnailPreview,
       version: nextVersion,
       description: description || `Manual update - Version ${nextVersion}`,
       createdAt: new Date()
@@ -322,12 +323,72 @@ export const saveModel = async (req, res) => {
     project.modelVersions.push(newVersion);
     project.currentVersion = nextVersion;
 
+    // Handle material updates if provided
+    let updatedMaterials = null;
+    let totalCost = project.totalCost;
+    if (updatedMaterialsJson) {
+      try {
+        // If the materials were sent as a string, parse them
+        const parsedMaterials = typeof updatedMaterialsJson === 'string' 
+          ? JSON.parse(updatedMaterialsJson) 
+          : updatedMaterialsJson;
+        
+        // Update the project's materials
+        if (parsedMaterials) {
+          // Calculate the total cost of all materials
+          totalCost = 0;
+          
+          // Convert materials from object format to array format if needed
+          const materialArray = Array.isArray(parsedMaterials) 
+            ? parsedMaterials 
+            : Object.entries(parsedMaterials).map(([name, details]) => ({
+                material: name,
+                quantity: details.quantity,
+                unitPrice: details.unit_price || details.unitPrice,
+                totalPrice: details.total_price || details.totalPrice
+              }));
+          
+          // Update total cost and format materials
+          updatedMaterials = materialArray.map(material => {
+            const totalPrice = material.quantity * material.unitPrice;
+            totalCost += totalPrice;
+            return {
+              material: material.material,
+              quantity: material.quantity,
+              unitPrice: material.unitPrice,
+              totalPrice
+            };
+          });
+          
+          // Save the updated materials and total cost to project
+          project.materials = updatedMaterials;
+          project.totalCost = totalCost;
+          project.updatedAt = new Date();  // Update the timestamp
+        }
+      } catch (error) {
+        console.error("Error processing material updates:", error);
+      }
+    }
+
     await project.save();
 
     res.json({
       success: true,
       newVersion,
-      message: "Model updated successfully"
+      projectDetails: {
+        projectName: project.projectName,
+        projectDescription: project.projectDescription,
+        author: project.author,
+        size: project.size,
+        budget: project.budget,
+        style: project.style,
+        clientDetails: project.clientDetails,
+        materials: project.materials,
+        totalCost: project.totalCost,
+        updatedAt: project.updatedAt,
+        createdAt: project.createdAt
+      },
+      message: "Model and materials updated successfully"
     });
   } catch (error) {
     console.error("Error saving model:", error);

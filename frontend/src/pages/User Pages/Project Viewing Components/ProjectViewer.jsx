@@ -12,6 +12,7 @@ import ProjectShortcuts from './ProjectShortcuts';
 import ProjectToolbar from './ProjectToolbar';
 import ProjectLoadingAnimation from './ProjectLoadingAnimation';
 import { CustomGrid, PlaceholderModel, VersionInfo } from './Project3DSceneHelpers';
+import ProjectModelChangeTracker from './ProjectModelChangeTracker';
 
 const ProjectViewer = () => {
   const navigate = useNavigate();
@@ -20,8 +21,10 @@ const ProjectViewer = () => {
   const { projectId } = location.state || {};
   const [model, setModel] = useState(null);
   const [modelParts, setModelParts] = useState([]);
+  const [originalModelParts, setOriginalModelParts] = useState([]);
   const [selectedParts, setSelectedParts] = useState(new Set());
   const [projectDetails, setProjectDetails] = useState(null);
+  const [updatedMaterials, setUpdatedMaterials] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modelLoading, setModelLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,6 +36,7 @@ const ProjectViewer = () => {
   const [modelVersions, setModelVersions] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(null);
+  const [isComparingVersions, setIsComparingVersions] = useState(false);
 
   // Fetch project details and versions simultaneously
   useEffect(() => {
@@ -91,6 +95,7 @@ const ProjectViewer = () => {
       setModelLoading(true);
       setModel(null);
       setModelParts([]);
+      setOriginalModelParts([]);
 
       const loader = new GLTFLoader();
       await new Promise((resolve, reject) => {
@@ -181,11 +186,20 @@ const ProjectViewer = () => {
                 opacity: group.opacity
               },
               meshes: group.meshes,
-              materialIndices: Array.from(group.materialIndices)
+              materialIndices: Array.from(group.materialIndices),
+              // Add properties to track for visualization and material impacts
+              scale: { x: 1, y: 1, z: 1 },
+              position: { x: 0, y: 0, z: 0 },
+              rotation: { x: 0, y: 0, z: 0 },
+              visible: true
             }));
 
             setModel(scene);
             setModelParts(parts);
+            
+            // Store a deep copy of the original model parts
+            setOriginalModelParts(JSON.parse(JSON.stringify(parts)));
+            
             resolve();
           },
           undefined,
@@ -199,6 +213,13 @@ const ProjectViewer = () => {
         sloyd: version,
         currentVersion: version.version
       }));
+      
+      // Reset the updated materials when loading a new version
+      setUpdatedMaterials(null);
+      
+      // Reset comparison state
+      setIsComparingVersions(false);
+      
     } catch (error) {
       console.error("🚨 Error loading model:", error);
       setError(`Error loading model: ${error.message}`);
@@ -207,48 +228,466 @@ const ProjectViewer = () => {
     }
   };
 
-  // Version selection handler
-  const handleVersionSelect = async (version) => {
+  // Version selection handler with comparison capability
+  const handleVersionSelect = async (version, compare = false) => {
     setCurrentVersion(version);
     await loadModelVersion(version);
+    
+    // If compare flag is true, set comparison mode
+    setIsComparingVersions(compare);
   };
 
+  // Handle material updates from ModelChangeTracker
+  const handleMaterialsChanged = (updatedMaterials) => {
+    setUpdatedMaterials(updatedMaterials);
+  };
+
+  // Update part color with visualization option
   const updatePartColor = (partUuid, newColor) => {
-    if (!model) return;
+    if (!model || !partUuid) return;
 
     const part = modelParts.find(p => p.meshUuid === partUuid);
     if (!part) return;
 
-    // Update only the meshes for this specific part UUID
-    part.meshes.forEach(({ uuid, materialIndex }) => {
-      const mesh = model.getObjectByProperty('uuid', uuid);
-      if (!mesh) return;
-
-      // Update color for the specific mesh's material
-      if (Array.isArray(mesh.material)) {
-        if (materialIndex !== undefined && mesh.material[materialIndex]) {
-          mesh.material[materialIndex].color.set(newColor);
-        }
-      } else if (mesh.material) {
-        mesh.material.color.set(newColor);
-      }
+    // Store previous state for undo/redo
+    const previousState = new Map();
+    previousState.set(partUuid, {
+      color: part.currentColor,
+      material: part.meshes.map(({ uuid, materialIndex }) => {
+        const mesh = model.getObjectByProperty('uuid', uuid);
+        if (!mesh) return null;
+        return {
+          uuid,
+          materialIndex,
+          color: Array.isArray(mesh.material) 
+            ? (materialIndex !== undefined ? mesh.material[materialIndex].color.getHex() : null)
+            : mesh.material.color.getHex()
+        };
+      }).filter(Boolean)
     });
 
-    // Update the state for this specific part
-    setModelParts(parts =>
-      parts.map(p =>
+    // Immediately update the modelParts state
+    setModelParts(prevParts =>
+      prevParts.map(p =>
         p.meshUuid === partUuid
           ? { ...p, currentColor: newColor }
           : p
       )
     );
+
+    // Update the actual mesh materials with the new color
+    part.meshes.forEach(({ uuid, materialIndex }) => {
+      const mesh = model.getObjectByProperty('uuid', uuid);
+      if (!mesh) return;
+
+      if (Array.isArray(mesh.material)) {
+        if (materialIndex !== undefined && mesh.material[materialIndex]) {
+          mesh.material[materialIndex] = mesh.material[materialIndex].clone();
+          mesh.material[materialIndex].color.set(newColor);
+          mesh.material[materialIndex].needsUpdate = true;
+        }
+      } else {
+        mesh.material = mesh.material.clone();
+        mesh.material.color.set(newColor);
+        mesh.material.needsUpdate = true;
+      }
+    });
+
+    // Add to history for undo/redo
+    setMaterialHistory(prev => {
+      const newHistory = prev.slice(0, currentHistoryIndex + 1);
+      return [...newHistory, {
+        type: 'color-change',
+        partUuid,
+        newColor,
+        previousState
+      }];
+    });
+    setCurrentHistoryIndex(prev => prev + 1);
+
+    // Update material history for tracking changes
+    handleMaterialChange({
+      color: newColor
+    });
   };
 
+  // Reset all colors
   const resetAllColors = () => {
     if (!model) return;
+
+    // Store previous state for undo/redo
+    const previousState = new Map();
     modelParts.forEach(part => {
-      updatePartColor(part.meshUuid, part.originalColor);
+      previousState.set(part.meshUuid, {
+        color: part.currentColor,
+        material: part.meshes.map(({ uuid, materialIndex }) => {
+          const mesh = model.getObjectByProperty('uuid', uuid);
+          if (!mesh) return null;
+          return {
+            uuid,
+            materialIndex,
+            color: Array.isArray(mesh.material) 
+              ? (materialIndex !== undefined ? mesh.material[materialIndex].color.getHex() : null)
+              : mesh.material.color.getHex()
+          };
+        }).filter(Boolean)
+      });
     });
+
+    // Update modelParts state
+    setModelParts(prevParts =>
+      prevParts.map(part => ({
+        ...part,
+        currentColor: part.originalColor
+      }))
+    );
+
+    // Reset mesh materials
+    modelParts.forEach(part => {
+      part.meshes.forEach(({ uuid, materialIndex }) => {
+        const mesh = model.getObjectByProperty('uuid', uuid);
+        if (!mesh) return;
+
+        if (Array.isArray(mesh.material)) {
+          if (materialIndex !== undefined && mesh.material[materialIndex]) {
+            mesh.material[materialIndex] = mesh.material[materialIndex].clone();
+            mesh.material[materialIndex].color.set(part.originalColor);
+            mesh.material[materialIndex].needsUpdate = true;
+          }
+        } else {
+          mesh.material = mesh.material.clone();
+          mesh.material.color.set(part.originalColor);
+          mesh.material.needsUpdate = true;
+        }
+      });
+    });
+
+    // Add to history for undo/redo
+    setMaterialHistory(prev => {
+      const newHistory = prev.slice(0, currentHistoryIndex + 1);
+      return [...newHistory, {
+        type: 'reset-colors',
+        previousState
+      }];
+    });
+    setCurrentHistoryIndex(prev => prev + 1);
+  };
+
+  // Handle material changes and store history for undo/redo
+  const handleMaterialChange = (changes) => {
+    if (!model || selectedParts.size === 0) return;
+
+    // Store the current state for undo
+    const previousStates = new Map();
+
+    // Apply changes to selected parts
+    selectedParts.forEach(partUuid => {
+      const part = modelParts.find(p => p.meshUuid === partUuid);
+      if (!part) return;
+
+      // Store original values for this part before changes
+      const originalValues = {
+        material: { ...part.currentMaterial },
+        color: part.currentColor,
+      };
+      previousStates.set(partUuid, originalValues);
+
+      // Apply changes to each mesh in the part
+      part.meshes.forEach(({ uuid, materialIndex }) => {
+        model.traverse((obj) => {
+          if (obj.isMesh && obj.uuid === uuid) {
+            // Handle material properties like roughness, metalness, opacity
+            if (Array.isArray(obj.material)) {
+              if (materialIndex !== undefined && obj.material[materialIndex]) {
+                Object.entries(changes).forEach(([key, value]) => {
+                  if (key === 'color') {
+                    obj.material[materialIndex].color.set(value);
+                  } else if (key in obj.material[materialIndex]) {
+                    obj.material[materialIndex][key] = value;
+                    obj.material[materialIndex].needsUpdate = true;
+                  }
+                });
+              }
+            } else if (obj.material) {
+              Object.entries(changes).forEach(([key, value]) => {
+                if (key === 'color') {
+                  obj.material.color.set(value);
+                } else if (key in obj.material) {
+                  obj.material[key] = value;
+                  obj.material.needsUpdate = true;
+                }
+              });
+            }
+          }
+        });
+      });
+
+      // Update the model parts state
+      setModelParts(parts => 
+        parts.map(p => {
+          if (p.meshUuid === partUuid) {
+            return {
+              ...p,
+              currentMaterial: {
+                ...p.currentMaterial,
+                ...Object.fromEntries(
+                  Object.entries(changes).filter(([key]) => key !== 'color')
+                ),
+              },
+              currentColor: changes.color || p.currentColor,
+            };
+          }
+          return p;
+        })
+      );
+    });
+
+    // Add to history
+    setMaterialHistory(prev => {
+      const newHistory = prev.slice(0, currentHistoryIndex + 1);
+      return [...newHistory, {
+        type: 'material-change',
+        changes,
+        previousStates,
+        selectedParts: new Set(selectedParts)
+      }];
+    });
+    setCurrentHistoryIndex(prev => prev + 1);
+  };
+
+  // Undo material change
+  const undoMaterialChange = () => {
+    if (currentHistoryIndex < 0) return;
+
+    const lastAction = materialHistory[currentHistoryIndex];
+    
+    if (lastAction.type === 'material-change') {
+      // Restore previous material states
+      lastAction.previousStates.forEach((originalValues, partUuid) => {
+        const part = modelParts.find(p => p.meshUuid === partUuid);
+        if (!part) return;
+
+        // Restore original material and color
+        part.meshes.forEach(({ uuid, materialIndex }) => {
+          model.traverse((obj) => {
+            if (obj.isMesh && obj.uuid === uuid) {
+              if (Array.isArray(obj.material)) {
+                if (materialIndex !== undefined && obj.material[materialIndex]) {
+                  obj.material[materialIndex].color.set(originalValues.color);
+                  Object.entries(originalValues.material).forEach(([key, value]) => {
+                    if (key in obj.material[materialIndex]) {
+                      obj.material[materialIndex][key] = value;
+                    }
+                  });
+                  obj.material[materialIndex].needsUpdate = true;
+                }
+              } else if (obj.material) {
+                obj.material.color.set(originalValues.color);
+                Object.entries(originalValues.material).forEach(([key, value]) => {
+                  if (key in obj.material) {
+                    obj.material[key] = value;
+                  }
+                });
+                obj.material.needsUpdate = true;
+              }
+            }
+          });
+        });
+      });
+
+      // Update modelParts state to reflect the undone changes
+      setModelParts(parts =>
+        parts.map(part => {
+          if (lastAction.previousStates.has(part.meshUuid)) {
+            const originalValues = lastAction.previousStates.get(part.meshUuid);
+            return {
+              ...part,
+              currentMaterial: originalValues.material,
+              currentColor: originalValues.color
+            };
+          }
+          return part;
+        })
+      );
+    } else if (lastAction.type === 'delete') {
+      // Restore deleted parts
+      lastAction.partsData.parts.forEach(deletedPart => {
+        // Restore each mesh in the part to the scene
+        deletedPart.meshes.forEach(({ uuid }) => {
+          const meshState = lastAction.partsData.meshStates.get(uuid);
+          if (meshState && meshState.parent) {
+            const mesh = meshState.mesh;
+            meshState.parent.add(mesh);
+          }
+        });
+      });
+
+      // Add deleted parts back to modelParts
+      setModelParts(prev => [...prev, ...lastAction.partsData.parts]);
+    } else if (lastAction.type === 'reset-transforms') {
+      // Restore previous transforms
+      lastAction.previousStates.forEach((transforms, uuid) => {
+        model.traverse((obj) => {
+          if (obj.uuid === uuid) {
+            obj.position.copy(transforms.position);
+            obj.rotation.copy(transforms.rotation);
+            obj.scale.copy(transforms.scale);
+          }
+        });
+      });
+
+      // Update modelParts state to reflect the undone transforms
+      setModelParts(parts =>
+        parts.map(part => {
+          if (part.meshes.some(mesh => lastAction.previousStates.has(mesh.uuid))) {
+            // Find mesh with stored transforms to restore part state
+            const mesh = part.meshes.find(m => lastAction.previousStates.has(m.uuid));
+            if (mesh) {
+              const transforms = lastAction.previousStates.get(mesh.uuid);
+              return {
+                ...part,
+                position: {
+                  x: transforms.position.x,
+                  y: transforms.position.y,
+                  z: transforms.position.z
+                },
+                rotation: {
+                  x: transforms.rotation.x,
+                  y: transforms.rotation.y,
+                  z: transforms.rotation.z
+                },
+                scale: {
+                  x: transforms.scale.x,
+                  y: transforms.scale.y,
+                  z: transforms.scale.z
+                }
+              };
+            }
+          }
+          return part;
+        })
+      );
+    }
+
+    // Decrement history index
+    setCurrentHistoryIndex(prev => prev - 1);
+  };
+
+  // Redo material change
+  const redoMaterialChange = () => {
+    if (currentHistoryIndex >= materialHistory.length - 1) return;
+
+    // Move forward in history
+    const actionToRedo = materialHistory[currentHistoryIndex + 1];
+    
+    if (actionToRedo.type === 'material-change') {
+      // Apply the changes that were undone
+      actionToRedo.selectedParts.forEach(partUuid => {
+        const part = modelParts.find(p => p.meshUuid === partUuid);
+        if (!part) return;
+
+        // Apply changes to each mesh in the part
+        part.meshes.forEach(({ uuid, materialIndex }) => {
+          model.traverse((obj) => {
+            if (obj.isMesh && obj.uuid === uuid) {
+              if (Array.isArray(obj.material)) {
+                if (materialIndex !== undefined && obj.material[materialIndex]) {
+                  Object.entries(actionToRedo.changes).forEach(([key, value]) => {
+                    if (key === 'color') {
+                      obj.material[materialIndex].color.set(value);
+                    } else if (key in obj.material[materialIndex]) {
+                      obj.material[materialIndex][key] = value;
+                    }
+                  });
+                  obj.material[materialIndex].needsUpdate = true;
+                }
+              } else if (obj.material) {
+                Object.entries(actionToRedo.changes).forEach(([key, value]) => {
+                  if (key === 'color') {
+                    obj.material.color.set(value);
+                  } else if (key in obj.material) {
+                    obj.material[key] = value;
+                  }
+                });
+                obj.material.needsUpdate = true;
+              }
+            }
+          });
+        });
+      });
+
+      // Update modelParts state with redone changes
+      setModelParts(parts =>
+        parts.map(part => {
+          if (actionToRedo.selectedParts.has(part.meshUuid)) {
+            return {
+              ...part,
+              currentMaterial: {
+                ...part.currentMaterial,
+                ...Object.fromEntries(
+                  Object.entries(actionToRedo.changes).filter(([key]) => key !== 'color')
+                ),
+              },
+              currentColor: actionToRedo.changes.color || part.currentColor,
+            };
+          }
+          return part;
+        })
+      );
+    } else if (actionToRedo.type === 'delete') {
+      // Re-delete the parts
+      actionToRedo.selectedParts.forEach(partUuid => {
+        const part = modelParts.find(p => p.meshUuid === partUuid);
+        if (part) {
+          part.meshes.forEach(({ uuid }) => {
+            model.traverse((obj) => {
+              if (obj.uuid === uuid && obj.parent) {
+                obj.parent.remove(obj);
+              }
+            });
+          });
+        }
+      });
+
+      // Update modelParts state to remove the deleted parts
+      setModelParts(prev => 
+        prev.filter(part => !actionToRedo.selectedParts.has(part.meshUuid))
+      );
+    } else if (actionToRedo.type === 'reset-transforms') {
+      // Reset transforms again - all to default values
+      actionToRedo.selectedParts.forEach(partUuid => {
+        const part = modelParts.find(p => p.meshUuid === partUuid);
+        if (part) {
+          part.meshes.forEach(({ uuid }) => {
+            model.traverse((obj) => {
+              if (obj.uuid === uuid) {
+                obj.position.set(0, 0, 0);
+                obj.rotation.set(0, 0, 0);
+                obj.scale.set(1, 1, 1);
+              }
+            });
+          });
+        }
+      });
+
+      // Update modelParts state with reset transforms
+      setModelParts(parts =>
+        parts.map(part => {
+          if (actionToRedo.selectedParts.has(part.meshUuid)) {
+            return {
+              ...part,
+              position: { x: 0, y: 0, z: 0 },
+              rotation: { x: 0, y: 0, z: 0 },
+              scale: { x: 1, y: 1, z: 1 }
+            };
+          }
+          return part;
+        })
+      );
+    }
+
+    // Increment history index
+    setCurrentHistoryIndex(prev => prev + 1);
   };
 
   const handleTransformChange = (type, axis, value) => {
@@ -260,148 +699,62 @@ const ProjectViewer = () => {
         part.meshes.forEach(({ uuid }) => {
           model.traverse((obj) => {
             if (obj.isMesh && obj.uuid === uuid) {
-              if (type === 'position') obj.position[axis] = value;
-              if (type === 'rotation') obj.rotation[axis] = THREE.MathUtils.degToRad(value);
-              if (type === 'scale') obj.scale[axis] = value;
-            }
-          });
-        });
-      }
-    });
-  };
-
-  const addToHistory = useCallback((part, changes) => {
-    setMaterialHistory(prev => {
-      const newHistory = prev.slice(0, currentHistoryIndex + 1);
-      return [...newHistory, { partId: part.meshUuid, changes }];
-    });
-    setCurrentHistoryIndex(prev => prev + 1);
-  }, [currentHistoryIndex]);
-
-  const undoMaterialChange = useCallback(() => {
-    if (currentHistoryIndex < 0) return;
-
-    const lastChange = materialHistory[currentHistoryIndex];
-
-    if (lastChange.type === 'delete') {
-      // Restore deleted parts
-      setModelParts(prev => [...prev, ...lastChange.partsData.parts]);
-
-      // Restore mesh states
-      lastChange.partsData.meshStates.forEach((state, uuid) => {
-        model.traverse((obj) => {
-          if (obj.isMesh && obj.uuid === uuid) {
-            obj.visible = state.visible;
-            obj.position.copy(state.position);
-            obj.rotation.copy(state.rotation);
-            obj.scale.copy(state.scale);
-            obj.material = state.material.clone();
-          }
-        });
-      });
-
-      // Restore selection
-      setSelectedParts(new Set(lastChange.selectedParts));
-    } else if (lastChange.type === 'reset-transforms') {
-      // Restore previous transform states
-      lastChange.previousStates.forEach((state, uuid) => {
-        model.traverse((obj) => {
-          if (obj.isMesh && obj.uuid === uuid) {
-            obj.position.copy(state.position);
-            obj.rotation.copy(state.rotation);
-            obj.scale.copy(state.scale);
-          }
-        });
-      });
-      setSelectedParts(new Set(lastChange.selectedParts));
-    } else {
-      // Handle regular material changes
-      const part = modelParts.find(p => p.meshUuid === lastChange.partId);
-      if (part) {
-        Object.entries(lastChange.changes.previous).forEach(([property, value]) => {
-          handleMaterialChange(property, value, false);
-        });
-      }
-    }
-
-    setCurrentHistoryIndex(prev => prev - 1);
-  }, [currentHistoryIndex, materialHistory, modelParts, model]);
-
-  const redoMaterialChange = useCallback(() => {
-    if (currentHistoryIndex >= materialHistory.length - 1) return;
-
-    const nextChange = materialHistory[currentHistoryIndex + 1];
-    const part = modelParts.find(p => p.meshUuid === nextChange.partId);
-
-    if (part) {
-      Object.entries(nextChange.changes.current).forEach(([property, value]) => {
-        handleMaterialChange(property, value, false);
-      });
-    }
-
-    setCurrentHistoryIndex(prev => prev + 1);
-  }, [currentHistoryIndex, materialHistory, modelParts]);
-
-  const handleMaterialChange = (property, value, addHistory = true) => {
-    if (!model || selectedParts.size === 0) return;
-
-    const previousValues = {};
-    selectedParts.forEach(partUuid => {
-      const part = modelParts.find(p => p.meshUuid === partUuid);
-      if (part) {
-        part.meshes.forEach(({ uuid, materialIndex }) => {
-          model.traverse((obj) => {
-            if (obj.isMesh && obj.uuid === uuid) {
-              const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-              const targetMaterial = materialIndex !== null && materials[materialIndex]
-                ? materials[materialIndex]
-                : obj.material;
-
-              // Store previous value before change
-              previousValues[property] = targetMaterial[property]?.clone?.() || targetMaterial[property];
-
-              if (property === 'color') {
-                targetMaterial.color = new THREE.Color(value);
-              } else {
-                targetMaterial[property] = value;
-                if (property === 'opacity') {
-                  targetMaterial.transparent = value < 1;
-                }
+              if (type === 'position') {
+                obj.position[axis] = value;
+                // Update the modelParts state to track position changes
+                setModelParts(parts =>
+                  parts.map(p =>
+                    p.meshUuid === partUuid
+                      ? {
+                          ...p,
+                          position: {
+                            ...p.position,
+                            [axis]: value
+                          }
+                        }
+                      : p
+                  )
+                );
               }
-              targetMaterial.needsUpdate = true;
+              if (type === 'rotation') {
+                obj.rotation[axis] = THREE.MathUtils.degToRad(value);
+                // Update the modelParts state to track rotation changes
+                setModelParts(parts =>
+                  parts.map(p =>
+                    p.meshUuid === partUuid
+                      ? {
+                          ...p,
+                          rotation: {
+                            ...p.rotation,
+                            [axis]: value
+                          }
+                        }
+                      : p
+                  )
+                );
+              }
+              if (type === 'scale') {
+                obj.scale[axis] = value;
+                // Update the modelParts state to track scale changes
+                setModelParts(parts =>
+                  parts.map(p =>
+                    p.meshUuid === partUuid
+                      ? {
+                          ...p,
+                          scale: {
+                            ...p.scale,
+                            [axis]: value
+                          }
+                        }
+                      : p
+                  )
+                );
+              }
             }
           });
         });
       }
     });
-
-    // Update the currentMaterial state in modelParts
-    setModelParts(parts =>
-      parts.map(p =>
-        selectedParts.has(p.meshUuid)
-          ? {
-            ...p,
-            currentMaterial: {
-              ...p.currentMaterial,
-              [property]: value
-            }
-          }
-          : p
-      )
-    );
-
-    // Add to history if needed
-    if (addHistory) {
-      selectedParts.forEach(partUuid => {
-        const part = modelParts.find(p => p.meshUuid === partUuid);
-        if (part) {
-          addToHistory(part, {
-            previous: { [property]: previousValues[property] },
-            current: { [property]: value }
-          });
-        }
-      });
-    }
   };
 
   // Function to delete selected parts
@@ -722,58 +1075,67 @@ const ProjectViewer = () => {
     setCurrentHistoryIndex(prev => prev + 1);
   };
 
-  // Add save function
+  // Add save function with material updates
   const handleSaveModel = async () => {
-    if (!model) return;
+    if (!model || isSaving) return;
 
     setIsSaving(true);
     try {
-      // Export the current model state to GLB
-      const exporter = new GLTFExporter();
-      const glbData = await new Promise((resolve, reject) => {
-        exporter.parse(model,
-          (gltf) => resolve(gltf),
-          (error) => reject(error),
-          { binary: true } // Export as GLB
-        );
+      // Create a FormData instance to send the model and materials
+      const formData = new FormData();
+      
+      // Add project ID
+      formData.append('projectId', projectId);
+
+      // Add description
+      formData.append('description', 'Updated model materials and colors');
+
+      // Add updated materials if there are changes
+      if (updatedMaterials) {
+        formData.append('updatedMaterials', JSON.stringify(updatedMaterials));
+      }
+
+      // Prepare model data (you might need to modify this based on your model format)
+      const modelData = await new Promise((resolve) => {
+        model.toBlob(blob => resolve(blob));
+      });
+      formData.append('model', modelData);
+
+      // Make the API call
+      const response = await fetch(`${backendUrl}/api/projects/save-model`, {
+        method: 'POST',
+        body: formData,
       });
 
-      // Create form data with the model
-      const formData = new FormData();
-      const blob = new Blob([glbData], { type: 'model/gltf-binary' });
-      const file = new File([blob], 'model.glb', { type: 'model/gltf-binary' });
-      formData.append('model', file);
-      formData.append('projectId', projectId);
-      formData.append('description', 'Updated model with customizations');
+      const result = await response.json();
 
-      // Save the model
-      const response = await axios.post(
-        `${backendUrl}/api/project/save-model`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      if (response.data) {
-        const newVersion = response.data.newVersion;
-        // Update the versions list with the new version
-        setModelVersions(prev => [...prev, newVersion]);
-        setCurrentVersion(newVersion);
-        setProjectDetails(prev => ({
-          ...prev,
-          sloyd: newVersion,
-          currentVersion: newVersion.version
-        }));
-        // Show success message
-        alert('Model saved successfully!');
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save model');
       }
+
+      // Update project details with the new data
+      if (result.updatedMaterials) {
+        setProjectDetails(prevDetails => ({
+          ...prevDetails,
+          materials: result.updatedMaterials,
+          totalCost: result.updatedMaterials.reduce((sum, mat) => sum + mat.totalPrice, 0)
+        }));
+      }
+
+      // Clear the updates since they're now saved
+      setUpdatedMaterials(null);
+      
+      // Set the new version
+      if (result.newVersion) {
+        setCurrentVersion(result.newVersion);
+        setModelVersions(prev => [...prev, result.newVersion]);
+      }
+
+      // Show success notification
+      alert('Model saved successfully');
     } catch (error) {
       console.error('Error saving model:', error);
-      setError('Failed to save model changes');
-      alert('Failed to save model changes. Please try again.');
+      alert('Failed to save model: ' + error.message);
     } finally {
       setIsSaving(false);
     }
@@ -790,7 +1152,7 @@ const ProjectViewer = () => {
         <ProjectToolbar 
           isSaving={isSaving} 
           modelLoading={modelLoading} 
-          onSave={handleSaveModel} 
+          onSave={handleSaveModel}
         />
 
         {/* Version info indicator */}
@@ -823,6 +1185,19 @@ const ProjectViewer = () => {
             <PlaceholderModel />
           )}
         </Canvas>
+        
+        {/* Model Changes Overlay */}
+        {originalModelParts.length > 0 && modelParts.length > 0 && (
+          <div style={{ position: 'absolute', bottom: '20px', left: '20px', width: '300px', zIndex: 10 }}>
+            <ProjectModelChangeTracker
+              modelParts={modelParts}
+              originalModelParts={originalModelParts}
+              projectDetails={projectDetails}
+              onMaterialsChanged={handleMaterialsChanged}
+              isComparingVersions={isComparingVersions}
+            />
+          </div>
+        )}
       </div>
 
       {/* Sidebar */}
@@ -848,6 +1223,7 @@ const ProjectViewer = () => {
           modelVersions={modelVersions}
           currentVersion={currentVersion?.version}
           onVersionSelect={handleVersionSelect}
+          updatedMaterials={updatedMaterials}
         />
       </div>
     </div>
