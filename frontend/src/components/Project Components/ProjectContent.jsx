@@ -323,22 +323,29 @@ const ProjectContent = ({
             <button onClick={() => setInfoDialog({ open: true, content: 'Select a contractor for your project before confirming.' })}>⋮</button>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            {contractors.map((contractor) => (
-              <button
-                key={contractor._id}
-                className={`p-2 border rounded w-full text-left transition-all duration-300 ${selectedContractor?._id === contractor._id ? 'bg-purple-700 text-white' : 'bg-white hover:bg-gray-100'
+            {Array.isArray(contractors) && contractors.length > 0 ? (
+              contractors.map((contractor) => (
+                <button
+                  key={contractor._id}
+                  className={`p-2 border rounded w-full text-left transition-all duration-300 ${
+                    selectedContractor?._id === contractor._id 
+                      ? 'bg-purple-700 text-white' 
+                      : 'bg-white hover:bg-gray-100'
                   }`}
                   onClick={() => {
                     setSelectedContractor(contractor);
                     setInfoDialog({ open: true, content: '' });
                   }}
-              >
-                <h2 className='font-bold'>{contractor.name}</h2>
-                <p>
-                  <span className="font-sm">License Number:</span> {contractor.licenseNumber}
-                </p>
-              </button>
-            ))}
+                >
+                  <h2 className='font-bold'>{contractor.name}</h2>
+                  <p>
+                    <span className="font-sm">License Number:</span> {contractor.licenseNumber}
+                  </p>
+                </button>
+              ))
+            ) : (
+              <p className="text-gray-500 italic">No contractors available. Please check back later.</p>
+            )}
           </div>
         </div>
 

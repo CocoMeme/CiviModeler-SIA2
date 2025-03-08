@@ -10,7 +10,7 @@ const UserLayout = () => {
       </div>
 
       {/* Main content taking 5/6 of the screen width */}
-      <div className="w-5/6 p-6">
+      <div className="w-5/6 p-4">
         <Outlet />
       </div>
     </div>

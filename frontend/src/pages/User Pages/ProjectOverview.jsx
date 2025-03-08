@@ -37,10 +37,21 @@ export default function ProjectOverview() {
   useEffect(() => {
     const fetchContractors = async () => {
       try {
+        // Use the standard /all endpoint instead of the specialized one
         const response = await axios.get(`${backendUrl}/api/contractor/all`);
-        setContractors(response.data);
+        
+        // The response from /all is directly the array, with no success property
+        if (Array.isArray(response.data)) {
+          setContractors(response.data);
+        } else {
+          console.error('Unexpected response format for contractors:', response.data);
+          // Initialize with an empty array to prevent the map error
+          setContractors([]);
+        }
       } catch (error) {
         console.error('Error fetching contractors:', error);
+        // Initialize with an empty array to prevent the map error
+        setContractors([]);
       }
     };
 
@@ -48,7 +59,10 @@ export default function ProjectOverview() {
       if (contractorId) {
         try {
           const response = await axios.get(`${backendUrl}/api/contractor/${contractorId}`);
-          setSelectedContractor(response.data);
+          // Check if the response has the expected structure
+          if (response.data && response.data.success) {
+            setSelectedContractor(response.data.contractor);
+          }
         } catch (error) {
           console.error('Error fetching selected contractor:', error);
         }
@@ -120,7 +134,9 @@ export default function ProjectOverview() {
           if (contractorId && contractorId !== selectedContractor?._id) {
             try {
               const contractorResponse = await axios.get(`${backendUrl}/api/contractor/${contractorId}`);
-              setSelectedContractor(contractorResponse.data);
+              if (contractorResponse.data && contractorResponse.data.success) {
+                setSelectedContractor(contractorResponse.data.contractor);
+              }
             } catch (error) {
               console.error('Error fetching updated contractor:', error);
             }

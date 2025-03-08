@@ -5,13 +5,13 @@ export const createContractor = async (req, res) => {
   try {
     const contractor = new contractorModel(req.body);
     const savedContractor = await contractor.save();
-    res.status(201).json(savedContractor);
+    res.status(201).json({ success: true, contractor: savedContractor });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating contractor', error });
+    res.status(500).json({ success: false, message: 'Error creating contractor', error });
   }
 };
 
-// Get all contractors
+// Get all contractors - returns the array directly for compatibility with ProjectContent.jsx
 export const getAllContractors = async (req, res) => {
   try {
     const contractors = await contractorModel.find();
@@ -25,9 +25,9 @@ export const getAllContractors = async (req, res) => {
 export const updateContractor = async (req, res) => {
   try {
     const updatedContractor = await contractorModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json(updatedContractor);
+    res.status(200).json({ success: true, contractor: updatedContractor });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating contractor', error });
+    res.status(500).json({ success: false, message: 'Error updating contractor', error });
   }
 };
 
@@ -35,22 +35,47 @@ export const updateContractor = async (req, res) => {
 export const deleteContractor = async (req, res) => {
   try {
     await contractorModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: 'Contractor deleted successfully' });
+    res.status(200).json({ success: true, message: 'Contractor deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting contractor', error });
+    res.status(500).json({ success: false, message: 'Error deleting contractor', error });
   }
 };
-
 
 // Get contractor by ID
 export const getContractorById = async (req, res) => {
   try {
     const contractor = await contractorModel.findById(req.params.id);
     if (!contractor) {
-      return res.status(404).json({ message: 'Contractor not found' });
+      return res.status(404).json({ success: false, message: 'Contractor not found' });
     }
-    res.status(200).json(contractor);
+    res.status(200).json({ success: true, contractor });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching contractor', error });
+    res.status(500).json({ success: false, message: 'Error fetching contractor', error });
+  }
+};
+
+// Get contractors by specialized endpoint - specifically for frontend component
+export const getContractors = async (req, res) => {
+  try {
+    const { limit = 3, sort } = req.query;
+    
+    const query = contractorModel.find();
+    
+    // Apply sorting if specified
+    if (sort === 'newest') {
+      query.sort('-createdAt');
+    } else if (sort === 'rating') {
+      query.sort('-rating');
+    }
+    
+    // Apply limit if specified
+    if (limit) {
+      query.limit(parseInt(limit));
+    }
+    
+    const contractors = await query.exec();
+    res.status(200).json({ success: true, contractors });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching contractors', error });
   }
 };

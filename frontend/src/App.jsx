@@ -21,7 +21,7 @@ import ResetPassord from "./components/Auth Components/ResetPassword";
 import ModelGenerator from "./pages/User Pages/ModelGenerator";
 import Profile from "./pages/User Pages/Profile Components/Profile";
 import UserLayout from "./pages/User Pages/UserLayout";
-import UserHome from "./pages/User Pages/UserHome";
+import UserHome from "./pages/User Pages/Home Page Components/UserHome";
 import UserProjects from "./pages/User Pages/UserProjects";
 import Help from "./pages/User Pages/Help";
 import SampleProjects from "./pages/User Pages/SampleProjects";

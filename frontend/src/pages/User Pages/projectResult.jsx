@@ -106,7 +106,7 @@ export default function Result() {
   return (
     <div className="container mx-auto">
       {/* Header */}
-      <img className="rounded-lg mb-4 w-full" src="/project images/H5.png" alt="CiviModeler H5" />
+      <img className="rounded-lg mb-4 w-full" src="/project images/H6.png" alt="CiviModeler H5" />
 
       {/* Main Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
