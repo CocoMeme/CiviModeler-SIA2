@@ -10,7 +10,7 @@ Chart.register(...registerables);
 
 const ReportsPage = () => {
   const [lineData, setLineData] = useState(null);
-  const [projectData, setProjectData] = useState(null);
+  const [totalProjectsData, setTotalProjectsData] = useState(null);
   const [contractorData, setContractorData] = useState(null);
   const [ratingsData, setRatingsData] = useState(null);
   const [genderData, setGenderData] = useState(null);
@@ -59,6 +59,19 @@ const ReportsPage = () => {
               pointBackgroundColor: "#ff7f0e",
               borderWidth: 2,
               tension: 0.4,
+            },
+          ],
+        });
+
+        setTotalProjectsData({
+          labels,
+          datasets: [
+            {
+              label: "Total Projects",
+              data: totalProjects,
+              borderColor: "#ff6384",
+              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              fill: true,
             },
           ],
         });
@@ -252,7 +265,7 @@ const ReportsPage = () => {
   </div>
   <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
     <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
-    {projectData && <Line data={projectData} />}
+    {totalProjectsData && <Line data={totalProjectsData} />}
   </div>
   <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
     <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
