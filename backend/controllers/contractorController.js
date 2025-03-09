@@ -57,7 +57,7 @@ export const getContractorById = async (req, res) => {
 // Get contractors by specialized endpoint - specifically for frontend component
 export const getContractors = async (req, res) => {
   try {
-    const { limit = 3, sort } = req.query;
+    const { limit, sort } = req.query;
     
     const query = contractorModel.find();
     
@@ -68,7 +68,7 @@ export const getContractors = async (req, res) => {
       query.sort('-rating');
     }
     
-    // Apply limit if specified
+    // Apply limit only if explicitly specified
     if (limit) {
       query.limit(parseInt(limit));
     }

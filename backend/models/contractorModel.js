@@ -4,7 +4,11 @@ const contractorSchema = new mongoose.Schema({
   name: { type: String, required: true },
   officeAddress: { type: String, required: true },
   contactNumber: { type: String, required: true },
-  notableProjects: { type: [String], required: true }, // Changed to an array of strings
+  email: { type: String },
+  website: { type: String },
+  facebook: { type: String },
+  notableProjects: { type: [String], required: true },
+  services: { type: [String], default: ['Residential Construction', 'Commercial Projects', 'Renovation'] }
 }, { timestamps: true });
 
 const contractorModel = mongoose.model('Contractor', contractorSchema);

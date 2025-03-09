@@ -34,8 +34,8 @@ import ProfileLayout from "./pages/User Pages/Profile Components/ProfileLayout";
 import ProfileOverview from "./pages/User Pages/Profile Components/Overview";
 import UserFeedback from "./pages/User Pages/UserFeedback";
 import Security from "./pages/User Pages/Profile Components/Security";
-
-
+import ContractorProfile from "./pages/User Pages/ContractorProfile";
+import ContractorList from "./pages/User Pages/ContractorList";
 
 const App = () => {
   return (
@@ -75,7 +75,8 @@ const App = () => {
         {/* User Interface */}
         <Route path="/user/*" element={<UserLayout />}>
           <Route path="home" element={<UserHome />} />
-          <Route path="project-detail" element={<ProjectDetail />} />
+          <Route path="contractors" element={<ContractorList />} />
+          <Route path="contractor/:id" element={<ContractorProfile />} />
           <Route path="sample-projects" element={<SampleProjects />} />
           <Route path="project-result" element={<ProjectResult />} />
           <Route path="user-projects" element={<UserProjects />} />
