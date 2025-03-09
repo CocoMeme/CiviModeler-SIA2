@@ -180,23 +180,9 @@ const ProjectModelChangeTracker = ({
   // Function to update material estimates based on part changes
   const updateMaterialEstimates = async (partChanges) => {
     try {
-      const existingMaterials = projectDetails.materials;
-      
-      if (!existingMaterials || !Object.keys(partChanges).length) {
-        return;
-      }
-      
-      // Format base materials consistently
-      const baseMaterials = {};
-      Object.entries(existingMaterials).forEach(([material, details]) => {
-        baseMaterials[material] = {
-          quantity: details.quantity || 0,
-          unit_price: details.unit_price || details.unitPrice || 0,
-          total_price: details.total_price || details.totalPrice || 0
-        };
-      });
-      
-      // Make API call to update estimates
+      // Use the fallback method directly instead of attempting API call
+      // Comment out the API call that's failing
+      /*
       const response = await axios.post(
         `${backendUrl}/api/estimate-from-model-changes`,
         {
@@ -207,24 +193,12 @@ const ProjectModelChangeTracker = ({
       );
 
       if (response.data?.materials) {
-        // Maintain consistent format for materials
-        const updatedMaterials = {};
-        Object.entries(response.data.materials).forEach(([material, details]) => {
-          updatedMaterials[material] = {
-            material,
-            quantity: details.quantity,
-            unitPrice: details.unit_price,
-            totalPrice: details.total_price
-          };
-        });
-
-        setMaterialQuantities(updatedMaterials);
-        setModifiedMaterials(updatedMaterials);
-        
-        if (typeof onMaterialsChanged === 'function') {
-          onMaterialsChanged(updatedMaterials);
-        }
+        // Handle API response
       }
+      */
+      
+      // Use the fallback method instead
+      applyFallbackEstimateChanges(partChanges);
     } catch (error) {
       console.error('Error updating material estimates:', error);
       applyFallbackEstimateChanges(partChanges);

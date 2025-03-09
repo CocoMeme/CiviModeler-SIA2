@@ -1095,16 +1095,38 @@ const ProjectViewer = () => {
         formData.append('updatedMaterials', JSON.stringify(updatedMaterials));
       }
 
-      // Prepare model data (you might need to modify this based on your model format)
-      const modelData = await new Promise((resolve) => {
-        model.toBlob(blob => resolve(blob));
+      // Use GLTFExporter with binary option to get a proper GLB file
+      const modelData = await new Promise((resolve, reject) => {
+        try {
+          const exporter = new GLTFExporter();
+          exporter.parse(
+            model,
+            (buffer) => {
+              // When binary option is true, we get an ArrayBuffer directly
+              const blob = new Blob([buffer], { type: 'application/octet-stream' });
+              resolve(blob);
+            },
+            (error) => {
+              reject(error);
+            },
+            { binary: true } // Export as binary GLB format
+          );
+        } catch (error) {
+          reject(error);
+        }
       });
-      formData.append('model', modelData);
+      
+      // Ensure the file has the correct extension
+      formData.append('model', modelData, 'model.glb');
 
-      // Make the API call
-      const response = await fetch(`${backendUrl}/api/projects/save-model`, {
+      // Fix the API endpoint to match the backend route structure
+      const response = await fetch(`${backendUrl}/api/project/save-model`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json'
+        }
       });
 
       const result = await response.json();
@@ -1135,7 +1157,26 @@ const ProjectViewer = () => {
       alert('Model saved successfully');
     } catch (error) {
       console.error('Error saving model:', error);
-      alert('Failed to save model: ' + error.message);
+      
+      // Add a fallback here - if online saving fails, save locally
+      try {
+        // If the model save fails, create a local version for the user
+        const modelJSON = await new Promise((resolve, reject) => {
+          const exporter = new GLTFExporter();
+          exporter.parse(model, resolve, reject, { binary: false }); // Use JSON format for local storage
+        });
+        
+        // Store model data in localStorage (for demo/fallback purposes)
+        localStorage.setItem(`model_${projectId}_backup`, JSON.stringify({
+          modelData: modelJSON,
+          materials: updatedMaterials,
+          timestamp: new Date().toISOString()
+        }));
+        
+        alert('Failed to save to server, but created a local backup. ' + error.message);
+      } catch (fallbackError) {
+        alert('Failed to save model: ' + error.message);
+      }
     } finally {
       setIsSaving(false);
     }

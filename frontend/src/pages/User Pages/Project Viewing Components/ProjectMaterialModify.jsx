@@ -45,7 +45,7 @@ const MaterialPropertyControl = ({ label, value, onChange, presets, property }) 
   );
 };
 
-const ProjectMaterialModify = ({ 
+const ProjectMaterialModify = ({
   selectedParts, // Changed from selectedPart to selectedParts
   onTransformChange,
   onMaterialChange,
@@ -209,39 +209,8 @@ const ProjectMaterialModify = ({
       {/* Material Properties with enhanced sliders */}
       <div>
         <h3 className="text-lg font-semibold mb-4">Material Properties</h3>
-        
-        {/* Color with enhanced picker */}
-        <div className="mb-6">
-          <label className="text-sm font-medium text-gray-300 mb-2 block">
-            Color
-            <span className="text-xs text-gray-400 ml-2">Click to open color picker</span>
-          </label>
-          <div className="space-y-2">
-            <div className="relative group">
-              <input
-                type="color"
-                value={material.color}
-                onChange={(e) => handleMaterialChange('color', e.target.value)}
-                className="w-full h-12 bg-gray-700 rounded cursor-pointer transition-transform group-hover:scale-[1.02]"
-              />
-              <div className="absolute inset-0 rounded border-2 border-transparent group-hover:border-blue-500 pointer-events-none transition-colors" />
-            </div>
-            {/* Color presets */}
-            <div className="grid grid-cols-8 gap-1">
-              {['#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'].map(color => (
-                <button
-                  key={color}
-                  onClick={() => handleMaterialChange('color', color)}
-                  className="w-8 h-8 rounded-full border border-gray-600 transition-transform hover:scale-110"
-                  style={{
-                    backgroundColor: color,
-                    boxShadow: material.color === color ? '0 0 0 2px white' : 'none'
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+
+        {/* Removed Color section since it's already in the Colors tab */}
 
         {/* Metalness with enhanced visual feedback */}
         <MaterialPropertyControl
@@ -310,7 +279,7 @@ const ProjectMaterialModify = ({
             </div>
           </div>
         </h3>
-        
+
         {/* Position Controls with axis buttons */}
         <div className="mb-6">
           <h4 className="text-sm font-medium text-gray-300 mb-2 flex justify-between items-center">
@@ -357,7 +326,7 @@ const ProjectMaterialModify = ({
         </div>
 
         {/* Rotation Controls with preset buttons */}
-        <div className="mb-6"></div>
+        <div className="mb-6">
           <h4 className="text-sm font-medium text-gray-300 mb-2 flex justify-between items-center">
             <span>Rotation</span>
             <div className="flex space-x-2">
@@ -515,23 +484,22 @@ const ProjectMaterialModify = ({
             </div>
           )}
         </div>
-      
-  
 
-      {/* Reset All Button with confirmation */}
-      <div className="relative group">
-        <button
-          onClick={(e) => {
-            if (e.shiftKey || window.confirm('Are you sure you want to reset all modifications?')) {
-              handleReset();
-            }
-          }}
-          className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200"
-        >
-          Reset All Modifications
-        </button>
-        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-          Hold Shift + Click to skip confirmation
+        {/* Reset All Button with confirmation */}
+        <div className="relative group">
+          <button
+            onClick={(e) => {
+              if (e.shiftKey || window.confirm('Are you sure you want to reset all modifications?')) {
+                handleReset();
+              }
+            }}
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200"
+          >
+            Reset All Modifications
+          </button>
+          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+            Hold Shift + Click to skip confirmation
+          </div>
         </div>
       </div>
     </div>

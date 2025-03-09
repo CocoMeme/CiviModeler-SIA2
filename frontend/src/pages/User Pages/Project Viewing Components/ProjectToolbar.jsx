@@ -8,7 +8,10 @@ const ProjectToolbar = ({ isSaving, modelLoading, onSave, onSaveSuccess }) => {
 
   const handleSave = async () => {
     await onSave();
-    onSaveSuccess();
+    // Only call onSaveSuccess if it exists
+    if (typeof onSaveSuccess === 'function') {
+      onSaveSuccess();
+    }
   };
 
   return (
