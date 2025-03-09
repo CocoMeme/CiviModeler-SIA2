@@ -6,19 +6,48 @@ const Docs = () => {
       <h1 style={styles.heading}>📖 System Documentation</h1>
       <p style={styles.subtext}>Welcome to the guide on how to use our system effectively.</p>
 
-      <div style={styles.stepsContainer}>
-        {["Register & Login", "Verify Your Account", "Create a Project", "View Material Estimation & Generate 3D Model", "Modify Your 3D Model"].map((step, index) => (
+      {/* Steps 1 to 3 in one row */}
+      <div style={styles.rowContainer}>
+        {[0, 1, 2].map((index) => (
           <div key={index} style={styles.card}>
-            <h2 style={styles.stepTitle}>{`Step ${index + 1}: ${step}`}</h2>
-            <p>{descriptions[index]}</p>
-            <img src={images[index]} alt={step} style={styles.image} />
-            <ol style={styles.list}>{instructions[index].map((item, i) => <li key={i}>{item}</li>)}</ol>
+            <h2 style={styles.stepTitle}>{`Step ${index + 1}: ${steps[index]}`}</h2>
+            <p style={styles.description}>{descriptions[index]}</p>
+            <img src={images[index]} alt={steps[index]} style={styles.image} />
+            <ol style={styles.list}>
+              {instructions[index].map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+
+      {/* Steps 4 and 5 in another row */}
+      <div style={styles.rowContainer}>
+        {[3, 4].map((index) => (
+          <div key={index} style={styles.card}>
+            <h2 style={styles.stepTitle}>{`Step ${index + 1}: ${steps[index]}`}</h2>
+            <p style={styles.description}>{descriptions[index]}</p>
+            <img src={images[index]} alt={steps[index]} style={styles.image} />
+            <ol style={styles.list}>
+              {instructions[index].map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ol>
           </div>
         ))}
       </div>
     </div>
   );
 };
+
+const steps = [
+  "Register & Login",
+  "Verify Your Account",
+  "Create a Project",
+  "View Material Estimation & Generate 3D Model",
+  "Modify Your 3D Model"
+];
 
 const descriptions = [
   "Before accessing the system, you need to create an account.",
@@ -30,7 +59,7 @@ const descriptions = [
 
 const images = [
   "/images/RegisterScreenshot.png",
-  "/images/OTPScreenshot.png",
+  "/images/OTPScreenshot1.png",
   "/images/CreateAProjectScreenshot.png",
   "/images/MaterialScreenshot.png",
   "/images/tutorial/3d-model.png"
@@ -45,53 +74,59 @@ const instructions = [
 ];
 
 const styles = {
-    container: {
-        padding: "40px",
-        maxWidth: "1000px",
-        margin: "auto",
-        fontFamily: "'Arial', sans-serif",
-        color: "#333",
-        textAlign: "center",
-        marginTop: "80px", // Added margin to move it lower
-      },
-      heading: {
-        fontSize: "32px",
-        color: "#2c3e50",
-        marginTop: "20px", // Further adjust position if needed
-      },
-  subtext: {
-    fontSize: "20px",
+  container: {
+    padding: "60px",
+    maxWidth: "1400px",
+    margin: "auto",
+    fontFamily: "'Arial', sans-serif",
+    color: "#333",
+    textAlign: "center",
+    marginTop: "100px",
+  },
+  heading: {
+    fontSize: "42px",
+    color: "#2c3e50",
     marginBottom: "30px",
   },
-  stepsContainer: {
+  subtext: {
+    fontSize: "24px",
+    marginBottom: "40px",
+  },
+  rowContainer: {
     display: "flex",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: "30px",
+    justifyContent: "center",
+    gap: "40px",
+    marginBottom: "40px",
   },
   card: {
     backgroundColor: "#f8f9fa",
-    padding: "30px",
-    width: "45%",
-    minWidth: "320px",
-    borderRadius: "12px",
-    boxShadow: "0 6px 12px rgba(0, 0, 0, 0.15)",
+    padding: "40px",
+    width: "48%",
+    minWidth: "350px",
+    borderRadius: "16px",
+    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
     textAlign: "left",
   },
   stepTitle: {
     color: "#800080",
-    fontSize: "26px",
-    marginBottom: "12px",
+    fontSize: "30px",
+    marginBottom: "15px",
+  },
+  description: {
+    fontSize: "20px",
+    marginBottom: "15px",
   },
   list: {
-    paddingLeft: "25px",
+    paddingLeft: "30px",
     lineHeight: "1.8",
     fontSize: "18px",
   },
   image: {
     width: "100%",
-    borderRadius: "10px",
-    marginBottom: "15px",
+    height: "auto",
+    borderRadius: "12px",
+    marginBottom: "20px",
   },
 };
 
