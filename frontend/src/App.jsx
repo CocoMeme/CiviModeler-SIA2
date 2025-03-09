@@ -8,6 +8,8 @@ import Register from "./pages/Guest Pages/Register";
 import Navbar from "./components/Pages Components/Navbar";
 import Footer from "./components/Pages Components/Footer";
 import AboutUs from "./pages/Guest Pages/AboutUs";
+import Docs from "./pages/Guest Pages/Docs";
+
 import GeneratingPage from "./components/Pages Components/GeneratingPage";
 import ProjectDetail from "./pages/User Pages/ProjectDetail";
 import Dashboard from "./pages/Admin Pages/Dashboard";
@@ -57,6 +59,7 @@ const App = () => {
                   <Route path="overview" element={<ProfileOverview />} />
                 </Route>
                 
+                <Route path="/docs" element={<Docs />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/testimony" element={<Testimony />} />
                 <Route path="/about-us" element={<AboutUs />} />
