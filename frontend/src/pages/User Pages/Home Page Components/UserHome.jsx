@@ -19,20 +19,20 @@ const UserHome = () => {
         <div className="w-full md:w-4/5 space-y-6">
           <RecentDesign />
           <ProjectInsights />
-          <CreateDesign />
+          {/* <CreateDesign /> */}
         </div>
         
         {/* Right Side - Sidebar (1/5 width) */}
         <div className="w-full md:w-1/5 space-y-6">
           <LatestChanges />
           <NewestContractors />
-          <CheckoutMore />
+          {/* <CheckoutMore /> */}
         </div>
       </div>
       
       {/* Recent Projects Carousel */}
       <div className="mt-8">
-        <RecentProject />
+        {/* <RecentProject /> */}
       </div>
     </div>
   )
