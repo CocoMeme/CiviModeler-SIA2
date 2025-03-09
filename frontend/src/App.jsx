@@ -9,7 +9,6 @@ import Navbar from "./components/Pages Components/Navbar";
 import Footer from "./components/Pages Components/Footer";
 import AboutUs from "./pages/Guest Pages/AboutUs";
 import Docs from "./pages/Guest Pages/Docs";
-
 import GeneratingPage from "./components/Pages Components/GeneratingPage";
 import ProjectDetail from "./pages/User Pages/ProjectDetail";
 import Dashboard from "./pages/Admin Pages/Dashboard";
@@ -20,7 +19,6 @@ import UserManagement from "./pages/Admin Pages/UserManagement";
 import ProjectResult from "./pages/User Pages/projectResult";
 import EmailVerify from "./components/Auth Components/EmailVerify";
 import ResetPassord from "./components/Auth Components/ResetPassword";
-import ModelGenerator from "./pages/User Pages/ModelGenerator";
 import Profile from "./pages/User Pages/Profile Components/Profile";
 import UserLayout from "./pages/User Pages/UserLayout";
 import UserHome from "./pages/User Pages/Home Page Components/UserHome";
@@ -34,6 +32,7 @@ import ProjectViewer from "./pages/User Pages/Project Viewing Components/Project
 import ProjectLayout from "./pages/User Pages/Project Viewing Components/ProjectLayout";
 import ProfileLayout from "./pages/User Pages/Profile Components/ProfileLayout";
 import ProfileOverview from "./pages/User Pages/Profile Components/Overview";
+import UserFeedback from "./pages/User Pages/UserFeedback";
 
 
 const App = () => {
@@ -65,7 +64,6 @@ const App = () => {
                 <Route path="/about-us" element={<AboutUs />} />
 
                 <Route path="/loading" element={<GeneratingPage />} />
-                <Route path="/model-generator" element={<ModelGenerator />} />
               </Routes>
               <Footer />
             </>
@@ -79,9 +77,8 @@ const App = () => {
           <Route path="project-result" element={<ProjectResult />} />
           <Route path="user-projects" element={<UserProjects />} />
           <Route path="help" element={<Help />} />
-
           <Route path="project-overview" element={<ProjectOverview />} />
-          
+          <Route path="feedback" element={<UserFeedback/>} />
         </Route>
 
         {/* Project Viewing Interface */}
