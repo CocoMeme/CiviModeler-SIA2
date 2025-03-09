@@ -62,7 +62,7 @@ const images = [
   "/images/OTPScreenshot1.png",
   "/images/CreateAProjectScreenshot.png",
   "/images/MaterialScreenshot.png",
-  "/images/tutorial/3d-model.png"
+  "/images/3DModifyScreenshot.png"
 ];
 
 const instructions = [
