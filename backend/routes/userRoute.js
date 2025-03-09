@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUserData, getAllUsers, updateUser, deleteUser,updateStatus, getGenderData, getAccountStatusData} from '../controllers/userController.js';
+import { getUserData, getAllUsers, updateUser, deleteUser, updateStatus, getGenderData, getAccountStatusData, recordLoginHistory, updatePassword } from '../controllers/userController.js';
 import userAuth from '../middleware/userAuth.js';
 import { isAuthenticated } from '../controllers/authController.js';
 
@@ -10,7 +10,11 @@ userRouter.get('/all', userAuth, getAllUsers);
 userRouter.put('/update-status/:id', userAuth, updateStatus);
 userRouter.put('/update/:id', userAuth, updateUser); 
 userRouter.delete('/delete/:id', userAuth, deleteUser);
-userRouter.get('/gender-data', getGenderData)
+userRouter.get('/gender-data', getGenderData);
 userRouter.get('/account-status-data', getAccountStatusData);
+
+// New routes
+userRouter.post('/login-history/:id', userAuth, recordLoginHistory);
+userRouter.put('/update-password/:id', userAuth, updatePassword);
 
 export default userRouter;

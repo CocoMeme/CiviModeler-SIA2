@@ -34,6 +34,7 @@ import ProjectViewer from "./pages/User Pages/Project Viewing Components/Project
 import ProjectLayout from "./pages/User Pages/Project Viewing Components/ProjectLayout";
 import ProfileLayout from "./pages/User Pages/Profile Components/ProfileLayout";
 import ProfileOverview from "./pages/User Pages/Profile Components/Overview";
+import Security from "./pages/User Pages/Profile Components/Security";
 
 
 const App = () => {
@@ -57,6 +58,7 @@ const App = () => {
 
                 <Route path="/profile/*" element={<ProfileLayout/>}>
                   <Route path="overview" element={<ProfileOverview />} />
+                  <Route path="security" element={<Security />} />
                 </Route>
                 
                 <Route path="/docs" element={<Docs />} />

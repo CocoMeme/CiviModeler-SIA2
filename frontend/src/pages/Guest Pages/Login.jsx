@@ -16,6 +16,33 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
+  const recordLoginHistory = async (userId) => {
+    try {
+      // Get device info from user agent
+      const userAgent = window.navigator.userAgent;
+      const device = {
+        browser: /chrome|safari|firefox|msie|trident/i.exec(userAgent.toLowerCase())?.[0] || "Unknown",
+        os: /(windows|mac|linux)/i.exec(userAgent.toLowerCase())?.[0] || "Unknown",
+      };
+      const deviceInfo = `${device.browser} on ${device.os}`;
+
+      // Get IP address from ipapi.co
+      const ipResponse = await axios.get('https://ipapi.co/json/', { withCredentials: false });
+      const ip = ipResponse.data.ip;
+
+      // Record login history
+      await axios.post(
+        `${backendUrl}/api/user/login-history/${userId}`,
+        { ip, device: deviceInfo },
+        { withCredentials: true }
+      );
+    } catch (error) {
+      console.error('Error recording login history:', error);
+      // Don't show error to user as this is a background operation
+      // Still proceed with login even if history recording fails
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
@@ -33,6 +60,12 @@ const Login = () => {
           }
             setIsLoggedin(true);
             await getUserData(); // Ensure getUserData is awaited
+            
+            // Record login history after successful login
+            if (data.userId) {
+              await recordLoginHistory(data.userId);
+            }
+
             if (data.isAdmin) {
                 navigate('/admin/dashboard');
                 toast.success("Login successful!");

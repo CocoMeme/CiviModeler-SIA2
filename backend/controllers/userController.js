@@ -96,47 +96,6 @@ export const updateUser = async (req, res) => {
 
 
 
-// export const updateStatus = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { status } = req.body;
-
-//     // Validate MongoDB ObjectId
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//       return res.status(400).json({ success: false, message: "Invalid user ID" });
-//     }
-
-//     // Find the user by ID
-//     const user = await userModel.findById(id);
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: "User not found" });
-//     }
-
-//     // Update status and increment DeactiveationCount if status is 'Deactivated'
-//     if (status === 'Deactivated') {
-//       user.DeactiveationCount += 1;
-//       if (user.DeactiveationCount >= 3) {
-//         user.status = 'Blocked';
-//       } else {
-//         user.status = status;
-//       }
-//     } else {
-//       user.status = status;
-//     }
-
-//     // Save the updated user
-//     await user.save();
-
-//     res.status(200).json({ success: true, message: "User status updated successfully!", user });
-//   } catch (error) {
-//     console.error("Error updating user status:", error);
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-// Add the deleteUser function
-
-
 export const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -239,6 +198,77 @@ export const getAccountStatusData = async (req, res) => {
     }, {});
 
     res.json({ success: true, data: formattedData });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const recordLoginHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ip, device } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+
+    const user = await userModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Add new login record
+    user.loginHistory.push({ 
+      timestamp: new Date(),
+      ip: ip || "Unknown",
+      device: device || "Unknown"
+    });
+
+    // Update last login time
+    user.lastLogin = new Date();
+
+    // Keep only last 10 login records
+    if (user.loginHistory.length > 10) {
+      user.loginHistory = user.loginHistory.slice(-10);
+    }
+
+    await user.save();
+    res.json({ success: true, message: "Login history updated" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+
+    const user = await userModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password and lastPasswordChange
+    user.password = hashedPassword;
+    user.lastPasswordChange = new Date();
+
+    await user.save();
+    res.json({ success: true, message: "Password updated successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

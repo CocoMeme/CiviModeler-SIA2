@@ -56,7 +56,6 @@ const ProfileOverview = () => {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
 
-      // Create a profile object with nested fields
       const profileObj = {
         phoneNumber: formData.phoneNumber,
         address: {
@@ -70,21 +69,18 @@ const ProfileOverview = () => {
         gender: formData.gender,
       };
 
-      // Append the profile object as a JSON string
       formDataToSend.append("profile", JSON.stringify(profileObj));
 
       if (image) {
         formDataToSend.append("profilePic", image);
       }
 
-      // Remove the explicit "Content-Type" header so Axios sets the correct boundary automatically
       const response = await axios.put(
         `${backendUrl}/api/user/update/${userData._id}`,
         formDataToSend
       );
 
       setUserData(response.data.user);
-      // Reset initialization so the form reinitializes with updated data
       setInitialized(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -96,161 +92,225 @@ const ProfileOverview = () => {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-6 bg-white">
-      {/* Left Column: Profile Picture & Basic Info */}
-      <div className="col-span-3 flex flex-col items-center space-y-4">
-        {userData?.profilePic ? (
-          <img
-            src={userData.profilePic}
-            alt="Profile"
-            className="w-32 h-32 rounded-full border-4 border-purple-700 object-cover"
-          />
-        ) : (
-          <div className="w-32 h-32 rounded-full border-4 border-purple-700 flex items-center justify-center bg-gray-300 text-2xl font-bold text-white">
-            {userData?.name ? userData.name.charAt(0).toUpperCase() : "U"}
+    <div className="overview-container">
+      <h2 className="text-xl font-semibold text-purple-700 mb-6">Profile Overview</h2>
+      
+      {/* Profile Picture Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-medium text-gray-700 mb-3">Profile Picture</h3>
+        <div className="bg-gray-50 p-4 rounded-md flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <div className="flex-shrink-0">
+              {userData?.profilePic ? (
+                <img
+                  src={userData.profilePic}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full border-2 border-purple-600 object-cover"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full border-2 border-purple-600 flex items-center justify-center bg-gray-200 text-2xl font-bold text-gray-600">
+                  {userData?.name ? userData.name.charAt(0).toUpperCase() : "U"}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+                className="hidden"
+                id="fileUpload"
+              />
+              <label
+                htmlFor="fileUpload"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md cursor-pointer hover:bg-purple-700 inline-block text-center text-sm font-medium"
+              >
+                Change Profile Picture
+              </label>
+              <p className="text-sm text-gray-600">Recommended size: 500x500 pixels</p>
+            </div>
           </div>
-        )}
-
-        {/* Upload Profile Picture */}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImage(e.target.files[0])}
-          className="hidden"
-          id="fileUpload"
-        />
-        <label
-          htmlFor="fileUpload"
-          className="cursor-pointer text-purple-700 font-semibold hover:underline"
-        >
-          Edit Profile Picture
-        </label>
-
-        {/* User Info */}
-        <div className="text-center">
-          <p className="text-lg font-semibold">{userData?.name}</p>
-          <p className="text-gray-600">{userData?.email}</p>
+          {image && (
+            <div className="text-sm text-gray-600">
+              Selected file: {image.name}
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* Update Button - Always at the Bottom */}
+      {/* Basic Information Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-medium text-gray-700 mb-3">Basic Information</h3>
+        <div className="bg-gray-50 p-4 rounded-md">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="name">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter your full name"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="phoneNumber">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="dateOfBirth">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="gender">
+                  Gender
+                </label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Unknown">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Address Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-medium text-gray-700 mb-3">Address Information</h3>
+        <div className="bg-gray-50 p-4 rounded-md">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700 mb-2 font-medium" htmlFor="street">
+                Street Address
+              </label>
+              <input
+                type="text"
+                id="street"
+                name="street"
+                value={formData.street}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter street address"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="city">
+                  City
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter city"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="state">
+                  State/Province
+                </label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter state"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="country">
+                  Country
+                </label>
+                <input
+                  type="text"
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter country"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium" htmlFor="zipCode">
+                  ZIP/Postal Code
+                </label>
+                <input
+                  type="text"
+                  id="zipCode"
+                  name="zipCode"
+                  value={formData.zipCode}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter ZIP code"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Update Button */}
+      <div>
         <button
           onClick={handleUpdate}
-          className={`mt-auto w-full p-2 text-white rounded ${
-            loading ? "bg-gray-500" : "bg-purple-700 hover:bg-purple-800"
-          }`}
           disabled={loading}
+          className={`px-6 py-2 rounded-md text-white font-medium transition-colors duration-200 ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+          }`}
         >
           {loading ? "Updating..." : "Update Profile"}
         </button>
-      </div>
-
-      {/* Right Column: Profile Details Form */}
-      <div className="col-span-9 pl-10">
-        <h2 className="text-lg font-semibold border-b pb-2">Personal Information</h2>
-        
-        <div className="mt-4 grid grid-cols-3 gap-2 items-center pl-10">
-          <label className="text-left pr-2 col-span-1">
-            <strong>Name:</strong>
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>Phone Number:</strong>
-          </label>
-          <input
-            type="text"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>Date of Birth:</strong>
-          </label>
-          <input
-            type="date"
-            name="dateOfBirth"
-            value={formData.dateOfBirth}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>Gender:</strong>
-          </label>
-          <select
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          >
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>Street:</strong>
-          </label>
-          <input
-            type="text"
-            name="street"
-            value={formData.street}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>City:</strong>
-          </label>
-          <input
-            type="text"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>State:</strong>
-          </label>
-          <input
-            type="text"
-            name="state"
-            value={formData.state}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>Country:</strong>
-          </label>
-          <input
-            type="text"
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-
-          <label className="text-left pr-2 col-span-1">
-            <strong>Zip Code:</strong>
-          </label>
-          <input
-            type="text"
-            name="zipCode"
-            value={formData.zipCode}
-            onChange={handleChange}
-            className="col-span-2 w-full p-2 border rounded"
-          />
-        </div>
       </div>
     </div>
   );

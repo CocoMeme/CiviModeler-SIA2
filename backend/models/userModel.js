@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
     isAccountVerified: { type: Boolean, default: false },
     resetOtp: { type: String, default: '' },
     resetOtpExpireAt: { type: Number, default: 0 },
-    twoFactorEnabled: { type: Boolean, default: false },
     lastLogin: { type: Date, default: null },
     status: { type: String, enum: ['Active', 'Deactivated', 'Blocked'], default: 'Active' },
     DeactivationCount: { type: Number, default: 0 },
@@ -37,25 +36,6 @@ const userSchema = new mongoose.Schema({
         },
         dateOfBirth: { type: Date, default: null },
         gender: { type: String, enum: ['Male', 'Female', 'Unknown'], default: 'Unknown' },
-    },
-
-    // Subscription & Plan Details
-    subscription: {
-        plan: { type: String, enum: ['Free', 'Basic', 'Premium'], default: 'Free' },
-        startDate: { type: Date, default: null },
-        endDate: { type: Date, default: null },
-        isActive: { type: Boolean, default: false },
-    },
-
-    // User Preferences
-    preferences: {
-        language: { type: String, default: 'en' },
-        theme: { type: String, enum: ['light', 'dark'], default: 'light' },
-        notifications: {
-            email: { type: Boolean, default: true },
-            sms: { type: Boolean, default: false },
-            push: { type: Boolean, default: true },
-        },
     },
 
     // Activity Tracking
