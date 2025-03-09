@@ -4,8 +4,8 @@ import { DataGrid } from '@mui/x-data-grid';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
-import {toast} from 'react-toastify';
-
+import { toast } from 'react-toastify';
+import { format } from 'date-fns';
 
 const modalStyle = {
   position: 'absolute',
@@ -35,7 +35,15 @@ export default function UserManagement() {
       try {
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/all`, { withCredentials: true });
         if (response.data.success) {
-          const activeUsers = response.data.users.filter(user => !user.isDeleted);
+          const activeUsers = response.data.users.filter(user => !user.isDeleted).map(user => {
+            const latestLogin = user.loginHistory.reduce((latest, current) => {
+              return new Date(latest.timestamp) > new Date(current.timestamp) ? latest : current;
+            }, { timestamp: null });
+            return {
+              ...user,
+              latestLoginTimestamp: latestLogin.timestamp ? format(new Date(latestLogin.timestamp), 'MMMM dd, yyyy hh:mm a') : 'No login recorded'
+            };
+          });
           setUsers(activeUsers);
           setFilteredUsers(activeUsers);
         } else {
@@ -82,10 +90,6 @@ export default function UserManagement() {
   };
 
   const handleStatusClick = (user) => {
-    // if (user.DeactiveationCount >= 3) {
-    //   toast.warning('User is already banned and cannot change status.');
-    //   return;
-    // }
     setSelectedUser(user);
     setStatus(user.status);
     setIsStatusModalOpen(true);
@@ -122,6 +126,7 @@ export default function UserManagement() {
       console.error('Error updating user status:', error);
     }
   };
+
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredUsers);
     const workbook = XLSX.utils.book_new();
@@ -155,6 +160,11 @@ export default function UserManagement() {
       field: 'DeactivationCount',
       headerName: 'DeactivationCount',
       width: 150,
+    },
+    {
+      field: 'latestLoginTimestamp',
+      headerName: 'Latest Login',
+      width: 200,
     },
     {
       field: 'actions',
