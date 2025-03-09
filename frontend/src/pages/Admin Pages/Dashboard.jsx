@@ -16,11 +16,9 @@ const Dashboard = () => {
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    licenseNumber: '',
-    businessAddress: '',
+    officeAddress: '', 
     contactNumber: '',
-    experience: '',
-    contractTerms: '',
+    notableProjects: '', 
   });
 
   useEffect(() => {
@@ -59,11 +57,9 @@ const Dashboard = () => {
       setOpenCreateModal(false);
       setFormData({
         name: '',
-        licenseNumber: '',
-        businessAddress: '',
+        officeAddress: '', 
         contactNumber: '',
-        experience: '',
-        contractTerms: '',
+        notableProjects: '', 
       });
     } catch (error) {
       console.error('Error creating contractor:', error);
@@ -72,23 +68,27 @@ const Dashboard = () => {
 
   const handleUpdate = (contractor) => {
     setSelectedContractor(contractor);
-    setFormData(contractor);
+    setFormData({
+      ...contractor,
+      notableProjects: contractor.notableProjects.join(', '), 
+    });
     setOpenUpdateModal(true);
   };
 
   const handleUpdateSave = async () => {
     try {
-      const { data } = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/contractor/update/${selectedContractor._id}`, formData, { withCredentials: true });
+      const { data } = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/contractor/update/${selectedContractor._id}`, {
+        ...formData,
+        notableProjects: formData.notableProjects.split(',').map(project => project.trim()), // Convert string to array
+      }, { withCredentials: true });
       setContractors(contractors.map(contractor => contractor._id === data._id ? data : contractor));
       setOpenUpdateModal(false);
       setSelectedContractor(null);
       setFormData({
         name: '',
-        licenseNumber: '',
-        businessAddress: '',
+        officeAddress: '', 
         contactNumber: '',
-        experience: '',
-        contractTerms: '',
+        notableProjects: '',
       });
     } catch (error) {
       console.error('Error updating contractor:', error);
@@ -139,26 +139,22 @@ const Dashboard = () => {
           </div>
           <table className="min-w-full bg-gray-800 border-collapse ">
           <thead className="bg-white text-black">
-  <tr>
+          <tr>
     <th className="py-2 px-4 border-b text-left">Name</th>
-    <th className="py-2 px-4 border-b text-left">License Number</th>
-    <th className="py-2 px-4 border-b text-left">Business Address</th>
+    <th className="py-2 px-4 border-b text-left">Office Address</th> 
     <th className="py-2 px-4 border-b text-left">Contact Number</th>
-    <th className="py-2 px-4 border-b text-left">Experience</th>
-    <th className="py-2 px-4 border-b text-left">Contract Terms</th>
+    <th className="py-2 px-4 border-b text-left">Notable Projects</th> 
     <th className="py-2 px-4 border-b text-left">Actions</th>
   </tr>
 </thead>
 
-            <tbody>
+<tbody>
               {contractors.map((contractor) => (
                 <tr key={contractor._id}>
                   <td className="py-2 px-4 border-b">{contractor.name}</td>
-                  <td className="py-2 px-4 border-b">{contractor.licenseNumber}</td>
-                  <td className="py-2 px-4 border-b">{contractor.businessAddress}</td>
+                  <td className="py-2 px-4 border-b">{contractor.officeAddress}</td> 
                   <td className="py-2 px-4 border-b">{contractor.contactNumber}</td>
-                  <td className="py-2 px-4 border-b">{contractor.experience}</td>
-                  <td className="py-2 px-4 border-b">{contractor.contractTerms}</td>
+                  <td className="py-2 px-4 border-b">{contractor.notableProjects.join(', ')}</td> 
                   <td className="py-2 px-4 border-b">
                     <button className="bg-blue-500 text-white py-1 px-4 rounded hover:bg-blue-600 mr-2" onClick={() => handleUpdate(contractor)}>Update</button>
                     <button className="bg-red-500 text-white py-1 px-4 rounded hover:bg-red-600" onClick={() => handleDelete(contractor)}>Delete</button>
@@ -184,20 +180,11 @@ const Dashboard = () => {
           />
           <TextField
             margin="dense"
-            name="licenseNumber"
-            label="License Number"
+            name="officeAddress"
+            label="Office Address"
             type="text"
             fullWidth
-            value={formData.licenseNumber}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="businessAddress"
-            label="Business Address"
-            type="text"
-            fullWidth
-            value={formData.businessAddress}
+            value={formData.officeAddress}
             onChange={handleCreateChange}
           />
           <TextField
@@ -211,20 +198,11 @@ const Dashboard = () => {
           />
           <TextField
             margin="dense"
-            name="experience"
-            label="Experience"
+            name="notableProjects"
+            label="Notable Projects"
             type="text"
             fullWidth
-            value={formData.experience}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="contractTerms"
-            label="Contract Terms"
-            type="text"
-            fullWidth
-            value={formData.contractTerms}
+            value={formData.notableProjects}
             onChange={handleCreateChange}
           />
         </DialogContent>
@@ -248,20 +226,11 @@ const Dashboard = () => {
           />
           <TextField
             margin="dense"
-            name="licenseNumber"
-            label="License Number"
+            name="officeAddress"
+            label="Office Address"
             type="text"
             fullWidth
-            value={formData.licenseNumber}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="businessAddress"
-            label="Business Address"
-            type="text"
-            fullWidth
-            value={formData.businessAddress}
+            value={formData.officeAddress}
             onChange={handleCreateChange}
           />
           <TextField
@@ -275,20 +244,11 @@ const Dashboard = () => {
           />
           <TextField
             margin="dense"
-            name="experience"
-            label="Experience"
+            name="notableProjects"
+            label="Notable Projects"
             type="text"
             fullWidth
-            value={formData.experience}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="contractTerms"
-            label="Contract Terms"
-            type="text"
-            fullWidth
-            value={formData.contractTerms}
+            value={formData.notableProjects}
             onChange={handleCreateChange}
           />
         </DialogContent>
