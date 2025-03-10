@@ -83,6 +83,7 @@ const App = () => {
           <Route path="help" element={<Help />} />
           <Route path="project-overview" element={<ProjectOverview />} />
           <Route path="feedback" element={<UserFeedback/>} />
+          <Route path="project-detail" element={<ProjectDetail />} />
         </Route>
 
         {/* Project Viewing Interface */}
