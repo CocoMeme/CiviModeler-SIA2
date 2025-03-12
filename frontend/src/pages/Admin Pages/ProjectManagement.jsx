@@ -118,71 +118,88 @@ export default function ProjectManagement() {
       const margin = 40;
       let currentY = margin;
   
-      // **Add Logo to Header**
-      const logoPath = '/images/CiviModeler - NBG.png'; // Your logo path
+      // **Enhanced Header with Logo and Title**
+      const logoPath = '/images/CiviModeler - NBG.png';
       const logoWidth = 60;
       const logoHeight = 60;
       doc.addImage(logoPath, 'PNG', margin, currentY, logoWidth, logoHeight);
   
-      // **Header Title Beside Logo**
+      // Modern Typography for Header
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(24);
-      doc.setTextColor(102, 51, 153); // Purple color
-      doc.text("CiviModeler Project Report", margin + logoWidth + 15, currentY + 40);
+      doc.setFontSize(28);
+      doc.setTextColor(44, 62, 80); // Dark blue-gray for professionalism
+      doc.text("Project Documentation", margin + logoWidth + 15, currentY + 40);
   
-      currentY += 70; // Move cursor down
+      currentY += 70;
   
-      // **Styled Header Line**
-      doc.setLineWidth(1);
-      doc.setDrawColor(102, 51, 153);
+      // Professional header divider
+      doc.setLineWidth(1.5);
+      doc.setDrawColor(52, 152, 219); // Professional blue
       doc.line(margin, currentY, pageWidth - margin, currentY);
-      currentY += 20; // Adjust spacing
+      currentY += 25;
   
-      // **Move Date Below Divider**
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'italic');
-      doc.setTextColor(0, 0, 0);
-      const date = new Date().toLocaleDateString();
-      doc.text(`Generated on: ${date}`, margin, currentY);
+      // Document metadata with elegant typography
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      const date = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      doc.text(`Generated: ${date}`, margin, currentY);
+      doc.text(`Project ID: ${project._id}`, pageWidth - margin - 200, currentY);
   
-      currentY += 30; // Move cursor down for project details
+      currentY += 40;
   
-      // **Project Details**
+      // Primary Project Information with improved styling
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(102, 51, 153);
-      doc.text("Project Details", margin, currentY);
+      doc.setFontSize(16);
+      doc.setTextColor(44, 62, 80);
+      doc.text("Project Information", margin, currentY);
       currentY += 15;
   
+      // Sophisticated background for information sections
+      doc.setFillColor(249, 250, 251);
+      doc.roundedRect(margin - 10, currentY - 5, pageWidth - (margin * 2) + 20, 70, 3, 3, 'F');
+      
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0);
+      doc.setTextColor(70, 70, 70);
       const details = [
         `Project Name: ${project.projectName || 'N/A'}`,
         `Contractor: ${contractorName}`,
-        `Total Cost: ${project.totalCost?.toLocaleString() || '0.00'}`
+        `Total Cost: ${project.totalCost?.toLocaleString()} (Value in local currency)`
       ];
       details.forEach(text => {
         doc.text(text, margin, currentY);
         currentY += 18;
       });
   
-      // **Section Divider**
+      // Subtle section divider
+      doc.setLineDashPattern([1, 1], 0);
       doc.setDrawColor(200, 200, 200);
-      doc.line(margin, currentY, pageWidth - margin, currentY);
-      currentY += 20;
+      doc.line(margin, currentY + 10, pageWidth - margin, currentY + 10);
+      doc.setLineDashPattern([], 0);
+      currentY += 30;
   
-      // **Additional Project Details**
+      // Additional specifications section with consistent styling
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(102, 51, 153);
-      doc.text("Additional Project Details", margin, currentY);
+      doc.setFontSize(16);
+      doc.setTextColor(44, 62, 80);
+      doc.text("Project Specifications", margin, currentY);
       currentY += 15;
   
+      // Consistent styling for secondary information
+      doc.setFillColor(249, 250, 251);
+      doc.roundedRect(margin - 10, currentY - 5, pageWidth - (margin * 2) + 20, 90, 3, 3, 'F');
+      
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(12);
+      doc.setTextColor(70, 70, 70);
       const projectDetails = [
         `Location Size: ${project.size || 'N/A'}`,
-        `Budget: ${project.budget?.toLocaleString() || 'N/A'}`,
+        `Budget Allocation: ${project.budget?.toLocaleString() || 'N/A'} (Value in local currency)`,
         `Design Style: ${project.style || 'N/A'}`,
         `Description: ${project.projectDescription || 'N/A'}`
       ];
@@ -191,43 +208,103 @@ export default function ProjectManagement() {
         currentY += 18;
       });
   
-      // **Section Divider**
+      // Subtle section divider
+      doc.setLineDashPattern([1, 1], 0);
       doc.setDrawColor(200, 200, 200);
-      doc.line(margin, currentY, pageWidth - margin, currentY);
-      currentY += 20;
-  
-      // **Material Table**
+      doc.line(margin, currentY + 10, pageWidth - margin, currentY + 10);
+      doc.setLineDashPattern([], 0);
+      currentY += 30;
+      
+      // **ENHANCED: Executive Summary Section with professional styling**
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(102, 51, 153);
-      doc.text("Material Table", margin, currentY);
+      doc.setFontSize(16);
+      doc.setTextColor(44, 62, 80);
+      doc.text("Executive Summary", margin, currentY);
+      currentY += 15;
+      
+      // Elegant accent line
+      doc.setDrawColor(52, 152, 219);
+      doc.setLineWidth(0.75);
+      doc.line(margin, currentY, margin + 120, currentY);
+      currentY += 15;
+      
+      // Premium background with subtle gradient effect
+      doc.setFillColor(244, 246, 248);
+      doc.roundedRect(margin - 10, currentY - 5, pageWidth - (margin * 2) + 20, 140, 5, 5, 'F');
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(70, 70, 70);
+      
+      // Create a professional executive summary based on project details
+      const synthesisText = 
+        `The ${project.projectName || 'Project'} integrates ${project.style || 'contemporary'} design principles ` + 
+        `across its ${project.size || 'specified'} dimensions to achieve optimal spatial efficiency. With a total valuation of ` + 
+        `${project.totalCost?.toLocaleString() || '0'}, this project incorporates premium-grade materials and expert craftsmanship ` +
+        `to ensure structural integrity and aesthetic excellence. Under the management of ${contractorName}, all construction ` +
+        `phases will be executed in strict adherence to established industry protocols and regulatory requirements.\n\n` +
+        
+        `A distinguishing feature of this project is its strategic balance of form and function, with particular emphasis on ` +
+        `material quality and sustainable practices. The allocated budget of ${project.budget?.toLocaleString() || 'N/A'} ` +
+        `has been methodically distributed to maximize efficiency without compromising the established quality benchmarks.\n\n` +
+        
+        `This development represents a significant capital investment that promises substantial long-term returns through enhanced ` +
+        `functionality and market value appreciation, fully aligned with the strategic objectives and specifications.`;
+        
+      const textLines = doc.splitTextToSize(synthesisText, pageWidth - 2 * margin - 20);
+      doc.text(textLines, margin + 10, currentY + 15);
+      currentY += textLines.length * 13 + 30;
+  
+      // **Material Specifications Table with professional styling**
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(44, 62, 80);
+      doc.text("Material Specifications", margin, currentY);
       currentY += 15;
   
       const materialRows = project.materials?.map(material => [
         material.material,
         material.quantity.toString(),
-        `${material.unitPrice.toFixed(2)}`,
-        `${material.totalPrice.toFixed(2)}`
+        material.unitPrice.toLocaleString(),
+        material.totalPrice.toLocaleString()
       ]) || [];
   
       doc.autoTable({
         startY: currentY,
-        head: [['Material', 'Quantity', 'Unit Price', 'Total Price']],
+        head: [['Material', 'Quantity', 'Unit Price', 'Total']],
         body: materialRows,
-        theme: 'striped',
-        headStyles: { fillColor: [102, 51, 153], textColor: [255, 255, 255] }, // Purple header
-        styles: { font: "helvetica", fontSize: 10, cellPadding: 5 },
-        alternateRowStyles: { fillColor: [245, 245, 245] },
+        theme: 'grid',
+        headStyles: { 
+          fillColor: [52, 73, 94], // Dark blue-gray for professional headers
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        styles: { 
+          font: "helvetica", 
+          fontSize: 10, 
+          cellPadding: 8,
+          lineColor: [220, 220, 220]
+        },
+        alternateRowStyles: { fillColor: [249, 250, 251] },
         margin: { left: margin, right: margin },
         didDrawPage: (data) => {
-          // Footer
-          doc.setFontSize(10);
-          doc.setTextColor(102, 51, 153);
-          doc.text("This is an autogenerated report by CiviModeler", margin, pageHeight - 20);
+          // Professional footer with page numbers and branding
+          doc.setFontSize(9);
+          doc.setTextColor(120, 120, 120);
+          doc.text(`Page ${doc.internal.getNumberOfPages()}`, pageWidth - margin - 40, pageHeight - 20);
+          
+          // Company branding in footer
+          doc.setFontSize(9);
+          doc.setTextColor(44, 62, 80);
+          doc.setFont('helvetica', 'bold');
+          doc.text("CiviModeler Professional Documentation", margin, pageHeight - 20);
         }
       });
   
-      // Save the document
-      doc.save('User_report.pdf');
+      // Save the document with a professional filename
+      const safeProjectName = (project.projectName || 'Project').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      doc.save(`CiviModeler_${safeProjectName}_Documentation.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(`Error generating PDF: ${error.message}`);
@@ -330,8 +407,8 @@ export default function ProjectManagement() {
                     <tr key={index}>
                       <td style={{ border: '1px solid black', padding: '8px' }}>{material.material}</td>
                       <td style={{ border: '1px solid black', padding: '8px' }}>{material.quantity}</td>
-                      <td style={{ border: '1px solid black', padding: '8px' }}>₱{material.unitPrice.toLocaleString()}</td>
-                      <td style={{ border: '1px solid black', padding: '8px' }}>₱{material.totalPrice.toLocaleString()}</td>
+                      <td style={{ border: '1px solid black', padding: '8px' }}>{material.unitPrice.toLocaleString()}</td>
+                      <td style={{ border: '1px solid black', padding: '8px' }}>{material.totalPrice.toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
