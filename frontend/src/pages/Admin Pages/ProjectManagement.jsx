@@ -29,9 +29,7 @@ export default function ProjectManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState(null);
   const [contractorDetails, setContractorDetails] = useState(null);
-  const [openClientModal, setOpenClientModal] = useState(false);
   const [openMaterialsModal, setOpenMaterialsModal] = useState(false);
-  const [openContractorModal, setOpenContractorModal] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -56,36 +54,22 @@ export default function ProjectManagement() {
     ));
   };
 
-  const handleOpenClientModal = (project) => {
-    setSelectedProject(project);
-    setOpenClientModal(true);
-  };
-
-  const handleCloseClientModal = () => setOpenClientModal(false);
-
-  const handleOpenMaterialsModal = (project) => {
-    setSelectedProject(project);
-    setOpenMaterialsModal(true);
-  };
-
-  const handleCloseMaterialsModal = () => setOpenMaterialsModal(false);
-
-  const handleOpenContractorModal = async (project) => {
+  const handleOpenMaterialsModal = async (project) => {
     setSelectedProject(project);
     if (project.contractorId) {
       try {
         const response = await axios.get(`${backendUrl}/api/contractor/${project.contractorId}`);
-        setContractorDetails(response.data);
+        setContractorDetails(response.data.contractor);
       } catch (error) {
         console.error('Error fetching contractor:', error);
       }
     } else {
       setContractorDetails(null);
     }
-    setOpenContractorModal(true);
+    setOpenMaterialsModal(true);
   };
 
-  const handleCloseContractorModal = () => setOpenContractorModal(false);
+  const handleCloseMaterialsModal = () => setOpenMaterialsModal(false);
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredProjects);
@@ -111,7 +95,7 @@ export default function ProjectManagement() {
       if (project.contractorId) {
         try {
           const response = await axios.get(`${backendUrl}/api/contractor/${project.contractorId}`);
-          contractorName = response.data.name || 'N/A';
+          contractorName = response.data.contractor.name || 'N/A';
         } catch (error) {
           console.error('Error fetching contractor:', error);
         }
@@ -281,21 +265,15 @@ export default function ProjectManagement() {
       sortable: false,
       renderCell: (params) => (
         <Box display="flex" justifyContent="space-between" gap={1} width="100%">
-          <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleOpenClientModal(params.row)}>
-            Client Details
-          </Button>
-          <Button variant="contained" size="small" sx={{ bgcolor: 'success.main' }} onClick={() => handleOpenMaterialsModal(params.row)}>
-            Materials
-          </Button>
-          <Button variant="contained" size="small" sx={{ bgcolor: 'secondary.main' }} onClick={() => handleOpenContractorModal(params.row)}>
-            Contractor
+          <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleOpenMaterialsModal(params.row)}>
+            Project Overview
           </Button>
           <Button variant="contained" size="small" sx={{ bgcolor: 'warning.main' }}>
             View 3D
           </Button>
           <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleGeneratePDF(params.row)}>
-  Generate PDF
-</Button>
+            Generate PDF
+          </Button>
         </Box>
       ),
     },
@@ -344,34 +322,13 @@ export default function ProjectManagement() {
         }} 
       />
 
-      {/* Client Details Modal */}
-      <Modal open={openClientModal} onClose={handleCloseClientModal}>
-        <Box sx={{ ...modalStyle, width: '50%', maxWidth: 600, p: 4 }}>
-          <Typography variant="h6" className="mb-4 font-semibold text-center">Client Details</Typography>
-          {selectedProject && selectedProject.clientDetails ? (
-            <Box sx={{ mt: 2 }}>
-              <Typography>Name: {selectedProject.clientDetails.clientName}</Typography>
-              <Typography>Email: {selectedProject.clientDetails.email}</Typography>
-              <Typography>Phone: {selectedProject.clientDetails.phoneNumber}</Typography>
-              <Typography>Company: {selectedProject.clientDetails.companyName}</Typography>
-            </Box>
-          ) : (
-            <Typography>No client details available.</Typography>
-          )}
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Button variant="contained" color="primary" onClick={handleCloseClientModal}>
-              Close
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
       {/* Materials Modal */}
       <Modal open={openMaterialsModal} onClose={handleCloseMaterialsModal}>
         <Box sx={{ ...modalStyle, width: '50%', maxWidth: 600, p: 4 }}>
-          <Typography variant="h6" className="mb-4 font-semibold text-center">Materials</Typography>
-          {selectedProject && selectedProject.materials ? (
+          <Typography variant="h6" className="mb-4 font-semibold text-center">Project Overview</Typography>
+          {selectedProject ? (
             <Box sx={{ mt: 2 }}>
+              <Typography variant="h6">Materials</Typography>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
@@ -392,39 +349,14 @@ export default function ProjectManagement() {
                   ))}
                 </tbody>
               </table>
-              <Typography variant="h6" className="mt-4 text-center">
-                Total: ₱{selectedProject.materials.reduce((acc, material) => acc + material.totalPrice, 0).toLocaleString()}
-              </Typography>
+              <Typography variant="h6" className="mt-4">Contractor</Typography>
+              <Typography>Name: {contractorDetails ? contractorDetails.name : 'N/A'}</Typography>
             </Box>
           ) : (
-            <Typography>No materials available.</Typography>
+            <Typography>No project details available.</Typography>
           )}
           <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Button variant="contained" color="primary" onClick={handleCloseMaterialsModal}>
-              Close
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      {/* Contractor Modal */}
-      <Modal open={openContractorModal} onClose={handleCloseContractorModal}>
-        <Box sx={{ ...modalStyle, width: '50%', maxWidth: 600, p: 4 }}>
-          <Typography variant="h6" className="mb-4 font-semibold text-center">Contractor Details</Typography>
-          {contractorDetails ? (
-            <Box sx={{ mt: 2 }}>
-              <Typography>Name: {contractorDetails.name}</Typography>
-              <Typography>Email: {contractorDetails.licenseNumber}</Typography>
-              <Typography>Address: {contractorDetails.businessAddress}</Typography>
-              <Typography>Contact Number: {contractorDetails.contactNumber}</Typography>
-              <Typography>Experience: {contractorDetails.experience}</Typography>
-              <Typography>Terms: {contractorDetails.contractTerms}</Typography>
-            </Box>
-          ) : (
-            <Typography>No contractor details available.</Typography>
-          )}
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Button variant="contained" color="primary" onClick={handleCloseContractorModal}>
               Close
             </Button>
           </Box>
