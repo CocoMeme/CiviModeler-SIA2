@@ -7,7 +7,7 @@ import '/styles/ProjectDetail.css?url';
 import { AppContext } from '../../context/AppContext';
 import { useContext } from 'react';
 
-const steps = ['Client Details', 'Project Details', 'Setting-up'];
+const steps = ['Project Details', 'Setting-up'];
 
 export default function ProjectDetail() {
 
@@ -15,10 +15,6 @@ export default function ProjectDetail() {
 
   const [activeStep, setActiveStep] = React.useState(0);
   const [formData, setFormData] = React.useState({
-    clientName: '',
-    email: '',
-    phoneNumber: '',
-    companyName: '',
     projectName: '',
     locationSize: '',
     projectBudget: '',
@@ -78,15 +74,10 @@ export default function ProjectDetail() {
   const validateForm = () => {
     let errors = {};
     if (activeStep === 0) {
-      if (!formData.clientName) errors.clientName = 'Client name is required';
-      if (!formData.email) errors.email = 'Email is required';
-      if (!formData.phoneNumber) errors.phoneNumber = 'Phone number is required';
-      if (!formData.companyName) errors.companyName = 'Company name is required';
-    } else if (activeStep === 1) {
       if (!formData.projectName) errors.projectName = 'Project name is required';
       if (!formData.locationSize) errors.locationSize = 'Location size is required';
       if (!formData.projectBudget) errors.projectBudget = 'Project budget is required';
-    } else if (activeStep === 2) {
+    } else if (activeStep === 1) {
       if (!formData.projectDescription) errors.projectDescription = 'Project description is required';
     }
     setFormErrors(errors);
@@ -104,58 +95,6 @@ export default function ProjectDetail() {
       </Stepper>
       <Box sx={{ mt: 4 }}>
         {activeStep === 0 && (
-          <Box>
-            <Typography variant="h6" className="custom-typography">Client Details</Typography>
-            <TextField 
-              fullWidth 
-              label="Client Full Name" 
-              id="clientName" 
-              margin="normal" 
-              className="custom-textfield" 
-              value={formData.clientName} 
-              onChange={handleChange} 
-              error={!!formErrors.clientName}
-              helperText={formErrors.clientName}
-            />
-            <TextField 
-              fullWidth 
-              label="Email" 
-              id="email" 
-              type="email" 
-              margin="normal" 
-              className="custom-textfield" 
-              value={formData.email} 
-              onChange={handleChange} 
-              error={!!formErrors.email}
-              helperText={formErrors.email}
-            />
-            <TextField 
-              fullWidth 
-              label="Phone Number" 
-              id="phoneNumber" 
-              type="tel" 
-              margin="normal" 
-              className="custom-textfield" 
-              value={formData.phoneNumber} 
-              onChange={handleChange} 
-              error={!!formErrors.phoneNumber}
-              helperText={formErrors.phoneNumber}
-            />
-            <TextField 
-              fullWidth 
-              label="Company Name" 
-              id="companyName" 
-              margin="normal" 
-              className="custom-textfield" 
-              value={formData.companyName} 
-              onChange={handleChange} 
-              error={!!formErrors.companyName}
-              helperText={formErrors.companyName}
-            />
-            <Button variant="contained" onClick={handleNext} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">Next</Button>
-          </Box>
-        )}
-        {activeStep === 1 && (
           <Box>
             <Typography variant="h6" className="custom-typography">Project Details</Typography>
             <TextField 
@@ -212,7 +151,7 @@ export default function ProjectDetail() {
             <Button variant="contained" onClick={handleNext} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300">Next</Button>
           </Box>
         )}
-        {activeStep === 2 && (
+        {activeStep === 1 && (
           <Box>
              <Typography variant="h6" className="custom-typography">Setting-up</Typography>
             <TextField

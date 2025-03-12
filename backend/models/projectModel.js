@@ -7,12 +7,6 @@ const projectSchema = new mongoose.Schema({
   budget: { type: Number, required: true },
   style: { type: String, enum: ["Modern", "Classic", "Rustic"], required: true },
   projectDescription: { type: String },
-  clientDetails: {
-    clientName: { type: String },
-    email: { type: String },
-    phoneNumber: { type: String },
-    companyName: { type: String }
-  },
   materials: [
     {
       material: { type: String },

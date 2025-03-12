@@ -272,28 +272,6 @@ const ProjectContent = ({
             </div>
           </div>
         )}
-
-        {/* Client Details */}
-        <div className="bg-white p-4 shadow-lg rounded-lg">
-          <div className="flex justify-between items-center border-b pb-2">
-            <h2 className="text-lg font-semibold">Client Details</h2>
-            <button onClick={() => setInfoDialog({ open: true, content: 'Client details include essential contact information for project management.' })}>⋮</button>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 items-center">
-            <label className="text-left pr-2 col-span-1"><strong>Name:</strong></label>
-            <input type="text" name="clientName" value={clientDetailsState.clientName || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
-
-            <label className="text-left pr-2 col-span-1"><strong>Email:</strong></label>
-            <input type="email" name="email" value={clientDetailsState.email || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
-
-            <label className="text-left pr-2 col-span-1"><strong>Phone Number:</strong></label>
-            <input type="text" name="phoneNumber" value={clientDetailsState.phoneNumber || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
-
-            <label className="text-left pr-2 col-span-1"><strong>Company Name:</strong></label>
-            <input type="text" name="companyName" value={clientDetailsState.companyName || ''} onChange={handleClientDetailsChange} className="col-span-2 w-full p-2 border rounded" />
-          </div>
-        </div>
-
         {/* Project Details */}
         <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
           <div className="flex justify-between items-center border-b pb-2">

@@ -53,7 +53,6 @@ export default function Result() {
         style: designStyle,
         projectDescription,
         author: userData.name,
-        clientDetails: { clientName, email, phoneNumber, companyName },
         materials: Object.entries(result.materials).map(([material, details]) => ({
           material,
           quantity: details.quantity,
@@ -170,21 +169,6 @@ export default function Result() {
               </div>
             </div>
           )}
-
-          {/* Client Details */}
-          <div className="bg-white p-4 shadow-lg rounded-lg">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h2 className="text-lg font-semibold">Client Details</h2>
-              <button onClick={() => setInfoDialog({ open: true, content: 'Client details include essential contact information for project management.' })}>⋮</button>
-            </div>
-            <div className="mt-4">
-              <p><strong>Name:</strong> {clientName}</p>
-              <p><strong>Email:</strong> {email}</p>
-              <p><strong>Phone Number:</strong> {phoneNumber}</p>
-              <p><strong>Company Name:</strong> {companyName}</p>
-            </div>
-          </div>
-
           {/* Project Details */}
           <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
             <div className="flex justify-between items-center border-b pb-2">

@@ -7,7 +7,7 @@ material_costs = {
         "Bricks": 12,  # per piece (4" CHB)
         "Steel": 156,  # per 6m (10mm rebar)
         "Wood": 656,  # per sheet (1/2" plywood)
-        "Tiles": 300,  # estimated per sqm
+        "Tiles": 300,  # estimated per 12x12 tiles
         "Paint": 640,  # per gallon
         "Roofing": 400,  # per piece (G.I. sheet)
         "Glass": 850   # per sqm of clear glass
