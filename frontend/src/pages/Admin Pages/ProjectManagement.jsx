@@ -90,6 +90,17 @@ export default function ProjectManagement() {
     setSelectedProject(project);
   
     try {
+      // Fetch user details using userId from the project
+      let userName = 'N/A';
+      if (project.userId) {
+        try {
+          const response = await axios.get(`${backendUrl}/api/user/${project.userId}`);
+          userName = response.data.name || 'N/A';
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
+      }
+  
       // Fetch contractor details if contractorId is present
       let contractorName = 'N/A';
       if (project.contractorId) {
@@ -148,34 +159,10 @@ export default function ProjectManagement() {
       doc.setTextColor(0, 0, 0);
       const details = [
         `Project Name: ${project.projectName || 'N/A'}`,
-        `Client Name: ${project.clientDetails?.clientName || 'N/A'}`,
         `Contractor: ${contractorName}`,
         `Total Cost: ${project.totalCost?.toLocaleString() || '0.00'}`
       ];
       details.forEach(text => {
-        doc.text(text, margin, currentY);
-        currentY += 18;
-      });
-  
-      // **Section Divider**
-      doc.setDrawColor(200, 200, 200);
-      doc.line(margin, currentY, pageWidth - margin, currentY);
-      currentY += 20;
-  
-      // **Client Details**
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(102, 51, 153);
-      doc.text("Client Details", margin, currentY);
-      currentY += 15;
-  
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(0, 0, 0);
-      const clientDetails = [
-        `Email: ${project.clientDetails?.email || 'N/A'}`,
-        `Phone: ${project.clientDetails?.phoneNumber || 'N/A'}`,
-        `Company: ${project.clientDetails?.companyName || 'N/A'}`
-      ];
-      clientDetails.forEach(text => {
         doc.text(text, margin, currentY);
         currentY += 18;
       });

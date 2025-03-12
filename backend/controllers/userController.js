@@ -273,3 +273,16 @@ export const updatePassword = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+export const getUserById = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.status(200).json({ success: true, contractor });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching User', error });
+  }
+};
