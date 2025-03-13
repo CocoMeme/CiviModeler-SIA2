@@ -100,17 +100,6 @@ const Dashboard = () => {
     setOpenDeleteModal(true);
   };
 
-  const confirmDelete = async () => {
-    try {
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/contractor/delete/${contractorToDelete._id}`, { withCredentials: true });
-      setContractors(contractors.filter(contractor => contractor._id !== contractorToDelete._id));
-      setOpenDeleteModal(false);
-      setContractorToDelete(null);
-    } catch (error) {
-      console.error('Error deleting contractor:', error);
-    }
-  };
-
   return (
     <div className="flex">
       <div className="flex-1 p-6">
@@ -157,7 +146,6 @@ const Dashboard = () => {
                   <td className="py-2 px-4 border-b">{contractor.notableProjects.join(', ')}</td> 
                   <td className="py-2 px-4 border-b">
                     <button className="bg-blue-500 text-white py-1 px-4 rounded hover:bg-blue-600 mr-2" onClick={() => handleUpdate(contractor)}>Update</button>
-                    <button className="bg-red-500 text-white py-1 px-4 rounded hover:bg-red-600" onClick={() => handleDelete(contractor)}>Delete</button>
                   </td>
                 </tr>
               ))}
@@ -255,17 +243,6 @@ const Dashboard = () => {
         <DialogActions>
           <Button onClick={() => setOpenUpdateModal(false)} color="primary">Cancel</Button>
           <Button onClick={handleUpdateSave} color="primary">Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={openDeleteModal} onClose={() => setOpenDeleteModal(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Delete Contractor</DialogTitle>
-        <DialogContent>
-          <p>Are you sure you want to delete this contractor?</p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteModal(false)} color="primary">Cancel</Button>
-          <Button onClick={confirmDelete} color="primary">Delete</Button>
         </DialogActions>
       </Dialog>
     </div>

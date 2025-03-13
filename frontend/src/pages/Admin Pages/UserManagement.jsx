@@ -25,11 +25,10 @@ export default function UserManagement() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [status, setStatus] = useState('');
 
-  // Fetch users excluding soft deleted ones
+ 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -65,29 +64,6 @@ export default function UserManagement() {
     ));
   };
 
-  const handleDeleteClick = (user) => {
-    setSelectedUser(user);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedUser) return;
-
-    try {
-      const response = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/user/delete/${selectedUser._id}`, { withCredentials: true });
-
-      if (response.data.success) {
-        const updatedUsers = users.filter(user => user._id !== selectedUser._id);
-        setUsers(updatedUsers);
-        setFilteredUsers(updatedUsers);
-        setIsDeleteModalOpen(false);
-      } else {
-        console.error(response.data.message);
-      }
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
 
   const handleStatusClick = (user) => {
     setSelectedUser(user);
@@ -176,9 +152,6 @@ export default function UserManagement() {
           <Button variant="contained" color="primary" size="small" onClick={() => handleStatusClick(params.row)}>
             Change Status
           </Button>
-          <Button variant="contained" color="secondary" size="small" onClick={() => handleDeleteClick(params.row)}>
-            Delete
-          </Button>
         </Box>
       ),
     },
@@ -234,26 +207,7 @@ export default function UserManagement() {
       />
       </Box>
 
-      {/* Delete Confirmation Modal */}
-      <Modal open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
-        <Box sx={modalStyle}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Are you sure you want to delete this user?
-          </Typography>
-          <Typography sx={{ mb: 3 }}>
-            {selectedUser?.name} ({selectedUser?.email})
-          </Typography>
-          <Box display="flex" justifyContent="flex-end" gap={2}>
-            <Button variant="contained" color="error" onClick={confirmDelete}>
-              Delete
-            </Button>
-            <Button variant="contained" onClick={() => setIsDeleteModalOpen(false)}>
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
+d
       {/* Status Change Modal */}
       <Modal open={isStatusModalOpen} onClose={() => setIsStatusModalOpen(false)}>
         <Box sx={modalStyle}>
