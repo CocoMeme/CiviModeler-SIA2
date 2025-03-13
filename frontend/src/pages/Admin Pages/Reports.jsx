@@ -5,8 +5,9 @@ import { Chart, registerables } from "chart.js";
 import { format } from "date-fns"; // Date formatting
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-Chart.register(...registerables);
+Chart.register(...registerables, ChartDataLabels);
 
 const ReportsPage = () => {
   const [lineData, setLineData] = useState(null);
@@ -200,7 +201,6 @@ const ReportsPage = () => {
     fetchAccountStatusData();
   }, []);
 
-
   const handleDownloadPDF = () => {
     const reportElements = document.querySelectorAll(".chart-container"); // Select each chart separately
   
@@ -244,8 +244,6 @@ const ReportsPage = () => {
       });
     }, 500);
   };
-  
-  
 
   return (
     <div>
@@ -259,35 +257,35 @@ const ReportsPage = () => {
       </button>
 
       <div id="report-container" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
-    {lineData && <Line data={lineData} />}
-  </div>
-  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
-    {totalProjectsData && <Line data={totalProjectsData} />}
-  </div>
-  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
-    {contractorData && <Bar data={contractorData} />}
-  </div>
-  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
-    {ratingsData && <Bar data={ratingsData} />}
-  </div>
-  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
-    {genderData && <Pie data={genderData} />}
-  </div>
-  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Material Quantity Breakdown</h3>
-    {materialData && <Bar data={materialData} />}
-  </div>
-  <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-    <h3 className="text-lg font-semibold mb-2 text-white">Account Status Distribution</h3>
-    {accountStatusData && <Pie data={accountStatusData} />}
-  </div>
-</div>
+        <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
+          {lineData && <Line data={lineData} />}
+        </div>
+        <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
+          {totalProjectsData && <Line data={totalProjectsData} />}
+        </div>
+        <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
+          {contractorData && <Bar data={contractorData} />}
+        </div>
+        <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
+          {ratingsData && <Bar data={ratingsData} />}
+        </div>
+        <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
+          {genderData && <Pie data={genderData} options={{ plugins: { datalabels: { formatter: (value, context) => `${context.chart.data.labels[context.dataIndex]}: ${value}`, color: '#fff', font: { weight: 'bold', size: 14 }, align: 'center', anchor: 'center' } } }} />}
+        </div>
+        <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Material Quantity Breakdown</h3>
+          {materialData && <Bar data={materialData} />}
+        </div>
+        <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
+          <h3 className="text-lg font-semibold mb-2 text-white">Account Status Distribution</h3>
+          {accountStatusData && <Pie data={accountStatusData} options={{ plugins: { datalabels: { formatter: (value, context) => `${context.chart.data.labels[context.dataIndex]}: ${value}`, color: '#fff', font: { weight: 'bold', size: 14 }, align: 'center', anchor: 'center' } } }} />}
+        </div>
+      </div>
     </div>
   );
 };
