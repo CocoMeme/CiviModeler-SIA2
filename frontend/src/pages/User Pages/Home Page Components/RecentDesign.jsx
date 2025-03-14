@@ -42,14 +42,14 @@ const RecentDesign = () => {
               key={project._id} 
               className="block hover:scale-105 transition-transform duration-200"
             >
-              <div className="bg-gray-50 rounded-md overflow-hidden shadow-sm">
+              <div className="bg-gray-100 rounded-md overflow-hidden shadow-sm">
                 <img 
                   src={project.thumbnail || defaultImage} 
                   alt={project.projectName}
-                  className="w-full h-32 object-cover"
+                  className="w-36 m-auto h-full object-cover "
                   onError={(e) => { e.target.onerror = null; e.target.src = defaultImage; }}
                 />
-                <div className="p-3">
+                <div className="p-3 bg-slate-50">
                   <h3 className="font-medium text-gray-900 truncate">{project.projectName}</h3>
                   <p className="text-sm text-gray-500">
                     Last edited: {new Date(project.updatedAt || Date.now()).toLocaleDateString()}

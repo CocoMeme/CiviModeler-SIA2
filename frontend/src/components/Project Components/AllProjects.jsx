@@ -6,14 +6,35 @@ import { AppContext } from '../../context/AppContext.jsx';
 
 const AllProjects = () => {
   const [projects, setProjects] = useState([]);
+  const [contractors, setContractors] = useState([]);
   const { backendUrl } = useContext(AppContext);
 
   useEffect(() => {
+    // Fetch projects
     fetch(`${backendUrl}/api/project/get-all-projects`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => setProjects(data))
-      .catch((error) => console.error('Error fetching projects:', error));
-  }, []);
+      .catch((error) => {
+        console.error('Error fetching projects:', error);
+        setProjects([]);
+      });
+
+    // Update to use get-contractors endpoint
+    fetch(`${backendUrl}/api/contractor/get-contractors`, { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.contractors)) {
+          setContractors(data.contractors);
+        } else {
+          console.error('Invalid contractor data format');
+          setContractors([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching contractors:', error);
+        setContractors([]);
+      });
+  }, [backendUrl]);
 
   const responsive = {
     superLargeDesktop: { breakpoint: { max: 4000, min: 1024 }, items: 4 },
@@ -39,7 +60,7 @@ const AllProjects = () => {
         >
           {projects.map((project, index) => (
             <div key={project._id || project.projectName || index}>
-              <Card project={project} />
+              <Card project={project} contractors={contractors} />
             </div>
           ))}
         </Carousel>
