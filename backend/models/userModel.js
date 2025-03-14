@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema({
     // Account Verification & Security
     verifyOtp: { type: String, default: '' },
     verifyOtpExpireAt: { type: Number, default: 0 },
+    Statusotp: { type: String, default: '' },
+    StatusotpExpireAt: { type: Number, default: 0 },
     isAccountVerified: { type: Boolean, default: false },
     resetOtp: { type: String, default: '' },
     resetOtpExpireAt: { type: Number, default: 0 },

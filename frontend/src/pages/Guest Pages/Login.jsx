@@ -133,8 +133,8 @@ const Login = () => {
               {loading ? "Logging in..." : "Login"}
             </button>
           </div>
-          <p onClick={() => navigate('/reset-password')} className="align-baseline font-light text-xs from-neutral-500 to-neutral-700 text-right cursor-pointer mt-2 mr-2">
-            Forgot Password?
+          <p onClick={() => navigate('/status-activation')} className="align-baseline font-light text-xs from-neutral-500 to-neutral-700 text-right cursor-pointer mt-2 mr-2">
+            Acvivate Account
           </p>
         </form>
         <div className="flex items-center justify-center space-x-4 pt-3">
