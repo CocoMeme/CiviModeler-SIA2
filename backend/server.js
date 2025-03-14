@@ -9,6 +9,12 @@ import projectRouter from './routes/projectRoute.js';
 import contratorRouter from './routes/contractorRoute.js';
 import testimonialRouter from './routes/testimonialRoute.js';
 import fileUpload from 'express-fileupload';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the equivalent of __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -27,6 +33,9 @@ app.use(fileUpload({
   tempFileDir: './temp/',
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
 }));
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // API Endpoints
 app.get("/", (req, res) => res.send("API Working Perfectly"));

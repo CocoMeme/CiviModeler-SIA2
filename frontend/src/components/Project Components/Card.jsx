@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-const defaultImage = '/project images/T3.png';
-const defaultImage2 = '/project images/T2.png';
-const defaultImage3 = '/project images/T3.png';
+// Use the standard No Image file as default
+const defaultImage = '/project images/No Image.png';
 import '../../../public/styles/ProjectCard.css';
 
 const Card = ({ project }) => {
@@ -24,6 +23,7 @@ const Card = ({ project }) => {
         src={thumbnail || defaultImage}
         alt={projectName}
         className="card-thumbnail"
+        onError={(e) => { e.target.onerror = null; e.target.src = defaultImage; }}
       />
       <div className="card-content">
         <div className='card-leftside'>

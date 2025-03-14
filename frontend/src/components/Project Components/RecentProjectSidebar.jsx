@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext.jsx';
 import '../../../public/styles/RecentProjectSidebar.css';
 
-const defaultImage3 = '/project images/T3.png';
+// Use the No Image file as default
+const defaultImage = '/project images/No Image.png';
 
 const RecentProjectSidebar = () => {
   const [userProjects, setUserProjects] = useState([]);
@@ -40,9 +41,10 @@ const RecentProjectSidebar = () => {
           {userProjects.map((project) => (
             <li key={project._id} className="project-item" onClick={() => handleProjectClick(project)}>
               <img
-                src={project.thumbnail || defaultImage3}
+                src={project.thumbnail || defaultImage}
                 alt={project.projectName}
                 className="project-thumbnail"
+                onError={(e) => { e.target.onerror = null; e.target.src = defaultImage; }}
               />
               <span className="project-name">{project.projectName}</span>
             </li>

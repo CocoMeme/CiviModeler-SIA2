@@ -2,6 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../../context/AppContext';
 
+// Use the standard No Image file as default
+const defaultImage = '/project images/No Image.png';
+
 const RecentDesign = () => {
   const [recentProjects, setRecentProjects] = useState([]);
   const { backendUrl, userData, loading } = useContext(AppContext);
@@ -41,9 +44,10 @@ const RecentDesign = () => {
             >
               <div className="bg-gray-50 rounded-md overflow-hidden shadow-sm">
                 <img 
-                  src={project.thumbnail || "/project images/No Image.png"} 
+                  src={project.thumbnail || defaultImage} 
                   alt={project.projectName}
                   className="w-full h-32 object-cover"
+                  onError={(e) => { e.target.onerror = null; e.target.src = defaultImage; }}
                 />
                 <div className="p-3">
                   <h3 className="font-medium text-gray-900 truncate">{project.projectName}</h3>
