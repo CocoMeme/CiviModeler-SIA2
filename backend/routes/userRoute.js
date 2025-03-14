@@ -6,7 +6,7 @@ import { isAuthenticated } from '../controllers/authController.js';
 const userRouter = express.Router();
 
 userRouter.get('/data', userAuth, isAuthenticated, getUserData);
-userRouter.get('/all', userAuth, getAllUsers);
+userRouter.get('/all', getAllUsers);
 userRouter.put('/update-status/:id', userAuth, updateStatus);
 userRouter.put('/update/:id', userAuth, updateUser); 
 userRouter.delete('/delete/:id', userAuth, deleteUser);
