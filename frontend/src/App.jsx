@@ -36,7 +36,7 @@ import UserFeedback from "./pages/User Pages/UserFeedback";
 import Security from "./pages/User Pages/Profile Components/Security";
 import ContractorProfile from "./pages/User Pages/ContractorProfile";
 import ContractorList from "./pages/User Pages/ContractorList";
-
+import StatusActivation from "./components/Auth Components/StatusActivation";
 const App = () => {
   return (
     <div>
@@ -53,7 +53,8 @@ const App = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/email-verify" element={<EmailVerify />} />
                 <Route path="/reset-password" element={<ResetPassord />} />
-
+                <Route path="/status-activation" element={<StatusActivation />} />
+                
                 <Route path="/project-detail" element={<ProjectDetail />} />
 
                 <Route path="/profile/*" element={<ProfileLayout/>}>

@@ -255,6 +255,75 @@ export const sendResetOtp = async (req, res) => {
 
 }
 
+export const sendStatusOtp = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    try {
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
+
+        if (user.status === 'Active') {
+            return res.status(400).json({ success: false, message: "Your account status is already activated" });
+        }
+
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+        user.Statusotp = otp;
+        user.StatusotpExpireAt = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+        await user.save();
+
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: "Account Status Activation OTP",
+            text: `Hello ${user.name}! Your OTP for account status activation is ${otp}. It will expire in 15 minutes.`
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.json({ success: true, message: "OTP sent successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const verifyStatusOtp = async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(400).json({ success: false, message: "Email and OTP are required" });
+    }
+
+    try {
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
+
+        if (user.Statusotp !== otp || user.StatusotpExpireAt < Date.now()) {
+            return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+        }
+
+        user.status = 'Active';
+        user.Statusotp = '';
+        user.StatusotpExpireAt = 0;
+
+        await user.save();
+
+        res.json({ success: true, message: "Account status activated successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
 // Reset User Password
 export const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
