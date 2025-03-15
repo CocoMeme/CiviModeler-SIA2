@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
-import Card from './Card.jsx';
+import { useNavigate } from 'react-router-dom';
+import UserCard from './UserCard.jsx';
 import { AppContext } from '../../context/AppContext.jsx';
+import { FiRefreshCw } from 'react-icons/fi';
 
 const RecentProject = () => {
   const [projects, setProjects] = useState([]);
@@ -12,6 +14,8 @@ const RecentProject = () => {
   const [page, setPage] = useState(1);
   const projectsPerPage = 12;
   const loader = useRef(null);
+  const navigate = useNavigate();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch user's projects
   useEffect(() => {
@@ -88,6 +92,60 @@ const RecentProject = () => {
     };
   }, [handleObserver]);
 
+  const handleEdit = (project) => {
+    navigate(`/editor/${project._id}`);
+  };
+
+  const handleDelete = async (project) => {
+    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      try {
+        const response = await fetch(`${backendUrl}/api/project/delete/${project._id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          // Remove project from state
+          const updatedProjects = projects.filter(p => p._id !== project._id);
+          setProjects(updatedProjects);
+          setFilteredProjects(updatedProjects);
+          setVisibleProjects(updatedProjects.slice(0, page * projectsPerPage));
+        } else {
+          console.error('Error deleting project:', data.message);
+          alert('Failed to delete project. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        alert('Failed to delete project. Please try again.');
+      }
+    }
+  };
+
+  const refreshProjects = async () => {
+    setIsRefreshing(true);
+    if (!loading && userData?._id) {
+      try {
+        const res = await fetch(`${backendUrl}/api/project/get-user-projects/${userData._id}`, { 
+          credentials: 'include' 
+        });
+        const data = await res.json();
+        if (data.success) {
+          setProjects(data.projects);
+          setFilteredProjects(data.projects);
+          setVisibleProjects(data.projects.slice(0, projectsPerPage));
+          setPage(1);
+        } else {
+          console.error('Error fetching user projects:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching user projects:', error);
+      } finally {
+        setIsRefreshing(false);
+      }
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -97,24 +155,47 @@ const RecentProject = () => {
       <div className='mb-6'>
         <div className='flex flex-col space-y-4'>
           <p className='font-semibold text-lg'>Your Projects</p>
-          <div className='w-full max-w-md'>
-            <input
-              type="text"
-              placeholder="Search your projects..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full px-4 py-2 border rounded-md'
-            />
+          <div className='w-full max-w-md flex items-center gap-2'>
+            <div className='flex-1 relative'>
+              <input
+                type="text"
+                placeholder="Search your projects..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className='w-full px-4 py-2 border rounded-md'
+              />
+            </div>
+            <button
+              onClick={refreshProjects}
+              disabled={isRefreshing}
+              className={`p-2 text-gray-600 hover:text-purple-600 transition-all duration-200 rounded-md 
+                ${isRefreshing ? 'bg-gray-100' : 'hover:bg-gray-100'}`}
+              title="Refresh projects"
+            >
+              <FiRefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </div>
 
-      {visibleProjects.length > 0 ? (
+      {/* Loading state for initial load */}
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      ) : visibleProjects.length > 0 ? (
         <>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-300 ${
+            isRefreshing ? 'opacity-50' : 'opacity-100'
+          }`}>
             {visibleProjects.map((project, index) => (
               <div key={project._id || index}>
-                <Card project={project} />
+                <UserCard 
+                  project={project}
+                  onClick={() => navigate(`/project/${project._id}`)}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
               </div>
             ))}
           </div>
