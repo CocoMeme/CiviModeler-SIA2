@@ -1,5 +1,5 @@
 import express from 'express';
-import { createProject, getAllProject, getDashboardData, getUserProjects, getProjectReportsData, getRecentProjects, create3DModel, getProjectData, updateProject, getMaterialData, saveModel, getModelVersions } from '../controllers/projectController.js';
+import { createProject, getAllProject, getDashboardData, getUserProjects, getProjectReportsData, getRecentProjects, create3DModel, getProjectData, updateProject, getMaterialData, saveModel, getModelVersions, deleteProject } from '../controllers/projectController.js';
 import userAuth from '../middleware/userAuth.js';
 
 const router = express.Router();
@@ -17,6 +17,7 @@ router.put('/:projectId', userAuth, updateProject);
 
 router.post('/save-model', userAuth, saveModel);
 router.get('/:projectId/versions', getModelVersions);
+router.delete('/:projectId', userAuth, deleteProject);
 
 // Model-based material estimation endpoint
 router.post('/estimate-from-model-changes', async (req, res) => {

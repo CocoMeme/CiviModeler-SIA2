@@ -74,7 +74,7 @@ const RecentDesign = () => {
       {recentProjects.length > 0 && (
         <div className="mt-4 text-right">
           <Link 
-            to="/user/my-projects" 
+            to="/user/user-projects" 
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
             View All My Designs →

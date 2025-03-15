@@ -493,7 +493,7 @@ export const getAllProject = async (req, res) => {
 export const getUserProjects = async (req, res) => {
   try {
     const { userId } = req.params; // Get userId from URL parameter
-    const userProjects = await projectModel.find({ userId });
+    const userProjects = await projectModel.find({ userId }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, projects: userProjects });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching user projects', error });
@@ -875,5 +875,35 @@ export const saveModel = async (req, res) => {
     }
     console.error("Error saving model:", error);
     res.status(500).json({ error: "Failed to save model" });
+  }
+};
+
+export const deleteProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await projectModel.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Delete any associated model files or thumbnails from Cloudinary
+    if (project.sloyd && project.sloyd.modelUrl) {
+      const publicId = project.sloyd.modelUrl.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+    }
+
+    if (project.thumbnail) {
+      const publicId = project.thumbnail.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    // Delete project from database
+    await projectModel.findByIdAndDelete(projectId);
+
+    res.status(200).json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting project:', error);
+    res.status(500).json({ message: 'Error deleting project', error });
   }
 };

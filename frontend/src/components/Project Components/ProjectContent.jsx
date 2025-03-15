@@ -3,6 +3,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } fro
 import jsPDF from 'jspdf';
 import { applyPlugin } from 'jspdf-autotable';
 import ModalCreate3D from './ModalCreate3D';
+import DeleteProject from './DeleteProject';
+import ProjectConfiguration from './ProjectConfiguration';
+import { FiInfo, FiUsers, FiCpu, FiPackage, FiBarChart2 } from 'react-icons/fi';
 applyPlugin(jsPDF)
 
 
@@ -207,45 +210,15 @@ const ProjectContent = ({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Left Side - Client, Project & Contractor Details */}
       <div className="lg:col-span-1 flex flex-col h-full">
-        {/* Project Configuration */}
-        <div className="bg-white p-4 shadow-lg rounded-lg mb-4">
-          <div className="flex justify-between items-center border-b pb-2">
-            <h2 className="text-lg font-semibold">Project Configuration</h2>
-            <button onClick={() => setInfoDialog({ open: true, content: 'Configure your project settings before generating a model or confirming the project.' })}>⋮</button>
-          </div>
-          <div className="mt-4">
-            <p className="text-gray-600 text-sm">
-              Clicking "Update" will save all project details, including client, contractor, and material data to the database.
-            </p>
-          </div>
-          <div className="mt-4 flex flex-col gap-2">
-            <button
-              className="px-4 py-2 bg-purple-700 text-white font-bold rounded hover:bg-purple-800 transition-all"
-              onClick={() => setOpenDialog(true)}
-            >
-              Update
-            </button>
-            <button
-              className="px-4 py-2 bg-cyan-700 text-white font-bold rounded hover:bg-cyan-800 transition-all"
-              onClick={handleGenerate3D}
-            >
-              Generate 3D Model
-            </button>
-            <button
-              className="px-4 py-2 bg-lime-700 text-white font-bold rounded hover:bg-lime-800 transition-all"
-              onClick={handleGoTo3D}
-            >
-              Go to 3D
-            </button>
-            {/* Add PDF Generation Button */}
-            <button
-              className="px-4 py-2 bg-blue-700 text-white font-bold rounded hover:bg-blue-800 transition-all"
-              onClick={handleGeneratePDF}
-            >
-              Generate PDF
-            </button>
-          </div>
-        </div>
+        {/* Replace old configuration section with new component */}
+        <ProjectConfiguration 
+          projectDetailsState={projectDetailsState}
+          handleGenerate3D={handleGenerate3D}
+          handleGoTo3D={handleGoTo3D}
+          setOpenDialog={setOpenDialog}
+          handleGeneratePDF={handleGeneratePDF}
+          setInfoDialog={setInfoDialog}
+        />
 
         {/* Confirmation Modal */}
         {openDialog && (
@@ -275,7 +248,10 @@ const ProjectContent = ({
         {/* Project Details */}
         <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
           <div className="flex justify-between items-center border-b pb-2">
-            <h2 className="text-lg font-semibold">Project Details</h2>
+            <div className="flex items-center space-x-3">
+              <FiInfo className="w-5 h-5 text-gray-800" />
+              <h2 className="text-lg font-semibold">Project Details</h2>
+            </div>
             <button onClick={() => setInfoDialog({ open: true, content: 'Project details outline the scope, budget, and design style for planning and execution.' })}>⋮</button>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 items-center">
@@ -299,7 +275,10 @@ const ProjectContent = ({
         {/* Contractor Selection */}
         <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
           <div className="flex justify-between items-center border-b pb-2">
-            <h2 className="text-lg font-semibold">Choose a Contractor</h2>
+            <div className="flex items-center space-x-3">
+              <FiUsers className="w-5 h-5 text-gray-800" />
+              <h2 className="text-lg font-semibold">Choose a Contractor</h2>
+            </div>
             <button onClick={() => setInfoDialog({ open: true, content: 'Select a contractor for your project before confirming.' })}>⋮</button>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -366,7 +345,10 @@ const ProjectContent = ({
         {/* Sloyd Details */}
         <div className=" bg-white p-4 shadow-lg rounded-lg">
           <div className="flex justify-between items-center border-b pb-2">
-            <h2 className="text-lg font-semibold">Sloyd Details</h2>
+            <div className="flex items-center space-x-3">
+              <FiCpu className="w-5 h-5 text-gray-800" />
+              <h2 className="text-lg font-semibold">Sloyd Details</h2>
+            </div>
             <button onClick={() => setInfoDialog({ open: true, content: 'Project details outline the scope, budget, and design style for planning and execution.' })}>⋮</button>
           </div>
           <div className="mt-4">
@@ -380,7 +362,12 @@ const ProjectContent = ({
 
         {/* Material Table */}
         <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
-          <h2 className="text-lg font-semibold border-b pb-2">Material Table</h2>
+          <div className="flex justify-between items-center border-b pb-2">
+            <div className="flex items-center space-x-3">
+              <FiPackage className="w-5 h-5 text-gray-800" />
+              <h2 className="text-lg font-semibold">Material Table</h2>
+            </div>
+          </div>
           <div className="overflow-x-auto mt-4">
             <table className="w-full border-collapse border border-gray-300">
               <thead className="bg-purple-700">
@@ -413,7 +400,12 @@ const ProjectContent = ({
 
         {/* Material Graph */}
         <div className="bg-white p-4 shadow-lg rounded-lg relative z-0 mt-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Material Quantity Breakdown</h2>
+          <div className="flex justify-between items-center border-b pb-2">
+            <div className="flex items-center space-x-3">
+              <FiBarChart2 className="w-5 h-5 text-gray-800" />
+              <h2 className="text-lg font-semibold">Material Quantity Breakdown</h2>
+            </div>
+          </div>
           <div className="flex-grow flex justify-center items-center">
             <ResponsiveContainer width="100%" height={450}>
               <BarChart layout="vertical" data={materialData}>

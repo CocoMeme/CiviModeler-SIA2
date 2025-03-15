@@ -85,64 +85,6 @@ const ProjectColors = ({
               </span>
             </div>
           )}
-          {/* Reset All Colors Button */}
-          {modelParts.length > 0 && (
-            <button
-              onClick={resetAllColors}
-              className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200"
-            >
-              Reset All Colors
-            </button>
-          )}
-
-          {/* Parts List */}
-          <div className="mb-4 space-y-4 max-h-fit overflow-y-auto pr-2">
-            {Object.entries(groupedParts).map(([groupName, parts]) => (
-              <div key={groupName} className="border-b border-gray-700 pb-2">
-                <h4 className="text-sm font-medium text-gray-300 mb-2 capitalize">{groupName.replace(/-/g, ' ')}</h4>
-                <div className="space-y-2">
-                  {parts.map((part) => (
-                    <button
-                      key={part.meshUuid}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (e.ctrlKey || e.metaKey) {
-                          // Multi-select mode
-                          setSelectedParts(prev => {
-                            const next = new Set(prev);
-                            if (next.has(part.meshUuid)) {
-                              next.delete(part.meshUuid);
-                            } else {
-                              next.add(part.meshUuid);
-                            }
-                            return next;
-                          });
-                        } else {
-                          // Single-select mode
-                          setSelectedParts(new Set([part.meshUuid]));
-                          setActivePartId(part.meshUuid);
-                        }
-                      }}
-                      className={`w-full text-left p-2 rounded transition-colors ${selectedParts.has(part.meshUuid)
-                          ? 'bg-blue-600'
-                          : 'hover:bg-gray-700'
-                        }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">
-                          {parts.length > 1 ? `${part.name} (${part.meshUuid.slice(0, 4)})` : part.name}
-                        </span>
-                        <div
-                          className="w-6 h-6 rounded border border-gray-600"
-                          style={{ backgroundColor: part.currentColor }}
-                        />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
 
           {/* Color Editor for Selected Part(s) */}
           {selectedParts.size > 0 && (
@@ -210,6 +152,68 @@ const ProjectColors = ({
               </button>
             </div>
           )}
+          {/* Reset All Colors Button */}
+          {modelParts.length > 0 && (
+            <button
+              onClick={resetAllColors}
+              className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200"
+            >
+              Reset All Colors
+            </button>
+          )}
+
+
+
+          {/* Parts List */}
+          <div className="mb-4 space-y-4 max-h-fit overflow-y-auto pr-2">
+            {Object.entries(groupedParts).map(([groupName, parts]) => (
+              <div key={groupName} className="border-b border-gray-700 pb-2">
+                <h4 className="text-sm font-medium text-gray-300 mb-2 capitalize">{groupName.replace(/-/g, ' ')}</h4>
+                <div className="space-y-2">
+                  {parts.map((part) => (
+                    <button
+                      key={part.meshUuid}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (e.ctrlKey || e.metaKey) {
+                          // Multi-select mode
+                          setSelectedParts(prev => {
+                            const next = new Set(prev);
+                            if (next.has(part.meshUuid)) {
+                              next.delete(part.meshUuid);
+                            } else {
+                              next.add(part.meshUuid);
+                            }
+                            return next;
+                          });
+                        } else {
+                          // Single-select mode
+                          setSelectedParts(new Set([part.meshUuid]));
+                          setActivePartId(part.meshUuid);
+                        }
+                      }}
+                      className={`w-full text-left p-2 rounded transition-colors ${selectedParts.has(part.meshUuid)
+                        ? 'bg-blue-600'
+                        : 'hover:bg-gray-700'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">
+                          {parts.length > 1 ? `${part.name} (${part.meshUuid.slice(0, 4)})` : part.name}
+                        </span>
+                        <div
+                          className="w-6 h-6 rounded border border-gray-600"
+                          style={{ backgroundColor: part.currentColor }}
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+
 
 
         </>

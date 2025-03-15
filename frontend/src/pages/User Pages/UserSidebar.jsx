@@ -1,14 +1,31 @@
-import { NavLink, Link } from "react-router-dom"; 
+import { NavLink, Link, useNavigate } from "react-router-dom"; 
 import { FaPlus } from "react-icons/fa";
 import { LuFolderOpen } from "react-icons/lu";
 import { RiFolder3Fill } from "react-icons/ri";
 import { BiSolidDashboard } from "react-icons/bi";
 import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { FaStar } from "react-icons/fa6";
+import { useContext } from "react";
+import { AppContext } from "../../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 import RecentProjectSidebar from "../../components/Project Components/RecentProjectSidebar";
 
-
 const UserSidebar = () => {
+  const navigate = useNavigate();
+  const { backendUrl } = useContext(AppContext);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${backendUrl}/api/auth/logout`, { withCredentials: true });
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to logout");
+    }
+  };
+
   return (
     <div className="min-h-full p-5 flex flex-col justify-between bg-slate-200 rounded-lg m-3">
       <div>
@@ -81,17 +98,14 @@ const UserSidebar = () => {
               <LuFolderOpen className="inline mr-3" /> Sample Project
             </Link>
           </li>
-
-          {/* List of the recent projects */}
-          <li className="mt-4 mb-2 block p-2 text-sm">
-            Recent Projects
-          </li>
           <RecentProjectSidebar/>
-
         </ul>
 
       </div>
-      <button className="hover:bg-purple-200 p-2 rounded text-center ring-2 ring-purple-300">
+      <button 
+        onClick={handleLogout}
+        className="hover:bg-purple-200 p-2 rounded text-center ring-2 ring-purple-300"
+      >
         Logout
       </button>
     </div>

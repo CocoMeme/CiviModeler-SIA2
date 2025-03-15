@@ -8,6 +8,7 @@ export default {
     extend: {
       animation: {
         scroll: "scroll 20s linear infinite",
+        'spin-slow': 'spin 3s linear infinite',
       },
       keyframes: {
         scroll: {
