@@ -2,7 +2,7 @@ import React from 'react';
 
 const Help = () => {
   return (
-    <div className="bg-primary text-white min-h-screen p-6">
+    <div className="bg-primary text-white min-h-screen">
       {/* Image Section */}
       <div className="flex justify-center">
         <img className="rounded-lg shadow-lg" src="/project images/H4.png" alt="CiviModeler H1" />

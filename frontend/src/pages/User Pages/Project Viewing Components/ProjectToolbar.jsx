@@ -2,15 +2,21 @@ import React from 'react';
 import { FiArrowLeft, FiSave } from 'react-icons/fi';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ProjectToolbar = ({ isSaving, modelLoading, onSave, onSaveSuccess }) => {
   const navigate = useNavigate();
 
   const handleSave = async () => {
-    await onSave();
-    // Only call onSaveSuccess if it exists
-    if (typeof onSaveSuccess === 'function') {
-      onSaveSuccess();
+    try {
+      await onSave();
+      toast.success('Changes saved successfully!');
+      // Only call onSaveSuccess if it exists
+      if (typeof onSaveSuccess === 'function') {
+        onSaveSuccess();
+      }
+    } catch (error) {
+      toast.error('Failed to save changes');
     }
   };
 

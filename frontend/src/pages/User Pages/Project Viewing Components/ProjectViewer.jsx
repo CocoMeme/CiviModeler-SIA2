@@ -1154,7 +1154,7 @@ const ProjectViewer = () => {
       }
 
       // Show success notification
-      alert('Model saved successfully');
+      // alert('Model saved successfully');
     } catch (error) {
       console.error('Error saving model:', error);
       

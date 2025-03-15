@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 
-const ProjectColors = ({ 
-  modelParts = [], 
-  selectedParts = new Set(), 
-  setSelectedParts, 
+const ProjectColors = ({
+  modelParts = [],
+  selectedParts = new Set(),
+  setSelectedParts,
   updatePartColor,
-  resetAllColors 
+  resetAllColors
 }) => {
   // Track the currently active part for the color editor
   const [activePartId, setActivePartId] = useState(null);
-  
+
   // Get the active part object
-  const activePart = activePartId 
-    ? modelParts.find(p => p.meshUuid === activePartId) 
+  const activePart = activePartId
+    ? modelParts.find(p => p.meshUuid === activePartId)
     : (selectedParts.size === 1 ? modelParts.find(p => p.meshUuid === Array.from(selectedParts)[0]) : null);
 
   // Set active part when selection changes
@@ -85,9 +85,18 @@ const ProjectColors = ({
               </span>
             </div>
           )}
+          {/* Reset All Colors Button */}
+          {modelParts.length > 0 && (
+            <button
+              onClick={resetAllColors}
+              className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200"
+            >
+              Reset All Colors
+            </button>
+          )}
 
           {/* Parts List */}
-          <div className="mb-4 space-y-4 max-h-60 overflow-y-auto pr-2">
+          <div className="mb-4 space-y-4 max-h-fit overflow-y-auto pr-2">
             {Object.entries(groupedParts).map(([groupName, parts]) => (
               <div key={groupName} className="border-b border-gray-700 pb-2">
                 <h4 className="text-sm font-medium text-gray-300 mb-2 capitalize">{groupName.replace(/-/g, ' ')}</h4>
@@ -114,11 +123,10 @@ const ProjectColors = ({
                           setActivePartId(part.meshUuid);
                         }
                       }}
-                      className={`w-full text-left p-2 rounded transition-colors ${
-                        selectedParts.has(part.meshUuid)
+                      className={`w-full text-left p-2 rounded transition-colors ${selectedParts.has(part.meshUuid)
                           ? 'bg-blue-600'
                           : 'hover:bg-gray-700'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm">
@@ -141,8 +149,8 @@ const ProjectColors = ({
             <div className="space-y-4 mt-6 bg-gray-700 bg-opacity-50 p-3 rounded">
               <div>
                 <h4 className="text-sm font-medium mb-2">
-                  {selectedParts.size === 1 
-                    ? `Selected Part: ${activePart?.name || ''}` 
+                  {selectedParts.size === 1
+                    ? `Selected Part: ${activePart?.name || ''}`
                     : `Apply color to ${selectedParts.size} selected parts`
                   }
                 </h4>
@@ -203,15 +211,7 @@ const ProjectColors = ({
             </div>
           )}
 
-          {/* Reset All Colors Button */}
-          {modelParts.length > 0 && (
-            <button
-              onClick={resetAllColors}
-              className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200"
-            >
-              Reset All Colors
-            </button>
-          )}
+
         </>
       )}
     </div>

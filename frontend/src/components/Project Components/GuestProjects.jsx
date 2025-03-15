@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import Card from './Card.jsx';
 import { AppContext } from '../../context/AppContext.jsx';
 import GuestProjectPreview from '../../pages/Guest Pages/GuestProjectPreview.jsx';
@@ -6,6 +6,7 @@ import GuestProjectPreview from '../../pages/Guest Pages/GuestProjectPreview.jsx
 const GuestProjects = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
+  const [visibleProjects, setVisibleProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     category: 'all',
@@ -16,6 +17,10 @@ const GuestProjects = () => {
   const { backendUrl } = useContext(AppContext);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const projectsPerPage = 10;
+  const loader = useRef(null);
 
   useEffect(() => {
     // Fetch projects
@@ -85,7 +90,48 @@ const GuestProjects = () => {
     }
     
     setFilteredProjects(result);
+    // Load initial projects
+    setVisibleProjects(result.slice(0, projectsPerPage));
+    setPage(1);
   }, [searchTerm, filters, projects, contractors]);
+
+  // Handle intersection observer
+  const handleObserver = useCallback((entries) => {
+    const target = entries[0];
+    if (target.isIntersecting && !isLoadingMore && filteredProjects.length > visibleProjects.length) {
+      setIsLoadingMore(true);
+      const nextPage = page + 1;
+      const startIndex = (nextPage - 1) * projectsPerPage;
+      const endIndex = startIndex + projectsPerPage;
+      
+      setTimeout(() => {
+        const newProjects = filteredProjects.slice(0, endIndex);
+        setVisibleProjects(newProjects);
+        setPage(nextPage);
+        setIsLoadingMore(false);
+      }, 500);
+    }
+  }, [page, filteredProjects, isLoadingMore, projectsPerPage, visibleProjects.length]);
+
+  // Setup intersection observer
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver(handleObserver, options);
+    if (loader.current) {
+      observer.observe(loader.current);
+    }
+
+    return () => {
+      if (loader.current) {
+        observer.unobserve(loader.current);
+      }
+    };
+  }, [handleObserver]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -196,18 +242,30 @@ const GuestProjects = () => {
 
         {/* Project Cards - Right Side */}
         <div className='w-full md:w-3/4 md:pl-6'>
-          {filteredProjects.length ? (
-            <div className='flex flex-wrap gap-4 justify-start'>
-              {filteredProjects.map((project, index) => (
-                <div key={project._id || index} className='w-full md:w-[calc(50%-0.5rem)] mb-4'>
-                  <Card 
-                    project={project} 
-                    contractors={contractors} 
-                    onClick={handleProjectClick}
-                  />
+          {visibleProjects.length ? (
+            <>
+              <div className='flex flex-wrap gap-4 justify-start'>
+                {visibleProjects.map((project, index) => (
+                  <div key={project._id || index} className='w-full md:w-[calc(50%-0.5rem)] mb-4'>
+                    <Card 
+                      project={project} 
+                      contractors={contractors} 
+                      onClick={handleProjectClick}
+                    />
+                  </div>
+                ))}
+              </div>
+              {/* Loading indicator */}
+              {filteredProjects.length > visibleProjects.length && (
+                <div ref={loader} className="flex justify-center py-4">
+                  {isLoadingMore ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  ) : (
+                    <div className="h-8"></div> // Placeholder to maintain layout
+                  )}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <p className="text-center py-8">No designs match your criteria.</p>
           )}
