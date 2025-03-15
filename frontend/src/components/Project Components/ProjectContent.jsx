@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import { applyPlugin } from 'jspdf-autotable';
 import ModalCreate3D from './ModalCreate3D';
 import DeleteProject from './DeleteProject';
+import axios from "axios";
 import ProjectConfiguration from './ProjectConfiguration';
 import { FiInfo, FiUsers, FiCpu, FiPackage, FiBarChart2 } from 'react-icons/fi';
 applyPlugin(jsPDF)
@@ -31,180 +32,165 @@ const ProjectContent = ({
 }) => {
   const [showCreate3DModal, setShowCreate3DModal] = useState(!sloyd?.modelUrl);
 
-  const handleGeneratePDF = () => {
+  const handleGeneratePDF = async () => {
     try {
-        const doc = new jsPDF('p', 'pt', 'a4');
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 40;
-        let currentY = margin;
-
-        // **Add Logo to Header**
-        const logoPath = '/images/CiviModeler - NBG.png'; // Your logo path
-        const logoWidth = 60;
-        const logoHeight = 60;
-        doc.addImage(logoPath, 'PNG', margin, currentY, logoWidth, logoHeight);
-
-        // **Header Title Beside Logo**
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(24);
-        doc.setTextColor(102, 51, 153); // Purple color
-        doc.text("CiviModeler Project Report", margin + logoWidth + 15, currentY + 40);
-
-        currentY += 70; // Move cursor down
-
-        // **Styled Header Line**
-        doc.setLineWidth(1);
-        doc.setDrawColor(102, 51, 153);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20;
-
-        // **Move Date Below Divider**
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'italic');
-        doc.setTextColor(0, 0, 0);
-        const date = new Date().toLocaleDateString();
-        doc.text(`Generated on: ${date}`, margin, currentY);
-
-        currentY += 30; // Move cursor down for project details
-
-        // **Project Details**
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(102, 51, 153);
-        doc.text("Project Details", margin, currentY);
-        currentY += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        const details = [
-            `Project Name: ${projectDetailsState.projectName || 'N/A'}`,
-            `Client Name: ${clientDetailsState.clientName || 'N/A'}`,
-            `Contractor: ${selectedContractor?.name || 'N/A'}`,
-            `Total Cost: ${(totalCost?.toFixed(2) || '0.00')}`
-        ];
-        details.forEach(text => {
-            doc.text(text, margin, currentY);
-            currentY += 18;
-        });
-
-        // **Section Divider**
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20;
-
-        // **Client Details**
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(102, 51, 153);
-        doc.text("Client Details", margin, currentY);
-        currentY += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        const clientDetails = [
-            `Email: ${clientDetailsState.email || 'N/A'}`,
-            `Phone: ${clientDetailsState.phoneNumber || 'N/A'}`,
-            `Company: ${clientDetailsState.companyName || 'N/A'}`
-        ];
-        clientDetails.forEach(text => {
-            doc.text(text, margin, currentY);
-            currentY += 18;
-        });
-
-        // **Section Divider**
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20;
-
-        // **Additional Project Details**
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(102, 51, 153);
-        doc.text("Additional Project Details", margin, currentY);
-        currentY += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        const projectDetails = [
-            `Location Size: ${projectDetailsState.size || 'N/A'}`,
-            `Budget: ${projectDetailsState.budget || 'N/A'}`,
-            `Design Style: ${projectDetailsState.style || 'N/A'}`,
-            `Description: ${projectDetailsState.projectDescription || 'N/A'}`
-        ];
-        projectDetails.forEach(text => {
-            doc.text(text, margin, currentY);
-            currentY += 18;
-        });
-
-        // **Section Divider**
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, currentY, pageWidth - margin, currentY);
-        currentY += 20;
-
-        // **Synthesis Section**
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(102, 51, 153);
-        doc.text("Project Synthesis", margin, currentY);
-        currentY += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        const synthesisText = 
-            `The ${projectDetailsState.projectName || 'Project'} is an ambitious and stylish residential design tailored to reflect elegance and charm. ` +
-            `Commissioned by ${clientDetailsState.clientName || 'the client'}, this project is a collaboration with ${clientDetailsState.companyName || 'a company'}, ` +
-            `ensuring high-quality execution under the expertise of ${selectedContractor?.name || 'a contractor'}. The client envisions a ${projectDetailsState.style || 'design'} ` +
-            `that encapsulates both modern comfort and timeless aesthetics.\n\n` +
-
-            `With a total budget of ${(projectDetailsState.budget || 'N/A')}, the ${projectDetailsState.projectName || 'house'} spans ${projectDetailsState.size || 'N/A'} ` +
-            `square meters, maximizing the use of space while ensuring a functional and aesthetically appealing structure. The home's ${projectDetailsState.projectDescription || 'design details'} ` +
-            `further highlight the attention to detail and craftsmanship involved in bringing this vision to life.\n\n` +
-
-            `The project's financial plan, totaling $${totalCost?.toFixed(2) || '0.00'}, ensures that high-quality materials and labor contribute to its successful execution. ` +
-            `By combining careful architectural planning, quality craftsmanship, and a well-defined budget, the ${projectDetailsState.projectName || 'project'} is set to be a blend ` +
-            `of elegance and functionality, reflecting the client's vision in a remarkable way.`;
-
-        const textLines = doc.splitTextToSize(synthesisText, pageWidth - 2 * margin);
-        doc.text(textLines, margin, currentY);
-        currentY += textLines.length * 14;
-
-        // **Material Table**
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(102, 51, 153);
-        doc.text("Material Table", margin, currentY);
-        currentY += 15;
-
-        const materialRows = Object.entries(materials || {}).map(([material, details]) => [
-            material,
-            details.quantity.toString(),
-            `${details.unitPrice.toFixed(2)}`,
-            `${details.totalPrice.toFixed(2)}`
-        ]);
-
-        doc.autoTable({
-            startY: currentY,
-            head: [['Material', 'Quantity', 'Unit Price', 'Total Price']],
-            body: materialRows,
-            theme: 'striped',
-            headStyles: { fillColor: [102, 51, 153], textColor: [255, 255, 255] }, // Purple header
-            styles: { font: "helvetica", fontSize: 10, cellPadding: 5 },
-            alternateRowStyles: { fillColor: [245, 245, 245] },
-            margin: { left: margin, right: margin },
-            didDrawPage: (data) => {
-                // Footer
-                doc.setFontSize(10);
-                doc.setTextColor(102, 51, 153);
-                doc.text("This is an autogenerated report by CiviModeler", margin, pageHeight - 20);
-            }
-        });
-
-        // Save the document
-        doc.save('User_report.pdf');
+      const doc = new jsPDF('p', 'pt', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 40;
+      let currentY = margin;
+  
+      // **Add Logo to Header**
+      const logoPath = '/images/CiviModeler - NBG.png'; // Your logo path
+      const logoWidth = 60;
+      const logoHeight = 60;
+      doc.addImage(logoPath, 'PNG', margin, currentY, logoWidth, logoHeight);
+  
+      // **Header Title Beside Logo**
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(24);
+      doc.setTextColor(102, 51, 153); // Purple color
+      doc.text("CiviModeler Project Report", margin + logoWidth + 15, currentY + 40);
+  
+      currentY += 70; // Move cursor down
+  
+      // **Styled Header Line**
+      doc.setLineWidth(1);
+      doc.setDrawColor(102, 51, 153);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 20;
+  
+      // **Move Date Below Divider**
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(0, 0, 0);
+      const date = new Date().toLocaleDateString();
+      doc.text(`Generated on: ${date}`, margin, currentY);
+  
+      currentY += 30; // Move cursor down for project details
+  
+      // **Project Details**
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(102, 51, 153);
+      doc.text("Project Details", margin, currentY);
+      currentY += 15;
+  
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      const details = [
+          `Project Name: ${projectDetailsState.projectName || 'N/A'}`,
+          `Contractor: ${selectedContractor?.name || 'N/A'}`,
+          `Total Cost: ${(totalCost?.toFixed(2) || '0.00')}`
+      ];
+      details.forEach(text => {
+          doc.text(text, margin, currentY);
+          currentY += 18;
+      });
+  
+      // **Section Divider**
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 20;
+  
+      // **Additional Project Details**
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(102, 51, 153);
+      doc.text("Additional Project Details", margin, currentY);
+      currentY += 15;
+  
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+      const projectDetails = [
+          `Location Size: ${projectDetailsState.size || 'N/A'}`,
+          `Budget: ${projectDetailsState.budget || 'N/A'}`,
+          `Design Style: ${projectDetailsState.style || 'N/A'}`,
+          `Description: ${projectDetailsState.projectDescription || 'N/A'}`
+      ];
+      projectDetails.forEach(text => {
+          doc.text(text, margin, currentY);
+          currentY += 18;
+      });
+  
+      // **Section Divider**
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 20;
+  
+      // **Synthesis Section**
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(102, 51, 153);
+      doc.text("Project Synthesis", margin, currentY);
+      currentY += 15;
+  
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+      const synthesisText = 
+          `The ${projectDetailsState.projectName || 'Project'} is an ambitious and stylish residential design tailored to reflect elegance and charm. ` +
+          `Commissioned by the client, this project is a collaboration with ${clientDetailsState.companyName || 'a company'}, ` +
+          `ensuring high-quality execution under the expertise of ${selectedContractor?.name || 'a contractor'}. The client envisions a ${projectDetailsState.style || 'design'} ` +
+          `that encapsulates both modern comfort and timeless aesthetics.\n\n` +
+  
+          `With a total budget of ${(projectDetailsState.budget || 'N/A')}, the ${projectDetailsState.projectName || 'house'} spans ${projectDetailsState.size || 'N/A'} ` +
+          `square meters, maximizing the use of space while ensuring a functional and aesthetically appealing structure. The home's ${projectDetailsState.projectDescription || 'design details'} ` +
+          `further highlight the attention to detail and craftsmanship involved in bringing this vision to life.\n\n` +
+  
+          `The project's financial plan, totaling $${totalCost?.toFixed(2) || '0.00'}, ensures that high-quality materials and labor contribute to its successful execution. ` +
+          `By combining careful architectural planning, quality craftsmanship, and a well-defined budget, the ${projectDetailsState.projectName || 'project'} is set to be a blend ` +
+          `of elegance and functionality, reflecting the client's vision in a remarkable way.`;
+  
+      const textLines = doc.splitTextToSize(synthesisText, pageWidth - 2 * margin);
+      doc.text(textLines, margin, currentY);
+      currentY += textLines.length * 14;
+  
+      // **Material Table**
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(102, 51, 153);
+      doc.text("Material Table", margin, currentY);
+      currentY += 15;
+  
+      const materialRows = Object.entries(materials || {}).map(([material, details]) => [
+          details.material,
+          details.quantity.toString(),
+          `${details.unitPrice.toFixed(2)}`,
+          `${details.totalPrice.toFixed(2)}`
+      ]);
+  
+      doc.autoTable({
+          startY: currentY,
+          head: [['Material', 'Quantity', 'Unit Price', 'Total Price']],
+          body: materialRows,
+          theme: 'striped',
+          headStyles: { fillColor: [102, 51, 153], textColor: [255, 255, 255] }, // Purple header
+          styles: { font: "helvetica", fontSize: 10, cellPadding: 5 },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { left: margin, right: margin },
+          didDrawPage: (data) => {
+              // Footer
+              doc.setFontSize(10);
+              doc.setTextColor(102, 51, 153);
+              doc.text("This is an autogenerated report by CiviModeler", margin, pageHeight - 20);
+              doc.text(`Page ${doc.internal.getNumberOfPages()}`, pageWidth - margin - 40, pageHeight - 20);
+          }
+      });
+  
+      // Download the 3D model
+      if (sloyd?.modelUrl) {
+          const link = document.createElement('a');
+          link.href = sloyd.modelUrl;
+          link.download = '3D_Model.glb';
+          link.click();
+      }
+  
+      // Save the document
+      doc.save('User_report.pdf');
     } catch (error) {
-        console.error('Error generating PDF:', error);
-        alert(`Error generating PDF: ${error.message}`);
+      console.error('Error generating PDF:', error);
+      alert(`Error generating PDF: ${error.message}`);
     }
-};
-
+  };
+  
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
