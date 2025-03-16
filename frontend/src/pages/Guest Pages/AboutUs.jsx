@@ -92,7 +92,7 @@ const AboutUs = () => {
             {[
               { name: "Joey Ann Lavega", role: "Full Stack Developer", img: "/images/team1.jpg" },
               { name: "Andrei Co", role: "Full Stack Developer", img: "/images/Andrei Co.jpg" },
-              { name: "Josh Ziemenn Tan", role: "Full Stack Developer", img: "/images/team3.jpg" },
+              { name: "Josh Ziemenn Tan", role: "Full Stack Developer", img: "/images/josh.jpg" },
               { name: "Fatima Trinidad", role: "Full Stack Developer", img: "/images/pic.jpg" }
             ].map((member, index) => (
               <motion.div
