@@ -333,34 +333,32 @@ export default function ProjectManagement() {
     { field: 'userName', headerName: 'Name', flex: 1, minWidth: 180 },
     { field: 'projectName', headerName: 'Project Name', flex: 1.5, minWidth: 220 },
     { 
-        field: 'budget', 
-        headerName: 'Budget', 
-        flex: 1, 
-        minWidth: 150, 
-        renderCell: (params) => `${params.value.toLocaleString()}`
+      field: 'budget', 
+      headerName: 'Budget', 
+      flex: 1, 
+      minWidth: 150, 
+      renderCell: (params) => `${params.value.toLocaleString()}`
     },
     {
-        field: 'actions',
-        headerName: 'Actions',
-        flex: 2,
-        minWidth: 420,
-        sortable: false,
-        renderCell: (params) => (
-            <Box display="flex" justifyContent="space-between" gap={1} width="100%">
-                <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleOpenMaterialsModal(params.row)}>
-                    Project Overview
-                </Button>
-                <Button variant="contained" size="small" sx={{ bgcolor: 'warning.main' }}>
-                    View 3D
-                </Button>
-                <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleGeneratePDF(params.row)}>
-                    Generate PDF
-                </Button>
-            </Box>
-        ),
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 2,
+      minWidth: 420,
+      sortable: false,
+      renderCell: (params) => (
+        <Box display="flex" justifyContent="space-between" gap={1} width="%">
+          <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleOpenMaterialsModal(params.row)}>
+            Project Overview
+          </Button>
+          <Button variant="contained" size="small" sx={{ bgcolor: 'primary.main' }} onClick={() => handleGeneratePDF(params.row)}>
+            Generate PDF
+          </Button>
+        </Box>
+      ),
     },
-];
+  ];
 
+  
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
       <h1 className="text-3xl font-bold mb-6 text-center">Project Management</h1>
