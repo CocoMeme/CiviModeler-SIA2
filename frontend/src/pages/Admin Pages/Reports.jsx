@@ -224,6 +224,11 @@ const ReportsPage = () => {
       addHeader(); // Add header to the first page
   
       reportElements.forEach((element, index) => {
+        const exportButton = element.querySelector("button");
+        if (exportButton) {
+          exportButton.style.display = "none"; // Hide the export button
+        }
+        
         html2canvas(element, { scale: 3 }).then((canvas) => {
           const imgData = canvas.toDataURL("image/png");
           const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
@@ -240,7 +245,43 @@ const ReportsPage = () => {
           if (index === reportElements.length - 1) {
             pdf.save("Admin_ChartReport.pdf");
           }
+        }).finally(() => {
+          if (exportButton) {
+            exportButton.style.display = ""; // Show the export button again
+          }
         });
+      });
+    }, 500);
+  };
+
+  const handleDownloadSinglePDF = (element) => {
+    setTimeout(() => {
+      const pdf = new jsPDF("portrait", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgWidth = pageWidth - 20; // Keep margins
+  
+      const exportButton = element.querySelector("button");
+      if (exportButton) {
+        exportButton.style.display = "none"; // Hide the export button
+      }
+  
+      html2canvas(element, { scale: 3 }).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
+  
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(20);
+        pdf.setTextColor(102, 51, 153);
+        pdf.text("CiviModeler Project Report", 10, 20);
+        pdf.setDrawColor(102, 51, 153);
+        pdf.line(10, 25, pageWidth - 10, 25); // Underline
+  
+        pdf.addImage(imgData, "PNG", 10, 40, imgWidth, imgHeight);
+        pdf.save("ChartReport.pdf");
+      }).finally(() => {
+        if (exportButton) {
+          exportButton.style.display = ""; // Show the export button again
+        }
       });
     }, 500);
   };
@@ -253,39 +294,96 @@ const ReportsPage = () => {
         onClick={handleDownloadPDF} 
         className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md mb-4"
       >
-        Export as PDF
+        Export All as PDF
       </button>
 
       <div id="report-container" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
+          <p className="text-sm text-gray-300 mb-2">This line chart displays how the total project budget and actual costs have varied over time. It helps track financial trends and identify budget deviations.</p>
           {lineData && <Line data={lineData} />}
+          <button 
+            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[0])} 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
+          >
+            Export as PDF
+          </button>
         </div>
+
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
+          <p className="text-sm text-gray-300 mb-2">This chart visualizes the number of projects initiated over time, providing insights into project growth and seasonal trends.</p>
           {totalProjectsData && <Line data={totalProjectsData} />}
+          <button 
+            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[1])} 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
+          >
+            Export as PDF
+          </button>
         </div>
+
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
+          <p className="text-sm text-gray-300 mb-2">This bar chart shows how many projects were handled by each contractor, offering a view of workload distribution across contractors.</p>
           {contractorData && <Bar data={contractorData} />}
+          <button 
+            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[2])} 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
+          >
+            Export as PDF
+          </button>
         </div>
+
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
+          <p className="text-sm text-gray-300 mb-2">This chart summarizes the distribution of client ratings (1-5 stars) received for completed projects, helping assess overall client satisfaction.</p>
           {ratingsData && <Bar data={ratingsData} />}
+          <button 
+            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[3])} 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
+          >
+            Export as PDF
+          </button>
         </div>
+
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
+          <p className="text-sm text-gray-300 mb-2">This pie chart illustrates the gender breakdown of users registered on the platform, aiding in understanding user demographics.</p>
           {genderData && <Pie data={genderData} options={{ plugins: { datalabels: { formatter: (value, context) => `${context.chart.data.labels[context.dataIndex]}: ${value}`, color: '#fff', font: { weight: 'bold', size: 14 }, align: 'center', anchor: 'center' } } }} />}
+          <button 
+            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[4])} 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
+          >
+            Export as PDF
+          </button>
         </div>
+
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Material Quantity Breakdown</h3>
+          <p className="text-sm text-gray-300 mb-2">This bar chart highlights the quantities of different materials used across projects, useful for analyzing material demand and usage patterns.</p>
           {materialData && <Bar data={materialData} />}
+          <button 
+            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[5])} 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
+          >
+            Export as PDF
+          </button>
         </div>
+
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
           <h3 className="text-lg font-semibold mb-2 text-white">Account Status Distribution</h3>
+          <p className="text-sm text-gray-300 mb-2">This pie chart provides an overview of user account statuses (e.g., active, pending, deactivated), helping monitor user activity on the platform.</p>
           {accountStatusData && <Pie data={accountStatusData} options={{ plugins: { datalabels: { formatter: (value, context) => `${context.chart.data.labels[context.dataIndex]}: ${value}`, color: '#fff', font: { weight: 'bold', size: 14 }, align: 'center', anchor: 'center' } } }} />}
+          <button 
+            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[6])} 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
+          >
+            Export as PDF
+          </button>
         </div>
       </div>
+  
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };
