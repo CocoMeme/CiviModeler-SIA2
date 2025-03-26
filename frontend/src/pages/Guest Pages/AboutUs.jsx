@@ -90,7 +90,7 @@ const AboutUs = () => {
           {/* Team Members Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-6">
             {[
-              { name: "Joey Ann Lavega", role: "Full Stack Developer", img: "/images/team1.jpg" },
+              { name: "Joey Ann Lavega", role: "Full Stack Developer", img: "/images/Lavega.jpg" },
               { name: "Andrei Co", role: "Full Stack Developer", img: "/images/Andrei Co.jpg" },
               { name: "Josh Ziemenn Tan", role: "Full Stack Developer", img: "/images/josh.jpg" },
               { name: "Fatima Trinidad", role: "Full Stack Developer", img: "/images/pic.jpg" }
