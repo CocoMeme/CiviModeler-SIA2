@@ -627,7 +627,7 @@ export const create3DModel = async (req, res) => {
     // Ensure the temp directory exists
     const tempDir = path.join(__dirname, '..', 'temp');
     if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir);
+      fs.mkdirSync(tempDir, { recursive: true });
     }
 
     // Save the model data to a temporary file using the project name and version
@@ -655,8 +655,15 @@ export const create3DModel = async (req, res) => {
       }
     }
 
-    // Delete the temporary file
-    fs.unlinkSync(tempFilePath);
+    // Delete the temporary file (only if it exists)
+    if (fs.existsSync(tempFilePath)) {
+      try {
+        fs.unlinkSync(tempFilePath);
+      } catch (unlinkError) {
+        console.error('Error deleting temporary file:', unlinkError);
+        // Continue execution even if file deletion fails
+      }
+    }
 
     // Create the new version data
     const newVersion = {
