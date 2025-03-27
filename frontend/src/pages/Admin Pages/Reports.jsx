@@ -299,87 +299,101 @@ const ReportsPage = () => {
 
       <div id="report-container" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Total Cost and Budget Over Time</h3>
-          <p className="text-sm text-gray-300 mb-2">This line chart displays how the total project budget and actual costs have varied over time. It helps track financial trends and identify budget deviations.</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-white">Total Cost and Budget Over Time</h3>
+            <button 
+              onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[0])} 
+              className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md text-sm"
+            >
+              Export as PDF
+            </button>
+          </div>
           {lineData && <Line data={lineData} />}
-          <button 
-            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[0])} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
-          >
-            Export as PDF
-          </button>
+          <p className="text-sm text-gray-300 mt-4">This line chart displays how the total project budget and actual costs have varied over time. It helps track financial trends and identify budget deviations. By comparing the budget line with the actual cost line, you can identify periods where projects exceeded or stayed under budget, enabling better financial planning and risk management for future projects. The visualization also reveals seasonal patterns in project expenditures and highlights the overall financial efficiency of completed projects.</p>
         </div>
 
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Total Projects Over Time</h3>
-          <p className="text-sm text-gray-300 mb-2">This chart visualizes the number of projects initiated over time, providing insights into project growth and seasonal trends.</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-white">Total Projects Over Time</h3>
+            <button 
+              onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[1])} 
+              className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md text-sm"
+            >
+              Export as PDF
+            </button>
+          </div>
           {totalProjectsData && <Line data={totalProjectsData} />}
-          <button 
-            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[1])} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
-          >
-            Export as PDF
-          </button>
+          <p className="text-sm text-gray-300 mt-4">This chart visualizes the number of projects initiated over time, providing insights into project growth and seasonal trends. It helps identify periods of high activity versus slow periods, which can inform resource allocation and staffing decisions. The trends shown can also correlate with marketing campaigns, economic factors, or industry cycles, offering a comprehensive view of business development patterns. Understanding these patterns assists in forecasting future workloads and planning strategic initiatives for sustainable growth.</p>
         </div>
 
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Projects per Contractor</h3>
-          <p className="text-sm text-gray-300 mb-2">This bar chart shows how many projects were handled by each contractor, offering a view of workload distribution across contractors.</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-white">Projects per Contractor</h3>
+            <button 
+              onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[2])} 
+              className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md text-sm"
+            >
+              Export as PDF
+            </button>
+          </div>
           {contractorData && <Bar data={contractorData} />}
-          <button 
-            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[2])} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
-          >
-            Export as PDF
-          </button>
+          <p className="text-sm text-gray-300 mt-4">This bar chart shows how many projects were handled by each contractor, offering a view of workload distribution across contractors. The visualization helps identify which contractors are handling the most projects and which may have capacity for additional work. This information is crucial for equitable task distribution, preventing contractor overload, and identifying specialized contractors who might be preferred for certain project types. The data can also inform contractor performance evaluations and help optimize the contractor network for future project assignments.</p>
         </div>
 
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Ratings Distribution</h3>
-          <p className="text-sm text-gray-300 mb-2">This chart summarizes the distribution of client ratings (1-5 stars) received for completed projects, helping assess overall client satisfaction.</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-white">Ratings Distribution</h3>
+            <button 
+              onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[3])} 
+              className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md text-sm"
+            >
+              Export as PDF
+            </button>
+          </div>
           {ratingsData && <Bar data={ratingsData} />}
-          <button 
-            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[3])} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
-          >
-            Export as PDF
-          </button>
+          <p className="text-sm text-gray-300 mt-4">This chart summarizes the distribution of client ratings (1-5 stars) received for completed projects, helping assess overall client satisfaction. It provides a clear picture of service quality perception among clients and identifies potential areas for improvement. A high concentration of 4-5 star ratings indicates excellent service delivery, while any significant number of lower ratings may signal issues that need addressing. This data is invaluable for quality assurance processes, training programs, and developing strategies to enhance client experience and boost reputation in the market. Regular monitoring of this metric helps maintain high service standards.</p>
         </div>
 
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Gender Distribution</h3>
-          <p className="text-sm text-gray-300 mb-2">This pie chart illustrates the gender breakdown of users registered on the platform, aiding in understanding user demographics.</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-white">Gender Distribution</h3>
+            <button 
+              onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[4])} 
+              className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md text-sm"
+            >
+              Export as PDF
+            </button>
+          </div>
           {genderData && <Pie data={genderData} options={{ plugins: { datalabels: { formatter: (value, context) => `${context.chart.data.labels[context.dataIndex]}: ${value}`, color: '#fff', font: { weight: 'bold', size: 14 }, align: 'center', anchor: 'center' } } }} />}
-          <button 
-            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[4])} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
-          >
-            Export as PDF
-          </button>
+          <p className="text-sm text-gray-300 mt-4">This pie chart illustrates the gender breakdown of users registered on the platform, aiding in understanding user demographics. The visualization helps identify if the platform is attracting a diverse user base or if there are opportunities to improve inclusivity through targeted outreach and marketing strategies. Understanding gender distribution can also inform user interface design decisions, content creation, and feature development to better cater to the actual user base. This demographic insight is particularly valuable for diversity initiatives and ensuring the platform provides an equitable experience for all users regardless of gender identity.</p>
         </div>
 
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Material Quantity Breakdown</h3>
-          <p className="text-sm text-gray-300 mb-2">This bar chart highlights the quantities of different materials used across projects, useful for analyzing material demand and usage patterns.</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-white">Material Quantity Breakdown</h3>
+            <button 
+              onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[5])} 
+              className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md text-sm"
+            >
+              Export as PDF
+            </button>
+          </div>
           {materialData && <Bar data={materialData} />}
-          <button 
-            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[5])} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
-          >
-            Export as PDF
-          </button>
+          <p className="text-sm text-gray-300 mt-4">This bar chart highlights the quantities of different materials used across projects, useful for analyzing material demand and usage patterns. The data provides critical insights for inventory management, procurement planning, and identifying opportunities for bulk purchasing to reduce costs. It also helps track sustainability metrics by showing the consumption of various materials over time, which can inform eco-friendly alternatives or waste reduction strategies. Understanding material usage trends allows for more accurate cost estimation for future projects and can reveal potential areas for material optimization or substitution to improve efficiency.</p>
         </div>
 
         <div className="chart-container bg-gray-800 border border-gray-700 p-4 rounded-md shadow-md">
-          <h3 className="text-lg font-semibold mb-2 text-white">Account Status Distribution</h3>
-          <p className="text-sm text-gray-300 mb-2">This pie chart provides an overview of user account statuses (e.g., active, pending, deactivated), helping monitor user activity on the platform.</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-white">Account Status Distribution</h3>
+            <button 
+              onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[6])} 
+              className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md text-sm"
+            >
+              Export as PDF
+            </button>
+          </div>
           {accountStatusData && <Pie data={accountStatusData} options={{ plugins: { datalabels: { formatter: (value, context) => `${context.chart.data.labels[context.dataIndex]}: ${value}`, color: '#fff', font: { weight: 'bold', size: 14 }, align: 'center', anchor: 'center' } } }} />}
-          <button 
-            onClick={() => handleDownloadSinglePDF(document.querySelectorAll(".chart-container")[6])} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md mt-4"
-          >
-            Export as PDF
-          </button>
+          <p className="text-sm text-gray-300 mt-4">This pie chart provides an overview of user account statuses (e.g., active, pending, deactivated), helping monitor user activity on the platform. The distribution gives valuable insights into user engagement levels and potential issues in the user onboarding process. A high proportion of pending accounts might indicate friction in the verification process, while a significant number of deactivated accounts could signal user retention challenges. This data helps administrators identify areas for improving user experience, streamlining account activation procedures, and developing strategies to re-engage dormant users. Regular analysis of this chart supports effective user management and platform growth strategies.</p>
         </div>
       </div>
   
