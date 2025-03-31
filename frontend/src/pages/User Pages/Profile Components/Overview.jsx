@@ -19,7 +19,6 @@ const ProfileOverview = () => {
     gender: "Other",
   });
   const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState(null);
 
   useEffect(() => {
     if (userData && !initialized) {
@@ -71,10 +70,6 @@ const ProfileOverview = () => {
 
       formDataToSend.append("profile", JSON.stringify(profileObj));
 
-      if (image) {
-        formDataToSend.append("profilePic", image);
-      }
-
       const response = await axios.put(
         `${backendUrl}/api/user/update/${userData._id}`,
         formDataToSend
@@ -95,46 +90,18 @@ const ProfileOverview = () => {
     <div className="overview-container">
       <h2 className="text-xl font-semibold text-purple-700 mb-6">Profile Overview</h2>
       
-      {/* Profile Picture Section */}
+      {/* Profile Initials Section */}
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Profile Picture</h3>
-        <div className="bg-gray-50 p-4 rounded-md flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="flex-shrink-0">
-              {userData?.profilePic ? (
-                <img
-                  src={userData.profilePic}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full border-2 border-purple-600 object-cover"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full border-2 border-purple-600 flex items-center justify-center bg-gray-200 text-2xl font-bold text-gray-600">
-                  {userData?.name ? userData.name.charAt(0).toUpperCase() : "U"}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col space-y-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                className="hidden"
-                id="fileUpload"
-              />
-              <label
-                htmlFor="fileUpload"
-                className="px-4 py-2 bg-purple-600 text-white rounded-md cursor-pointer hover:bg-purple-700 inline-block text-center text-sm font-medium"
-              >
-                Change Profile Picture
-              </label>
-              <p className="text-sm text-gray-600">Recommended size: 500x500 pixels</p>
-            </div>
+        <h3 className="text-lg font-medium text-gray-700 mb-3">Profile</h3>
+        <div className="bg-gray-50 p-4 rounded-md flex items-center justify-center">
+          <div className="w-24 h-24 rounded-full border-2 border-purple-600 flex items-center justify-center bg-gray-200 text-2xl font-bold text-gray-600">
+            {userData?.name
+              ? userData.name
+                  .split(" ")
+                  .map((word) => word.charAt(0).toUpperCase())
+                  .join("")
+              : "U"}
           </div>
-          {image && (
-            <div className="text-sm text-gray-600">
-              Selected file: {image.name}
-            </div>
-          )}
         </div>
       </div>
 
