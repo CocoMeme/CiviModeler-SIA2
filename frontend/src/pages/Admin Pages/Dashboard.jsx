@@ -10,15 +10,17 @@ const Dashboard = () => {
   });
   const [contractors, setContractors] = useState([]);
   const [openCreateModal, setOpenCreateModal] = useState(false);
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-  const [contractorToDelete, setContractorToDelete] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    officeAddress: '', 
+    officeAddress: '',
     contactNumber: '',
-    notableProjects: '', 
+    email: '',
+    website: '',
+    facebook: '',
+    notableProjects: '',
+    services: '',
   });
 
   useEffect(() => {
@@ -57,9 +59,13 @@ const Dashboard = () => {
       setOpenCreateModal(false);
       setFormData({
         name: '',
-        officeAddress: '', 
+        officeAddress: '',
         contactNumber: '',
-        notableProjects: '', 
+        email: '',
+        website: '',
+        facebook: '',
+        notableProjects: '',
+        services: '',
       });
     } catch (error) {
       console.error('Error creating contractor:', error);
@@ -70,7 +76,8 @@ const Dashboard = () => {
     setSelectedContractor(contractor);
     setFormData({
       ...contractor,
-      notableProjects: contractor.notableProjects.join(', '), 
+      notableProjects: contractor.notableProjects.join(', '),
+      services: contractor.services.join(', '),
     });
     setOpenUpdateModal(true);
   };
@@ -79,25 +86,25 @@ const Dashboard = () => {
     try {
       const { data } = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/contractor/update/${selectedContractor._id}`, {
         ...formData,
-        notableProjects: formData.notableProjects.split(',').map(project => project.trim()), // Convert string to array
+        notableProjects: formData.notableProjects.split(',').map(project => project.trim()),
+        services: formData.services.split(',').map(service => service.trim()),
       }, { withCredentials: true });
       setContractors(contractors.map(contractor => contractor._id === data._id ? data : contractor));
       setOpenUpdateModal(false);
       setSelectedContractor(null);
       setFormData({
         name: '',
-        officeAddress: '', 
+        officeAddress: '',
         contactNumber: '',
+        email: '',
+        website: '',
+        facebook: '',
         notableProjects: '',
+        services: '',
       });
     } catch (error) {
       console.error('Error updating contractor:', error);
     }
-  };
-
-  const handleDelete = (contractor) => {
-    setContractorToDelete(contractor);
-    setOpenDeleteModal(true);
   };
 
   return (
@@ -126,24 +133,31 @@ const Dashboard = () => {
               Add Contractor
             </Button>
           </div>
-          <table className="min-w-full bg-gray-800 border-collapse ">
-          <thead className="bg-white text-black">
-          <tr>
-    <th className="py-2 px-4 border-b text-left">Name</th>
-    <th className="py-2 px-4 border-b text-left">Office Address</th> 
-    <th className="py-2 px-4 border-b text-left">Contact Number</th>
-    <th className="py-2 px-4 border-b text-left">Notable Projects</th> 
-    <th className="py-2 px-4 border-b text-left">Actions</th>
-  </tr>
-</thead>
-
-<tbody>
+          <table className="min-w-full bg-gray-800 border-collapse">
+            <thead className="bg-white text-black">
+              <tr>
+                <th className="py-2 px-4 border-b text-left">Name</th>
+                <th className="py-2 px-4 border-b text-left">Office Address</th>
+                <th className="py-2 px-4 border-b text-left">Contact Number</th>
+                <th className="py-2 px-4 border-b text-left">Email</th>
+                <th className="py-2 px-4 border-b text-left">Website</th>
+                <th className="py-2 px-4 border-b text-left">Facebook</th>
+                <th className="py-2 px-4 border-b text-left">Notable Projects</th>
+                <th className="py-2 px-4 border-b text-left">Services</th>
+                <th className="py-2 px-4 border-b text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {contractors.map((contractor) => (
                 <tr key={contractor._id}>
                   <td className="py-2 px-4 border-b">{contractor.name}</td>
-                  <td className="py-2 px-4 border-b">{contractor.officeAddress}</td> 
+                  <td className="py-2 px-4 border-b">{contractor.officeAddress}</td>
                   <td className="py-2 px-4 border-b">{contractor.contactNumber}</td>
-                  <td className="py-2 px-4 border-b">{contractor.notableProjects.join(', ')}</td> 
+                  <td className="py-2 px-4 border-b">{contractor.email}</td>
+                  <td className="py-2 px-4 border-b">{contractor.website}</td>
+                  <td className="py-2 px-4 border-b">{contractor.facebook}</td>
+                  <td className="py-2 px-4 border-b">{contractor.notableProjects.join(', ')}</td>
+                  <td className="py-2 px-4 border-b">{contractor.services.join(', ')}</td>
                   <td className="py-2 px-4 border-b">
                     <button className="bg-blue-500 text-white py-1 px-4 rounded hover:bg-blue-600 mr-2" onClick={() => handleUpdate(contractor)}>Update</button>
                   </td>
@@ -157,42 +171,14 @@ const Dashboard = () => {
       <Dialog open={openCreateModal} onClose={() => setOpenCreateModal(false)} fullWidth maxWidth="sm">
         <DialogTitle>Create Contractor</DialogTitle>
         <DialogContent>
-          <TextField
-            margin="dense"
-            name="name"
-            label="Name"
-            type="text"
-            fullWidth
-            value={formData.name}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="officeAddress"
-            label="Office Address"
-            type="text"
-            fullWidth
-            value={formData.officeAddress}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="contactNumber"
-            label="Contact Number"
-            type="text"
-            fullWidth
-            value={formData.contactNumber}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="notableProjects"
-            label="Notable Projects"
-            type="text"
-            fullWidth
-            value={formData.notableProjects}
-            onChange={handleCreateChange}
-          />
+          <TextField margin="dense" name="name" label="Name" type="text" fullWidth value={formData.name} onChange={handleCreateChange} />
+          <TextField margin="dense" name="officeAddress" label="Office Address" type="text" fullWidth value={formData.officeAddress} onChange={handleCreateChange} />
+          <TextField margin="dense" name="contactNumber" label="Contact Number" type="text" fullWidth value={formData.contactNumber} onChange={handleCreateChange} />
+          <TextField margin="dense" name="email" label="Email" type="email" fullWidth value={formData.email} onChange={handleCreateChange} />
+          <TextField margin="dense" name="website" label="Website" type="text" fullWidth value={formData.website} onChange={handleCreateChange} />
+          <TextField margin="dense" name="facebook" label="Facebook" type="text" fullWidth value={formData.facebook} onChange={handleCreateChange} />
+          <TextField margin="dense" name="notableProjects" label="Notable Projects" type="text" fullWidth value={formData.notableProjects} onChange={handleCreateChange} />
+          <TextField margin="dense" name="services" label="Services" type="text" fullWidth value={formData.services} onChange={handleCreateChange} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenCreateModal(false)} color="primary">Cancel</Button>
@@ -203,42 +189,14 @@ const Dashboard = () => {
       <Dialog open={openUpdateModal} onClose={() => setOpenUpdateModal(false)} fullWidth maxWidth="sm">
         <DialogTitle>Update Contractor</DialogTitle>
         <DialogContent>
-          <TextField
-            margin="dense"
-            name="name"
-            label="Name"
-            type="text"
-            fullWidth
-            value={formData.name}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="officeAddress"
-            label="Office Address"
-            type="text"
-            fullWidth
-            value={formData.officeAddress}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="contactNumber"
-            label="Contact Number"
-            type="text"
-            fullWidth
-            value={formData.contactNumber}
-            onChange={handleCreateChange}
-          />
-          <TextField
-            margin="dense"
-            name="notableProjects"
-            label="Notable Projects"
-            type="text"
-            fullWidth
-            value={formData.notableProjects}
-            onChange={handleCreateChange}
-          />
+          <TextField margin="dense" name="name" label="Name" type="text" fullWidth value={formData.name} onChange={handleCreateChange} />
+          <TextField margin="dense" name="officeAddress" label="Office Address" type="text" fullWidth value={formData.officeAddress} onChange={handleCreateChange} />
+          <TextField margin="dense" name="contactNumber" label="Contact Number" type="text" fullWidth value={formData.contactNumber} onChange={handleCreateChange} />
+          <TextField margin="dense" name="email" label="Email" type="email" fullWidth value={formData.email} onChange={handleCreateChange} />
+          <TextField margin="dense" name="website" label="Website" type="text" fullWidth value={formData.website} onChange={handleCreateChange} />
+          <TextField margin="dense" name="facebook" label="Facebook" type="text" fullWidth value={formData.facebook} onChange={handleCreateChange} />
+          <TextField margin="dense" name="notableProjects" label="Notable Projects" type="text" fullWidth value={formData.notableProjects} onChange={handleCreateChange} />
+          <TextField margin="dense" name="services" label="Services" type="text" fullWidth value={formData.services} onChange={handleCreateChange} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenUpdateModal(false)} color="primary">Cancel</Button>

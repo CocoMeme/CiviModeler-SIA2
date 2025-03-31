@@ -37,21 +37,11 @@ export default function ProjectOverview() {
   useEffect(() => {
     const fetchContractors = async () => {
       try {
-        // Use the standard /all endpoint instead of the specialized one
         const response = await axios.get(`${backendUrl}/api/contractor/all`);
-        
-        // The response from /all is directly the array, with no success property
-        if (Array.isArray(response.data)) {
-          setContractors(response.data);
-        } else {
-          console.error('Unexpected response format for contractors:', response.data);
-          // Initialize with an empty array to prevent the map error
-          setContractors([]);
-        }
+        console.log('Contractor Data:', response.data); // Log the response
+        setContractors(response.data);
       } catch (error) {
         console.error('Error fetching contractors:', error);
-        // Initialize with an empty array to prevent the map error
-        setContractors([]);
       }
     };
 
