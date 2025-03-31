@@ -12,9 +12,7 @@ const StarRating = ({ rating }) => {
       {Array.from({ length: 5 }, (_, index) => (
         <span
           key={index}
-          className={`text-2xl cursor-pointer ${
-            index < rating ? "text-yellow-500" : "text-gray-300"
-          }`}
+          className={`text-2xl ${index < rating ? "text-yellow-500" : "text-gray-300"}`}
         >
           ★
         </span>
@@ -29,7 +27,7 @@ const NextArrow = (props) => {
   return (
     <div
       className={className}
-      style={{ ...style, display: "block", background: "purple" }}
+      style={{ ...style, display: "block", background: "purple", borderRadius: "50%" }}
       onClick={onClick}
     />
   );
@@ -40,7 +38,7 @@ const PrevArrow = (props) => {
   return (
     <div
       className={className}
-      style={{ ...style, display: "block", background: "purple" }}
+      style={{ ...style, display: "block", background: "purple", borderRadius: "50%" }}
       onClick={onClick}
     />
   );
@@ -51,35 +49,48 @@ const Testimony = () => {
   const [testimonials, setTestimonials] = useState([]);
 
   useEffect(() => {
+    let isMounted = true; // Track component mount status
+
     const fetchTestimonials = async () => {
       try {
-        console.log("Fetching testimonials...");
-        const response = await axios.get(
-          `${backendUrl}/api/testimonials/all`,
-          { withCredentials: true }
-        );
+        setTestimonials([]); // Clear state before fetching
 
-        console.log("API Response:", response.data);
+        const response = await axios.get(`${backendUrl}/api/testimonials/all`, {
+          withCredentials: true,
+        });
 
-        // Check if the response data is an array
-        if (Array.isArray(response.data)) {
-          setTestimonials(response.data); // Set testimonials directly
-        } else {
-          console.error("API Error: Unexpected response format");
+        if (isMounted) {
+          if (Array.isArray(response.data)) {
+            // Remove duplicates based on 'quote' or use 'testimonial.id' if available
+            const uniqueTestimonials = response.data.filter(
+              (value, index, self) =>
+                index === self.findIndex((t) => t.quote === value.quote)
+            );
+
+            setTestimonials(uniqueTestimonials);
+          } else {
+            console.error("API Error: Unexpected response format");
+          }
         }
       } catch (error) {
         console.error("Error fetching testimonials:", error.message, error.response?.data);
       }
     };
 
-    fetchTestimonials();
+    if (backendUrl) {
+      fetchTestimonials();
+    }
+
+    return () => {
+      isMounted = false; // Avoid state update if unmounted
+    };
   }, [backendUrl]);
 
   const settings = {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 6,
+    slidesToShow: 3,
     slidesToScroll: 1,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
@@ -87,20 +98,20 @@ const Testimony = () => {
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 3,
+          slidesToShow: 2,
           slidesToScroll: 1,
           infinite: true,
-          dots: true
-        }
+          dots: true,
+        },
       },
       {
-        breakpoint: 600,
+        breakpoint: 768,
         settings: {
           slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]
+          slidesToScroll: 1,
+        },
+      },
+    ],
   };
 
   return (
