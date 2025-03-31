@@ -152,14 +152,6 @@ export default function Result() {
             setSelectedContractor={setSelectedContractor}
             setInfoDialog={setInfoDialog}
           />
-
-          {/* Contractor Modal */}
-          {selectedContractor && infoDialog.open && (
-            <ContractorModal
-              selectedContractor={selectedContractor}
-              setInfoDialog={setInfoDialog}
-            />
-          )}
         </div>
 
         {/* Right Side - Graph & Material Table */}
@@ -283,6 +275,14 @@ function ContractorSelection({
   setSelectedContractor,
   setInfoDialog,
 }) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContractor, setModalContractor] = useState(null);
+
+  const handleViewDetails = (contractor) => {
+    setModalContractor(contractor);
+    setModalOpen(true);
+  };
+
   return (
     <div className="mt-4 bg-white p-4 shadow-lg rounded-lg">
       <div className="flex justify-between items-center border-b pb-2">
@@ -303,32 +303,25 @@ function ContractorSelection({
           <thead className="bg-purple-700 text-white">
             <tr>
               <th className="p-2">Name</th>
-              <th className="p-2">Office Address</th>
-              <th className="p-2">Contact Number</th>
-              <th className="p-2">Email</th>
-              <th className="p-2">Website</th>
-              <th className="p-2">Facebook</th>
-              <th className="p-2">Notable Projects</th>
-              <th className="p-2">Services</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {contractors.map((contractor) => (
               <tr key={contractor._id} className="border-b border-gray-300">
-                <td className="p-2">{contractor.name}</td>
-                <td className="p-2">{contractor.officeAddress}</td>
-                <td className="p-2">{contractor.contactNumber}</td>
-                <td className="p-2">{contractor.email}</td>
-                <td className="p-2">{contractor.website}</td>
-                <td className="p-2">{contractor.facebook}</td>
-                <td className="p-2">{contractor.notableProjects.join(', ')}</td>
-                <td className="p-2">{contractor.services.join(', ')}</td>
+                <td className="p-2">
+                  <button
+                    className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
+                    onClick={() => handleViewDetails(contractor)}
+                  >
+                    {contractor.name}
+                  </button>
+                </td>
                 <td className="p-2">
                   <button
                     className={`px-4 py-2 rounded ${
                       selectedContractor?._id === contractor._id
-                        ? 'bg-purple-700 text-white'
+                        ? 'bg-green-600 text-white'
                         : 'bg-gray-200 hover:bg-gray-300'
                     }`}
                     onClick={() => setSelectedContractor(contractor)}
@@ -341,72 +334,72 @@ function ContractorSelection({
           </tbody>
         </table>
       </div>
-    </div>
-  );
-}
 
-// Component: Contractor Modal
-function ContractorModal({ selectedContractor, setInfoDialog }) {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-        <h2 className="text-lg font-semibold border-b pb-2">{selectedContractor.name}</h2>
-        <div className="mt-4">
-          <p>
-            <strong>Office Address:</strong> {selectedContractor.officeAddress}
-          </p>
-          <p>
-            <strong>Contact Number:</strong> {selectedContractor.contactNumber}
-          </p>
-          <p>
-            <strong>Email:</strong> {selectedContractor.email || 'N/A'}
-          </p>
-          <p>
-            <strong>Website:</strong>{' '}
-            {selectedContractor.website ? (
-              <a
-                href={selectedContractor.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 underline"
+      {/* Contractor Details Modal */}
+      {modalOpen && modalContractor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+            <h2 className="text-lg font-semibold border-b pb-2">{modalContractor.name}</h2>
+            <div className="mt-4">
+              <p>
+                <strong>Office Address:</strong> {modalContractor.officeAddress}
+              </p>
+              <p>
+                <strong>Contact Number:</strong> {modalContractor.contactNumber}
+              </p>
+              <p>
+                <strong>Email:</strong> {modalContractor.email || 'N/A'}
+              </p>
+              <p>
+                <strong>Website:</strong>{' '}
+                {modalContractor.website ? (
+                  <a
+                    href={modalContractor.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    {modalContractor.website}
+                  </a>
+                ) : (
+                  'N/A'
+                )}
+              </p>
+              <p>
+                <strong>Facebook:</strong>{' '}
+                {modalContractor.facebook ? (
+                  <a
+                    href={modalContractor.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    {modalContractor.facebook}
+                  </a>
+                ) : (
+                  'N/A'
+                )}
+              </p>
+              <p>
+                <strong>Notable Projects:</strong>{' '}
+                {modalContractor.notableProjects?.join(', ') || 'N/A'}
+              </p>
+              <p>
+                <strong>Services:</strong>{' '}
+                {modalContractor.services?.join(', ') || 'N/A'}
+              </p>
+            </div>
+            <div className="text-right mt-4">
+              <button
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-all"
+                onClick={() => setModalOpen(false)}
               >
-                {selectedContractor.website}
-              </a>
-            ) : (
-              'N/A'
-            )}
-          </p>
-          <p>
-            <strong>Facebook:</strong>{' '}
-            {selectedContractor.facebook ? (
-              <a
-                href={selectedContractor.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 underline"
-              >
-                {selectedContractor.facebook}
-              </a>
-            ) : (
-              'N/A'
-            )}
-          </p>
-          <p>
-            <strong>Notable Projects:</strong> {selectedContractor.notableProjects.join(', ')}
-          </p>
-          <p>
-            <strong>Services:</strong> {selectedContractor.services.join(', ')}
-          </p>
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="text-right mt-4">
-          <button
-            className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
-            onClick={() => setInfoDialog({ open: false, content: '' })}
-          >
-            Close
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
