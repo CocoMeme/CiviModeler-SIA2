@@ -283,9 +283,6 @@ const ProjectContent = ({
                   }}
                 >
                   <h2 className='font-bold'>{contractor.name}</h2>
-                  <p>
-                    <span className="font-sm">License Number:</span> {contractor.licenseNumber}
-                  </p>
                 </button>
               ))
             ) : (
@@ -296,27 +293,36 @@ const ProjectContent = ({
 
         {/* Contractor Modal */}
         {selectedContractor && infoDialog.open && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-              <h2 className="text-lg font-semibold border-b pb-2">{selectedContractor.name}</h2>
-              <div className="mt-4">
-                <p><strong>License Number:</strong> {selectedContractor.licenseNumber}</p>
-                <p><strong>Business Address:</strong> {selectedContractor.businessAddress}</p>
-                <p><strong>Contact Number:</strong> {selectedContractor.contactNumber}</p>
-                <p><strong>Experience:</strong> {selectedContractor.experience}</p>
-                <p className="text-gray-500 text-sm italic">Years of experience may vary based on project type and location.</p>
-                <p><strong>Contract Terms:</strong> {selectedContractor.contractTerms}</p>
-              </div>
-              <div className="text-right mt-4">
-                <button
-                  className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
-                  onClick={() => setInfoDialog({ open: false, content: '' })}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+      <h2 className="text-lg font-semibold border-b pb-2">{selectedContractor.name}</h2>
+      <div className="mt-4">
+        <p><strong>Office Address:</strong> {selectedContractor.officeAddress || 'N/A'}</p>
+        <p><strong>Contact Number:</strong> {selectedContractor.contactNumber || 'N/A'}</p>
+        <p><strong>Email:</strong> {selectedContractor.email || 'N/A'}</p>
+        <p><strong>Website:</strong> 
+          {selectedContractor.website ? (
+            <a href={selectedContractor.website} target="_blank" rel="noopener noreferrer">{selectedContractor.website}</a>
+          ) : 'N/A'}
+        </p>
+        <p><strong>Facebook:</strong> 
+          {selectedContractor.facebook ? (
+            <a href={selectedContractor.facebook} target="_blank" rel="noopener noreferrer">{selectedContractor.facebook}</a>
+          ) : 'N/A'}
+        </p>
+        <p><strong>Notable Projects:</strong> {selectedContractor.notableProjects?.join(', ') || 'N/A'}</p>
+        <p><strong>Services:</strong> {selectedContractor.services?.join(', ') || 'N/A'}</p>
+      </div>
+      <div className="text-right mt-4">
+        <button
+          className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-all"
+          onClick={() => setInfoDialog({ open: false, content: '' })}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
         )}
       </div>
 
