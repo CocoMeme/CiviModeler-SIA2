@@ -35,15 +35,15 @@ export default function ProjectOverview() {
   const [currentSloyd, setCurrentSloyd] = useState(sloyd || {});
 
   useEffect(() => {
-    const fetchContractors = async () => {
-      try {
-        const response = await axios.get(`${backendUrl}/api/contractor/all`);
-        console.log('Contractor Data:', response.data); // Log the response
-        setContractors(response.data);
-      } catch (error) {
-        console.error('Error fetching contractors:', error);
-      }
-    };
+  const fetchContractors = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/contractor/all`);
+      console.log('Contractor Data:', response.data); // Log the response
+      setContractors(response.data);
+    } catch (error) {
+      console.error('Error fetching contractors:', error);
+    }
+  };
 
     const fetchSelectedContractor = async () => {
       if (contractorId) {
